@@ -5,7 +5,20 @@ import './globals.css';
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <Stack />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen 
+          name="index" 
+          options={{ 
+            title: 'Home',
+          }} 
+        />
+        <Stack.Screen 
+          name="newSong" 
+          options={{ 
+            title: 'New Song',
+          }} 
+        />
+      </Stack>
     </SafeAreaProvider>
   );
 }
