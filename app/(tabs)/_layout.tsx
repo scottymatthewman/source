@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
+import theme from '../../constants/theme';
 
 export default function TabLayout() {
   return (
@@ -10,6 +11,9 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
+            backgroundColor: theme.colors.light.bg,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.light.border,
           },
           default: {},
         }),

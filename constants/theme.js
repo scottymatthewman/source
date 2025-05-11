@@ -1,0 +1,64 @@
+// Theme constants extracted from tailwind.config.js
+// This provides a central location for all theme values
+
+const colors = {
+  light: {
+    bg: '#FAFAFA',
+    border: '#EEEEEE',
+    surface1: '#FFFFFF',
+    surface2: '#ECECEC',
+    highlightCaption: '#E3E3E3',
+    highlightAnnotation: '#E3E3E3',
+    textHeader: '#1A1A1A',
+    text: '#242424',
+    textInverted: '#FAFAFA',
+    textPlaceholder: '#A0A0A0',
+    textDestructive: '#FF4747',
+    customYellow: '#CCA537',
+    button: {
+      bg: '#FDFDFD',
+      bgDestructive: '#FFEDED',
+      border: '#CACACA',
+      borderDestructive: '#FFA3A3',
+    },
+    icon: {
+      primary: '#1A1A1A',
+      secondary: '#B0B0B0',
+      tertiary: '#E4E4E4',
+      destructive: '#FF4747',
+    },
+  },
+  dark: {
+    bg: '#1A1A1A',
+    border: '#333333',
+    surface1: '#0B0B0B',
+    surface2: '#2A2A2A',
+    highlightCaption: '#3B3B3B',
+    highlightAnnotation: '#2A2A2A',
+    textHeader: '#FFFFFF',
+    text: '#FAFAFA',
+    textInverted: '#1A1A1A',
+    textPlaceholder: '#999999',
+    textDestructive: '#FF8080',
+    customYellow: '#FFE78F',
+    button: {
+      bg: '#222222',
+      bgDestructive: '#4B000D',
+      border: '#666666',
+      borderDestructive: '#FF8080',
+    },
+    icon: {
+      primary: '#FFFFFF',
+      secondary: '#8C8C8C',
+      tertiary: '#484848',
+      destructive: '#FF8080',
+    },
+  },
+};
+
+// You can add more theme properties here (spacing, typography, etc.)
+
+export default {
+  colors,
+  // Add more theme properties as needed
+};

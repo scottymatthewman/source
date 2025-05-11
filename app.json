@@ -8,6 +8,12 @@
     "scheme": "wright",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
+    "font": {
+      "switzer": {
+        "normal": "./assets/fonts/Switzer-Regular.ttf",
+        "bold": "./assets/fonts/Switzer-Bold.ttf"
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.smatthewman.Wright",

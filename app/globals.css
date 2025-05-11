@@ -1,3 +1,7 @@
+/* NativeWind styles */
+/* This file is used by NativeWind's CSS extraction process */
+/* The @tailwind directives will be processed during build time */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
