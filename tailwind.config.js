@@ -5,12 +5,6 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      fontFamily: [
-        {
-          "asset": "./assets/fonts/Switzer-VariableItalic.ttf",
-          'switzer': ['Switzer', 'sans']
-        },
-      ],
       colors: {
         'dark': {
           'bg': '#1A1A1A',
