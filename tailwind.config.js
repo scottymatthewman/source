@@ -35,6 +35,7 @@ module.exports = {
             'primary': '#FFFFFF',
             'secondary': '#8C8C8C',
             'tertiary': '#484848',
+            'inactive': '#EEEEEE',
             'destructive': '#FF8080',
           },
         },
@@ -59,8 +60,9 @@ module.exports = {
           },
           'icon': {
             'primary': '#1A1A1A',
-            'secondary': '#B0B0B0',
+            'secondary': '#333333',
             'tertiary': '#E4E4E4',
+            'inactive': '#B0B0B0',
             'destructive': '#FF4747',
           },
         },
