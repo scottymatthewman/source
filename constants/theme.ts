@@ -24,6 +24,7 @@ interface ColorScheme {
     primary: string;
     secondary: string;
     tertiary: string;
+    inactive: string;
     destructive: string;
   };
 }
@@ -60,8 +61,9 @@ const colors: ThemeColors = {
     },
     icon: {
       primary: '#1A1A1A',
-      secondary: '#B0B0B0',
+      secondary: '#333333',
       tertiary: '#E4E4E4',
+      inactive: '#8C8C8C',
       destructive: '#FF4747',
     },
   },
@@ -86,8 +88,9 @@ const colors: ThemeColors = {
     },
     icon: {
       primary: '#FFFFFF',
-      secondary: '#8C8C8C',
+      secondary: '#EEEEEE',
       tertiary: '#484848',
+      inactive: '#8C8C8C',
       destructive: '#FF8080',
     },
   },

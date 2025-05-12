@@ -1,0 +1,22 @@
+export { default as AddFolderIcon } from './AddFolderIcon';
+export { default as AddIcon } from './AddIcon';
+export { default as ChevronDownIcon } from './ChevronDownIcon';
+export { default as ChevronLeftIcon } from './ChevronLeftIcon';
+export { default as ChevronRightIcon } from './ChevronRightIcon';
+export { default as ChevronUpIcon } from './ChevronUpIcon';
+export { default as CloseIcon } from './CloseIcon';
+export { default as CopyIcon } from './CopyIcon';
+export { default as DeleteIcon } from './DeleteIcon';
+export { default as DragIcon } from './DragIcon';
+export { default as FolderIcon } from './FolderIcon';
+export { default as GoIcon } from './GoIcon';
+export { default as HomeIcon } from './HomeIcon';
+export { default as KebabIcon } from './KebabIcon';
+export { default as LoadingIcon } from './LoadingIcon';
+export { default as MicIcon } from './MicIcon';
+export { default as PauseIcon } from './PauseIcon';
+export { default as PlayIcon } from './PlayIcon';
+export { default as RedoIcon } from './RedoIcon';
+export { default as SearchIcon } from './SearchIcon';
+export { default as WriteIcon } from './WriteIcon';
+
