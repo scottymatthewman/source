@@ -1,0 +1,6 @@
+module Pods_Wright {
+  umbrella header "Pods-Wright-umbrella.h"
+
+  export *
+  module * { export * }
+}
