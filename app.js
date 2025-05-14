@@ -1,6 +1,6 @@
 import { SQLiteProvider } from 'expo-sqlite';
 import React from 'react';
-import NewSongForm from './app/(tabs)/newSongForm';
+import NewSongForm from './newSongForm';
 
 export default function App() {
   return (

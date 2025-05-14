@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { HomeIcon, MicIcon, WriteIcon } from '../../components/icons';
+import { HomeIcon, WriteIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 
 export default function TabLayout() {
@@ -36,14 +36,6 @@ export default function TabLayout() {
           headerShown: false,
           title: '',
           tabBarIcon: ({ focused }) => <WriteIcon width={28} height={28} fill={focused ? theme.colors.light.icon.primary : theme.colors.light.icon.inactive} />,
-        }}
-      />
-      <Tabs.Screen
-        name="newSongForm"
-        options={{
-          headerShown: false,
-          title: '',
-          tabBarIcon: ({ focused }) => <MicIcon width={28} height={28} fill={focused ? theme.colors.light.icon.primary : theme.colors.light.icon.inactive} />,
         }}
       />
     </Tabs>
