@@ -3,7 +3,7 @@ import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Vie
 import { ChevronDownIcon, CloseIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 import { db } from '../../lib/db';
-import { insertFile } from '../../lib/queries';
+import { insertSong } from '../../lib/queries';
 
 const NewSong = () => {
     const [title, setTitle] = useState('');
@@ -17,8 +17,9 @@ const NewSong = () => {
             Alert.alert('Error', 'Please fill in title and content');
             return;
         }
-        await insertFile(db, { title, content });
-        Alert.alert('Success', 'File created successfully');
+        await insertSong(db, { title, content });
+        console.log('Song inserted successfully');
+        Alert.alert('Success', 'Song created successfully');
     };
 
     return (

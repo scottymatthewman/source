@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import * as SQLite from 'expo-sqlite';
-import { createFilesTable } from './schema'; // Import the SQL for creating the table
+import { createSongsTable } from './schema'; // Import the SQL for creating the table
 
 // Utility to run SQL with async/await
 export async function executeSqlAsync(
@@ -15,10 +15,10 @@ export async function executeSqlAsync(
 export const db: Promise<SQLiteDatabase> = SQLite.openDatabaseAsync('wright.db')
   .then(async db => {
     try {
-      await executeSqlAsync(db, createFilesTable);
-      console.log('Files table created or already exists.');
+      await executeSqlAsync(db, createSongsTable);
+      console.log('Songs table created or already exists.');
     } catch (error) {
-      console.error('Failed to create files table:', error);
+      console.error('Failed to create songs table:', error);
     }
     return db;
   })

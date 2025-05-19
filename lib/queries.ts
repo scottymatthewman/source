@@ -1,8 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { v4 as uuidv4 } from 'uuid';
 
 // TypeScript interface for your file object
-interface File {
+interface Songs {
   id: string;
   title: string | null;
   content: string | null;
@@ -11,62 +10,58 @@ interface File {
 }
 
 // Returns all files from the files table as an array
-export const getAllFiles = async (dbPromise: Promise<SQLiteDatabase>): Promise<File[]> => {
+export const getAllSongs = async (dbPromise: Promise<SQLiteDatabase>): Promise<Songs[]> => {
   const db = await dbPromise;
-  let resultRows: File[] = [];
-  try {
-    await db.withTransactionAsync(async () => {
-      const result = await db.runAsync('SELECT * FROM files;');
-      console.log('SQL Query Result:', result);
-      if (result && Array.isArray(result)) {
-        resultRows = result.map(row => ({
-          id: row.id,
-          title: row.title,
-          content: row.content,
-          date_created: row.date_created,
-          date_edited: row.date_edited,
-        }));
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching all files:', error);
-    return [];
-  }
-  console.log('Fetched rows:', resultRows);
-  return resultRows;
+  console.log('getting all songs');
+  const result = await db.getAllAsync('SELECT * FROM songs');
+  
+ 
+  console.log('Fetched rows:', result);
+  return result as Songs[];
 };
 
-// Inserts a new file into the files table
-export const insertFile = async (
+// Inserts a new song into the songs table
+export const insertSong = async (
   dbPromise: Promise<SQLiteDatabase>,
-  file: Omit<File, 'id' | 'date_created' | 'date_edited'>
-): Promise<string | null> => {
+  song: Omit<Songs, 'id' | 'date_created' | 'date_edited'>
+): Promise<number | null> => {
   const db = await dbPromise;
-  const id = uuidv4();
   const now = Date.now();
-  let insertResult: string | null = null;
+  let insertResult: number | null = null;
   try {
+    console.log('trying to insert song');
     await db.withTransactionAsync(async () => {
+      console.log('Running SQL Insert Query');
+      // Don't include id in the INSERT - SQLite will auto-generate it
       const result = await db.runAsync(
-        'INSERT INTO files (id, title, content, date_created, date_edited) VALUES (?, ?, ?, ?, ?);',
-        [id, file.title, file.content, now, now]
+        'INSERT INTO songs (title, content, date_created, date_edited) VALUES (?, ?, ?, ?);',
+        [song.title, song.content, now, now]
       );
-      if ((result as unknown as any).rowsAffected > 0) {
-        insertResult = id;
+      console.log('SQL Insert Result:', result);
+      if (result.changes > 0) {
+        // Get the auto-generated ID
+        const lastIdResult = await db.runAsync('SELECT last_insert_rowid() as id');
+        if (lastIdResult && Array.isArray(lastIdResult) && lastIdResult.length > 0) {
+          insertResult = lastIdResult[0].id;
+        }
+        console.log('generated id:', insertResult);
+      } else {
+        console.error('Insert failed, no rows affected.');
       }
     });
-    console.log('Inserting file:', { title: file.title, content: file.content });
+    console.log('Inserting song:', { title: song.title, content: song.content });
   } catch (error) {
-    console.error('Error inserting file:', error);
+    console.error('Error inserting song:', error);
     return null;
   }
+  console.log('inserted song');
   return insertResult;
 };
 
-// Updates an existing file in the files table
-export const updateFile = async (
+// Updates an existing song in the songs table
+export const updateSong = async (
   dbPromise: Promise<SQLiteDatabase>,
-  file: File
+  song: Songs
 ): Promise<boolean> => {
   const db = await dbPromise;
   const now = Date.now();
@@ -74,13 +69,13 @@ export const updateFile = async (
   try {
     await db.withTransactionAsync(async () => {
       const result = await db.runAsync(
-        'UPDATE files SET title = ?, content = ?, date_edited = ? WHERE id = ?;',
-        [file.title, file.content, now, file.id]
+        'UPDATE songs SET title = ?, content = ?, date_edited = ? WHERE id = ?;',
+        [song.title, song.content, now, song.id]
       );
       updateResult = (result as unknown as any).rowsAffected > 0;
     });
   } catch (error) {
-    console.error('Error updating file:', error);
+    console.error('Error updating song:', error);
     return false;
   }
   return updateResult;

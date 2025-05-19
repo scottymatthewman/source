@@ -4,9 +4,9 @@ import { FlatList, SafeAreaView, Text, TouchableOpacity, View } from "react-nati
 import { AddIcon, SearchIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 import { db } from '../../lib/db';
-import { getAllFiles } from '../../lib/queries';
+import { getAllSongs } from '../../lib/queries';
 
-type File = {
+type Song = {
   id: number;
   title: string;
   content: string;
@@ -14,34 +14,34 @@ type File = {
   date_edited: number;
 };
 export default function Index() {
-  const [files, setFiles] = useState<File[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
 
-  const fetchFiles = useCallback(async () => {
+  const fetchSongs = useCallback(async () => {
     try {
-      const result = await getAllFiles(db);
-      console.log('Result from getAllFiles:', result);
+      const result = await getAllSongs(db);
+      console.log('Result from getAllSongs:', result);
       if (Array.isArray(result)) {
-        const formattedResult = result.map(file => ({
-          ...file,
-          id: Number(file.id),
-          title: file.title || '',
-          content: file.content || '',
-          date_created: Number(file.date_created),
-          date_edited: Number(file.date_edited),
+        const formattedResult = result.map(song => ({
+          ...song,
+          id: Number(song.id),
+          title: song.title || '',
+          content: song.content || '',
+          date_created: Number(song.date_created),
+          date_edited: Number(song.date_edited),
         }));
-        setFiles(formattedResult as File[]);
+        setSongs(formattedResult as Song[]);
       } else {
         console.error('Unexpected result:', result);
       }
     } catch (error) {
-      console.error('Error fetching files:', error);
+      console.error('Error fetching songs:', error);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      fetchFiles();
-    }, [fetchFiles])
+      fetchSongs();
+    }, [fetchSongs])
   );
 
   return (
@@ -58,7 +58,7 @@ export default function Index() {
         </View>
       </View>
       <FlatList className="flex-1"
-        data={files}
+        data={songs}
         renderItem={({item}) => (
           <View className="p-4 border-b border-light-border">
             <Text className="text-lg">{item.title}</Text>

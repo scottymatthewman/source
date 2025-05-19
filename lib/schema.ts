@@ -1,6 +1,6 @@
-export const createFilesTable = `
-  CREATE TABLE IF NOT EXISTS files (
-    id TEXT PRIMARY KEY NOT NULL,
+export const createSongsTable = `
+  CREATE TABLE IF NOT EXISTS songs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     content TEXT,
     date_created INTEGER NOT NULL,

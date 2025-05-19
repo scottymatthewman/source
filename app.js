@@ -1,23 +1,23 @@
-import { SQLiteProvider } from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite';
 import React from 'react';
+import { createSongsTable } from './lib/schema';
 import NewSongForm from './newSongForm';
 
 export default function App() {
   return (
-    <SQLiteProvider 
-        databaseName="userDatabase.db"
+    <SQLite.SQLiteProvider 
+        databaseName="wright.db"
         onInit={async (db) => {
-            await db.execAsync(`
-                CREATE TABLE IF NOT EXISTS files (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    content TEXT NOT NULL
-                )
-            `);
+            // Drop the existing table and recreate it with the correct schema
+            await db.execAsync(`DROP TABLE IF EXISTS songs;`);
+            await db.execAsync(createSongsTable);
+            
+            // If you want to keep existing data, you'd need a more complex migration strategy
+            // This approach will delete all existing data
         }}
         options={{useNewConnection: false}}
     >
       <NewSongForm />
-    </SQLiteProvider>
+    </SQLite.SQLiteProvider>
   );
 }
