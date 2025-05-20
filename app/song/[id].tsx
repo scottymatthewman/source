@@ -1,14 +1,49 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ChevronDownIcon, ChevronLeftIcon, KebabIcon } from '../../components/icons';
 import theme from '../../constants/theme';
+import { useSongs } from '../../context/songContext';
 
 const Details = () => {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const [title, setTitle] = useState("Song Title");
-    const [lyrics, setLyrics] = useState("Song lyrics will appear here...");
+    const { songs, updateSong } = useSongs();
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    
+    // Convert id to string for comparison and add logging
+    console.log('URL ID:', id, 'Type:', typeof id);
+    console.log('Available songs:', songs);
+    
+    const song = songs.find((song) => song.id.toString() === id?.toString());
+
+    useEffect(() => {
+        if (song) {
+            setTitle(song.title || '');
+            setContent(song.content || '');
+        }
+    }, [song]);
+
+    const handleSave = async () => {
+        if (song) {
+            await updateSong(song.id, {
+                title,
+                content,
+                modifiedDate: new Date()
+            });
+            router.back();
+        }
+    };
+
+    if (!song) {
+        return (
+            <SafeAreaView className="flex-1 items-center justify-center bg-light-bg">
+                <Text className="text-light-text-body">Song not found</Text>
+                <Text className="text-light-text-secondary mt-2">ID: {id}</Text>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView className="flex-1 items-left justify-left bg-light-bg">
@@ -25,21 +60,24 @@ const Details = () => {
                         <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleSave}>
                     <Text className="text-light-text text-lg font-semibold">Save</Text>
                 </TouchableOpacity>
             </View>
             <TextInput 
                 className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
+                placeholder="Untitled"
                 value={title} 
                 onChangeText={setTitle}
             />
             <ScrollView className="pl-6 pr-6">
                 <TextInput 
                     className="placeholder:text-light-text-placeholder text-xl font-medium" 
+                    placeholder="I heard there was a secret chord..."
                     multiline={true}
-                    value={lyrics}
-                    onChangeText={setLyrics}
+                    textAlignVertical="top"
+                    value={content}
+                    onChangeText={setContent}
                 />
             </ScrollView>
         </SafeAreaView>
