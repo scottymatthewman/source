@@ -1,5 +1,6 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { MusicalKey } from '../constants/musicalKeys';
 
 if (
   !process.env.EXPO_PUBLIC_TURSO_DB_URL ||
@@ -7,15 +8,15 @@ if (
 ) {
   throw new Error('Turso DB URL and Auth Token must be set in .env.local');
 }
+
 export interface Song {
   id: string;
   title: string | null;
   content: string | null;
-  modifiedDate: Date | null;
+  date_modified: Date | null;
   folder_id: string | null;
+  key: MusicalKey | null;
 }
-
-export const DB_NAME = 'local.db'; // Turso db name
 
 export const tursoOptions = {
   url: process.env.EXPO_PUBLIC_TURSO_DB_URL,
@@ -27,9 +28,10 @@ interface SongsContextType {
   createSong: () => Promise<Song | undefined>;
   updateSong: (id: string, updates: Partial<Song>) => void;
   deleteSong: (id: string) => void;
-  syncSongs: () => void;
-  toggleSync: (enabled: boolean) => void;
-  isSyncing: boolean;
+  // Temporarily disabled sync
+  // syncSongs: () => void;
+  // toggleSync: (enabled: boolean) => void;
+  // isSyncing: boolean;
 }
 
 const SongsContext = createContext<SongsContextType | null>(null);
@@ -37,70 +39,74 @@ const SongsContext = createContext<SongsContextType | null>(null);
 export function SongsProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
   const [songs, setSongs] = useState<Song[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Temporarily disabled sync
+  // const [isSyncing, setIsSyncing] = useState(false);
+  // const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchSongs();
   }, [db]);
 
-  useEffect(() => {
-    return () => {
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current);
-      }
-    };
-  }, []);
+  // Temporarily disabled sync cleanup
+  // useEffect(() => {
+  //   return () => {
+  //     if (syncIntervalRef.current) {
+  //       clearInterval(syncIntervalRef.current);
+  //     }
+  //   };
+  // }, []);
 
   const fetchSongs = useCallback(async () => {
     const songs = await db.getAllAsync<Song>(
-      'SELECT * FROM songs ORDER BY modifiedDate DESC'
+      'SELECT * FROM songs ORDER BY date_modified DESC'
     );
     setSongs(songs);
   }, [db]);
 
-  const syncSongs = useCallback(async () => {
-    console.log('Syncing songs with Turso DB...');
+  // Temporarily disabled sync
+  // const syncSongs = useCallback(async () => {
+  //   console.log('Syncing songs with Turso DB...');
+  //   try {
+  //     await db.syncLibSQL();
+  //     await fetchSongs();
+  //     console.log('Synced songs with Turso DB');
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }, [db, fetchSongs]);
 
-    try {
-      await db.syncLibSQL();
-      await fetchSongs();
-      console.log('Synced songs with Turso DB');
-    } catch (e) {
-      console.log(e);
-    }
-  }, [db, fetchSongs]);
-
-  const toggleSync = useCallback(
-    async (enabled: boolean) => {
-      setIsSyncing(enabled);
-      if (enabled) {
-        console.log('Starting sync interval...');
-        await syncSongs(); // Sync immediately when enabled
-        syncIntervalRef.current = setInterval(syncSongs, 2000);
-      } else if (syncIntervalRef.current) {
-        console.log('Stopping sync interval...');
-        clearInterval(syncIntervalRef.current);
-      }
-    },
-    [syncSongs]
-  );
+  // const toggleSync = useCallback(
+  //   async (enabled: boolean) => {
+  //     setIsSyncing(enabled);
+  //     if (enabled) {
+  //       console.log('Starting sync interval...');
+  //       await syncSongs();
+  //       syncIntervalRef.current = setInterval(syncSongs, 2000);
+  //     } else if (syncIntervalRef.current) {
+  //       console.log('Stopping sync interval...');
+  //       clearInterval(syncIntervalRef.current);
+  //     }
+  //   },
+  //   [syncSongs]
+  // );
 
   const createSong = async () => {
     const newSong = {
       title: '',
       content: '',
-      modifiedDate: new Date(),
+      date_modified: new Date(),
       folder_id: null,
+      key: null,
     };
 
     try {
       const result = await db.runAsync(
-        'INSERT INTO songs (title, content, modifiedDate, folder_id) VALUES (?, ?, ?, ?)',
+        'INSERT INTO songs (title, content, date_modified, folder_id, key) VALUES (?, ?, ?, ?, ?)',
         newSong.title,
         newSong.content,
-        newSong.modifiedDate.toISOString(),
-        newSong.folder_id
+        newSong.date_modified.toISOString(),
+        newSong.folder_id,
+        newSong.key
       );
       fetchSongs();
       return { ...newSong, id: result.lastInsertRowId.toString() };
@@ -110,7 +116,6 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateSong = async (id: string, updates: Partial<Song>) => {
-    // First get the existing note
     const existingSong = await db.getFirstAsync<Song>(
       'SELECT * FROM songs WHERE id = ?',
       [id]
@@ -118,24 +123,26 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
 
     if (!existingSong) return;
 
-    // Merge existing values with updates
     const updatedSong = {
       title: updates.title ?? existingSong.title,
       content: updates.content ?? existingSong.content,
-      modifiedDate: updates.modifiedDate ?? new Date(),
+      date_modified: updates.date_modified ?? new Date(),
       folder_id: updates.folder_id ?? existingSong.folder_id,
+      key: updates.key ?? existingSong.key,
     };
 
     await db.runAsync(
-      'UPDATE songs SET title = ?, content = ?, modifiedDate = ?, folder_id = ? WHERE id = ?',
+      'UPDATE songs SET title = ?, content = ?, date_modified = ?, folder_id = ?, key = ? WHERE id = ?',
       updatedSong.title,
       updatedSong.content,
-      updatedSong.modifiedDate.toISOString(),
+      updatedSong.date_modified.toISOString(),
       updatedSong.folder_id,
+      updatedSong.key,
       id
     );
     fetchSongs();
   };
+
   const deleteSong = (id: string) => {
     db.runAsync('DELETE FROM songs WHERE id = ?', id);
     fetchSongs();
@@ -148,9 +155,10 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
         createSong,
         updateSong,
         deleteSong,
-        syncSongs,
-        toggleSync,
-        isSyncing,
+        // Temporarily disabled sync
+        // syncSongs,
+        // toggleSync,
+        // isSyncing,
       }}
     >
       {children}

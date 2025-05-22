@@ -1,22 +1,19 @@
 import React from 'react';
 import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
-
-const MUSICAL_KEYS = [
-  'C', 'C#', 'D', 'D#', 'E', 'F',
-  'F#', 'G', 'G#', 'A', 'A#', 'B'
-];
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MUSICAL_KEYS, MusicalKey } from '../constants/musicalKeys';
 
 interface SongActionsModalProps {
   visible: boolean;
   onClose: () => void;
-  selectedKey: string | null;
-  onSelectKey: (key: string | null) => void;
+  selectedKey: MusicalKey | null;
+  onSelectKey: (key: MusicalKey | null) => void;
   mode?: 'full' | 'keyOnly';
   onMakeCopy?: () => void;
   onDelete?: () => void;
 }
 
-const SongActionsModal = ({
+const SongActionsModal: React.FC<SongActionsModalProps> = ({
   visible,
   onClose,
   selectedKey,
@@ -24,7 +21,103 @@ const SongActionsModal = ({
   mode = 'full',
   onMakeCopy,
   onDelete,
-}: SongActionsModalProps) => {
+}) => {
+  const renderKeySelector = () => (
+    <View className="pt-6 pl-6 pr-6 pb-16">
+      <Text className="text-lg font-medium text-light-text-header">Set Key</Text>
+      <FlatList
+        data={MUSICAL_KEYS}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="py-1"
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => onSelectKey(selectedKey === item ? null : item)}
+            className={`mr-2 px-4 py-2 rounded-lg ${
+              selectedKey === item
+                ? 'bg-light-surface-inverted'
+                : 'bg-light-surface-2'
+            }`}
+          >
+            <Text
+              className={`text-lg ${
+                selectedKey === item
+                  ? 'text-white'
+                  : 'text-light-text-body'
+              }`}
+            >
+              {item}
+            </Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item}
+      />
+    </View>
+  );
+
+  const renderFullActions = () => (
+    <View className="pt-6 pl-6 pr-6 pb-16">
+      <TouchableOpacity
+        onPress={() => {
+          onSelectKey(null);
+          onClose();
+        }}
+        className="py-3 border-b border-light-surface-2"
+      >
+        <Text className="text-light-text-body text-lg font-medium">Set Key</Text>
+        <FlatList
+        data={MUSICAL_KEYS}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="py-1"
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => onSelectKey(selectedKey === item ? null : item)}
+            className={`mr-2 px-4 py-2 rounded-lg ${
+              selectedKey === item
+                ? 'bg-light-surface-inverted'
+                : 'bg-light-surface-2'
+            }`}
+          >
+            <Text
+              className={`text-lg ${
+                selectedKey === item
+                  ? 'text-white'
+                  : 'text-light-text-body'
+              }`}
+            >
+              {item}
+            </Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item}
+      />
+      </TouchableOpacity>
+      {onMakeCopy && (
+        <TouchableOpacity
+          onPress={() => {
+            onMakeCopy();
+            onClose();
+          }}
+          className="py-3 border-b border-light-surface-2"
+        >
+          <Text className="text-light-text-body text-lg font-medium">Make a Copy</Text>
+        </TouchableOpacity>
+      )}
+      {onDelete && (
+        <TouchableOpacity
+          onPress={() => {
+            onDelete();
+            onClose();
+          }}
+          className="py-3"
+        >
+          <Text className="text-light-text-destructive text-lg font-medium">Delete Song</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
   return (
     <Modal
       visible={visible}
@@ -33,60 +126,17 @@ const SongActionsModal = ({
       onRequestClose={onClose}
     >
       <Pressable
-        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}
+        className="flex-1 bg-black/50"
         onPress={onClose}
       >
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'white',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            padding: 24,
-            paddingBottom: 36,
-          }}
+        <Pressable
+          className="absolute bottom-0 w-full bg-light-bg rounded-t-3xl"
+          onPress={(e) => e.stopPropagation()}
         >
-          <Text style={{ fontSize: 18, color: '#222', marginBottom: 12 }}>Set Key</Text>
-          <FlatList
-            data={MUSICAL_KEYS}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item}
-            contentContainerStyle={{ marginBottom: 16 }}
-            renderItem={({ item }) => {
-              const isSelected = selectedKey === item;
-              return (
-                <TouchableOpacity
-                  onPress={() => onSelectKey(isSelected ? null : item)}
-                  style={{
-                    backgroundColor: isSelected ? '#222' : '#f0f0f0',
-                    borderRadius: 8,
-                    paddingVertical: 12,
-                    paddingHorizontal: 18,
-                    marginRight: 10,
-                  }}
-                >
-                  <Text style={{ color: isSelected ? '#fff' : '#222', fontWeight: 'bold' }}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              );
-            }}
-          />
-          {mode === 'full' && (
-            <>
-              <TouchableOpacity onPress={onMakeCopy} style={{ paddingVertical: 16 }}>
-                <Text style={{ fontSize: 18, color: '#222' }}>Duplicate</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onDelete} style={{ paddingVertical: 16 }}>
-                <Text style={{ fontSize: 18, color: 'red' }}>Delete Song</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
+          <SafeAreaView edges={['bottom']}>
+            {mode === 'keyOnly' ? renderKeySelector() : renderFullActions()}
+          </SafeAreaView>
+        </Pressable>
       </Pressable>
     </Modal>
   );
