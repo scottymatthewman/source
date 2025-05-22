@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { FoldersProvider } from '../context/folderContext';
 import { SongsProvider } from '../context/songContext';
 import './globals.css';
 
@@ -22,7 +23,7 @@ export default function RootLayout() {
         }
 
         // Define the target database version
-        const DATABASE_VERSION = 1;
+        const DATABASE_VERSION = 3;
 
         // PRAGMA is a special command in SQLite used to query or modify database settings. For example, PRAGMA user_version retrieves or sets a custom schema version number, helping you track migrations.
         // Retrieve the current database version using PRAGMA.
@@ -48,7 +49,10 @@ export default function RootLayout() {
           // - content: a text column.
           // - modifiedDate: a text column.
           await db.execAsync(
-            `CREATE TABLE IF NOT EXISTS songs (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, content TEXT, modifiedDate TEXT);`
+            `CREATE TABLE IF NOT EXISTS songs (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, content TEXT, modifiedDate TEXT, folder_id INTEGER);`
+          );
+          await db.execAsync(
+            `CREATE TABLE IF NOT EXISTS folders (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, date_modified TEXT);`
           );
           console.log(
             'Initial migration applied, DB version:',
@@ -56,15 +60,25 @@ export default function RootLayout() {
           );
           // Update the current version after applying the initial migration.
           currentDbVersion = 1;
-        } else {
-          console.log('DB version:', currentDbVersion);
         }
 
-        // Future migrations for later versions can be added here.
-        // Example:
-        // if (currentDbVersion === 1) {
-        //   // Add migration steps for upgrading from version 1 to a higher version.
-        // }
+        // Migration for version 1: Add folders table
+        if (currentDbVersion === 1) {
+          console.log('Applying migration for version 1: Adding folders table');
+          await db.execAsync(
+            `CREATE TABLE IF NOT EXISTS folders (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, date_modified TEXT);`
+          );
+          currentDbVersion = 2;
+        }
+
+        // Migration for version 2: Add folder_id to songs table
+        if (currentDbVersion === 2) {
+          console.log('Applying migration for version 2: Adding folder_id to songs table');
+          await db.execAsync(
+            `ALTER TABLE songs ADD COLUMN folder_id INTEGER;`
+          );
+          currentDbVersion = 3;
+        }
 
         // Set the database version to the target version after migration.
         await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
@@ -72,20 +86,9 @@ export default function RootLayout() {
     >
       <SafeAreaProvider>
         <SongsProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen 
-              name="index" 
-              options={{ 
-                title: 'Home',
-              }} 
-            />
-            <Stack.Screen 
-              name="newSong" 
-              options={{ 
-                title: 'New Song',
-              }} 
-            />
-          </Stack>
+          <FoldersProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </FoldersProvider>
         </SongsProvider>
       </SafeAreaProvider>
     </SQLiteProvider>
