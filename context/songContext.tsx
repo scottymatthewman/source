@@ -12,6 +12,7 @@ export interface Song {
   title: string | null;
   content: string | null;
   modifiedDate: Date | null;
+  folder_id: string | null;
 }
 
 export const DB_NAME = 'local.db'; // Turso db name
@@ -37,7 +38,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
-  const syncIntervalRef = useRef<NodeJS.Timeout>();
+  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchSongs();
@@ -90,14 +91,16 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       title: '',
       content: '',
       modifiedDate: new Date(),
+      folder_id: null,
     };
 
     try {
       const result = await db.runAsync(
-        'INSERT INTO songs (title, content, modifiedDate) VALUES (?, ?, ?)',
+        'INSERT INTO songs (title, content, modifiedDate, folder_id) VALUES (?, ?, ?, ?)',
         newSong.title,
         newSong.content,
-        newSong.modifiedDate.toISOString()
+        newSong.modifiedDate.toISOString(),
+        newSong.folder_id
       );
       fetchSongs();
       return { ...newSong, id: result.lastInsertRowId.toString() };
@@ -120,13 +123,15 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       title: updates.title ?? existingSong.title,
       content: updates.content ?? existingSong.content,
       modifiedDate: updates.modifiedDate ?? new Date(),
+      folder_id: updates.folder_id ?? existingSong.folder_id,
     };
 
     await db.runAsync(
-      'UPDATE songs SET title = ?, content = ?, modifiedDate = ? WHERE id = ?',
+      'UPDATE songs SET title = ?, content = ?, modifiedDate = ?, folder_id = ? WHERE id = ?',
       updatedSong.title,
       updatedSong.content,
       updatedSong.modifiedDate.toISOString(),
+      updatedSong.folder_id,
       id
     );
     fetchSongs();
