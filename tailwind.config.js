@@ -38,6 +38,7 @@ module.exports = {
           'border': '#EEEEEE',
           'surface-1': '#FFFFFF',
           'surface-2': '#ECECEC',
+          'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
           'highlight-annotation': '#E3E3E3',
           'text-header': '#1A1A1A',
