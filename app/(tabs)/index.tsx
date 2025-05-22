@@ -2,30 +2,40 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { AddIcon, SearchIcon } from '../../components/icons';
+import MoonIcon from '../../components/icons/MoonIcon';
+import SunIcon from '../../components/icons/SunIcon';
 import theme from '../../constants/theme';
 import { Folder, useFolders } from '../../context/folderContext';
 import { Song, useSongs } from '../../context/songContext';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeClasses } from '../../utils/theme';
 
 const SongItem = ({ song }: { song: Song }) => {
   const router = useRouter();
+  const classes = useThemeClasses();
   return (
     <TouchableOpacity 
       onPress={() => router.push({ pathname: '/song/[id]', params: { id: song.id } })}
-      className="px-6 py-4 border-b border-light-surface-2"
+      className={`px-6 py-4 border-b ${classes.border.surface}`}
     >
-      <Text className="text-light-text-body text-lg">{song.title || 'Untitled'}</Text>
+      <Text className={classes.text.body} style={{ fontSize: 18 }}>
+        {song.title || 'Untitled'}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const FolderItem = ({ folder }: { folder: Folder }) => {
   const router = useRouter();
+  const classes = useThemeClasses();
   return (
     <TouchableOpacity
       onPress={() => router.push({ pathname: '/folder/[id]', params: { id: folder.id } })}
-      className="px-6 py-4 border-b border-light-surface-2"
+      className={`px-6 py-4 border-b ${classes.border.surface}`}
     >
-      <Text className="text-light-text-body text-lg">{folder.title || 'Untitled Folder'}</Text>
+      <Text className={classes.text.body} style={{ fontSize: 18 }}>
+        {folder.title || 'Untitled Folder'}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -35,6 +45,9 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
   const { createFolder } = useFolders();
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [folderName, setFolderName] = useState('');
+  const { theme: currentTheme } = useTheme();
+  const classes = useThemeClasses();
+  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
   const handleNewSong = () => {
     onClose();
@@ -72,31 +85,31 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
         onPress={handleCancel}
       >
         <View 
-          className="bg-light-bg rounded-2xl w-[280px] overflow-hidden"
+          className={`${classes.bg.main} rounded-2xl w-[280px] overflow-hidden`}
           style={{ elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }}
         >
           {!isCreatingFolder ? (
             <>
               <TouchableOpacity 
                 onPress={handleNewSong}
-                className="px-6 py-4 border-b border-light-surface-2"
+                className={`px-6 py-4 border-b ${classes.border.surface}`}
               >
-                <Text className="text-light-text-body text-lg">New Song</Text>
+                <Text className={`${classes.text.body} text-lg`}>New Song</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleNewFolder}
                 className="px-6 py-4"
               >
-                <Text className="text-light-text-body text-lg">New Folder</Text>
+                <Text className={`${classes.text.body} text-lg`}>New Folder</Text>
               </TouchableOpacity>
             </>
           ) : (
             <View className="p-4">
-              <Text className="text-light-text-body text-lg mb-4">Create New Folder</Text>
+              <Text className={`${classes.text.body} text-lg mb-4`}>Create New Folder</Text>
               <TextInput
-                className="bg-light-surface-2 rounded-lg px-4 py-3 mb-4 text-light-text-body"
+                className={`${classes.bg.surface} ${classes.text.body} rounded-lg px-4 py-3 mb-4`}
                 placeholder="Folder name"
-                placeholderTextColor={theme.colors.light.textPlaceholder}
+                placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                 value={folderName}
                 onChangeText={setFolderName}
                 autoFocus
@@ -106,14 +119,14 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
                   onPress={handleCancel}
                   className="px-4 py-2"
                 >
-                  <Text className="text-light-text-body">Cancel</Text>
+                  <Text className={classes.text.body}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   onPress={handleCreateFolder}
-                  className="px-4 py-2 bg-light-surface-2 rounded-lg"
+                  className={`px-4 py-2 ${classes.bg.surface} rounded-lg`}
                   disabled={!folderName.trim()}
                 >
-                  <Text className="text-light-text-body">Create</Text>
+                  <Text className={classes.text.body}>Create</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -129,6 +142,9 @@ export default function Index() {
   const { folders } = useFolders();
   const router = useRouter();
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
+  const { theme: currentTheme, toggleTheme } = useTheme();
+  const classes = useThemeClasses();
+  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
   // Sort and slice for recent songs
   const recentSongs = [...songs]
@@ -138,23 +154,37 @@ export default function Index() {
   // console.log('Available songs:', songs);
 
   return (
-    <SafeAreaView className="flex-1 bg-light-bg">
+    <SafeAreaView className={`${classes.bg.main} flex-1`}>
       <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
-        <Text className="text-3xl text-light-text-header font-semibold">Home</Text>
+        <View className="flex-row items-center">
+          <Text className={classes.text.header} style={{ fontSize: 32, fontWeight: 'bold' }}>
+            Home
+          </Text>
+          <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
+            {currentTheme === 'dark' ? 
+              <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+              <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+            }
+          </TouchableOpacity>
+        </View>
         <View className="flex-row items-center gap-4">
           <TouchableOpacity>
-            <SearchIcon width={24} height={24} fill={theme.colors.light.icon.primary} />
+            <SearchIcon width={24} height={24} fill={colorPalette.icon.primary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowCreateOverlay(true)}>
-            <AddIcon width={24} height={24} fill={theme.colors.light.icon.primary} />
+            <AddIcon width={24} height={24} fill={colorPalette.icon.primary} />
           </TouchableOpacity>
         </View>
       </View>
       <View>
-        <View className="flex-row items-bottom justify-between pr-6 pt-4 pb-2">
-          <Text className="text-light-text-placeholder text-md font-semibold px-6 pb-2">Recent</Text>
+        <View className="flex-row items-bottom justify-between px-6 pt-4 pb-2">
+        <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
+            Recent Songs
+          </Text>
           <TouchableOpacity onPress={() => router.push('/allSongs')}>
-            <Text className="text-light-text-secondary text-md font-semibold">View All</Text>
+            <Text className={classes.text.secondary} style={{ fontSize: 16, fontWeight: '600' }}>
+              View All
+            </Text>
           </TouchableOpacity>
         </View>
         <FlatList
@@ -162,44 +192,46 @@ export default function Index() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingHorizontal: 18 }}
-          className="pb-5"
+          contentContainerStyle={{ paddingHorizontal: 18, }}
+          className="pb-2"
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-              className="mr-4 bg-light-surface-2 rounded-xl p-4 w-48 h-32 flex-col justify-end"
+              className={`mr-4 ${classes.bg.surface} rounded-xl p-4 w-48 h-32 flex-col justify-end`}
             >
-              <Text className="text-lg font-semibold text-light-text-header mt-auto" numberOfLines={2}>
+              <Text className={`text-lg font-semibold ${classes.text.header} mt-auto`} numberOfLines={2}>
                 {item.title || 'Untitled'}
               </Text>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <Text className="text-light-text-secondary px-6">No recent songs.</Text>
+            <Text className={`${classes.text.secondary} px-6`}>No recent songs.</Text>
           }
         />
-        <Text className="text-light-text-placeholder text-md font-semibold px-6 pt-6 pb-1">Folders</Text>
-      <FlatList
+        <Text className={`${classes.text.placeholder} text-base font-semibold px-6 pt-6 pb-1`}>
+          Folders
+        </Text>
+        <FlatList
           data={folders}
           keyExtractor={item => item.id}
           ListHeaderComponent={
             <TouchableOpacity
               onPress={() => router.push('/allSongs')}
-              className="px-6 py-4 border-b border-light-surface-2"
+              className={`px-6 py-4`}
             >
-              <Text className="text-light-text-body text-lg">All Songs</Text>
+              <Text className={`${classes.text.body} text-lg`}>All Songs</Text>
             </TouchableOpacity>
           }
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-              className="px-6 py-4 border-b border-light-surface-2"
+              className={`px-6 py-4`}
             >
-              <Text className="text-light-text-body text-lg">{item.title || 'Untitled Folder'}</Text>
+              <Text className={`${classes.text.body} text-lg`}>{item.title || 'Untitled Folder'}</Text>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <Text className="text-light-text-secondary px-6">No folders yet.</Text>
+            <Text className={`${classes.text.secondary} px-6`}>No folders yet.</Text>
           }
         />
       </View>

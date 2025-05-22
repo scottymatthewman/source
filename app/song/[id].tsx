@@ -4,19 +4,23 @@ import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Vie
 import { FolderDropdown } from '../../components/FolderDropdown';
 import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
 import SongActionsModal from '../../components/SongActionsModal';
+import { MusicalKey } from '../../constants/musicalKeys';
 import theme from '../../constants/theme';
 import { useSongs } from '../../context/songContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const Details = () => {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const { songs, updateSong, deleteSong, createSong } = useSongs();
+    const { theme: currentTheme } = useTheme();
+    const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showActions, setShowActions] = useState(false);
-    const [selectedKey, setSelectedKey] = useState<string | null>(null);
+    const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
     
     // Convert id to string for comparison and add logging
     console.log('URL ID:', id, 'Type:', typeof id);
@@ -29,6 +33,7 @@ const Details = () => {
             setTitle(song.title || '');
             setContent(song.content || '');
             setSelectedFolderId(song.folder_id);
+            setSelectedKey(song.key);
             setHasUnsavedChanges(false);
         }
     }, [song]);
@@ -38,18 +43,20 @@ const Details = () => {
             const hasChanges = 
                 title !== (song.title || '') || 
                 content !== (song.content || '') ||
-                selectedFolderId !== song.folder_id;
+                selectedFolderId !== song.folder_id ||
+                selectedKey !== song.key;
             setHasUnsavedChanges(hasChanges);
         }
-    }, [title, content, selectedFolderId, song]);
+    }, [title, content, selectedFolderId, selectedKey, song]);
 
     const handleSave = async () => {
         if (song) {
             await updateSong(song.id, {
                 title,
                 content,
-                modifiedDate: new Date(),
-                folder_id: selectedFolderId
+                date_modified: new Date(),
+                folder_id: selectedFolderId,
+                key: selectedKey
             });
             setHasUnsavedChanges(false);
             router.back();
@@ -82,8 +89,11 @@ const Details = () => {
         }
     };
 
-    // Example handlers
-    const handleSetKey = () => { /* your logic */ setShowActions(false); };
+    const handleSetKey = () => { 
+        // TODO: Implement key selection
+        setShowActions(false); 
+    };
+
     const handleMakeCopy = () => {
         if (!song) return;
         setShowActions(false);
@@ -96,6 +106,7 @@ const Details = () => {
             },
         });
     };
+
     const handleDelete = () => {
         if (!song) return;
         Alert.alert(
@@ -118,19 +129,19 @@ const Details = () => {
 
     if (!song) {
         return (
-            <SafeAreaView className="flex-1 items-center justify-center bg-light-bg">
-                <Text className="text-light-text-body">Song not found</Text>
-                <Text className="text-light-text-secondary mt-2">ID: {id}</Text>
+            <SafeAreaView className={`flex-1 items-center justify-center ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
+                <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>Song not found</Text>
+                <Text className={currentTheme === 'dark' ? 'text-dark-text-secondary' : 'text-light-text-secondary'} style={{ marginTop: 8 }}>ID: {id}</Text>
             </SafeAreaView>
         );
     }
 
     return (
         <>
-            <SafeAreaView className="flex-1 items-left justify-left bg-light-bg">
+            <SafeAreaView className={`flex-1 items-left justify-left ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
                 <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
                     <TouchableOpacity onPress={handleBack}>
-                        <ChevronLeftIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
+                        <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
                     </TouchableOpacity>
                     <View className="flex-row items-center gap-2">
                         <FolderDropdown 
@@ -138,22 +149,22 @@ const Details = () => {
                             onSelectFolder={setSelectedFolderId}
                         />
                         <TouchableOpacity onPress={() => setShowActions(true)}>
-                            <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
+                            <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={handleSave}>
-                        <Text className="text-light-text text-lg font-semibold">Save</Text>
+                        <Text className={currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
                 <TextInput 
-                    className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
+                    className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold pt-4 pl-6 pr-6 pb-3 ${currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'}`}
                     placeholder="Untitled"
                     value={title} 
                     onChangeText={setTitle}
                 />
                 <ScrollView className="pl-6 pr-6">
                     <TextInput 
-                        className="placeholder:text-light-text-placeholder text-xl font-medium" 
+                        className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-xl font-medium ${currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'}`}
                         placeholder="I heard there was a secret chord..."
                         multiline={true}
                         textAlignVertical="top"

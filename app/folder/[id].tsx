@@ -5,12 +5,15 @@ import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 import { useFolders } from '../../context/folderContext';
 import { useSongs } from '../../context/songContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function FolderDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { folders, updateFolder } = useFolders();
   const { songs } = useSongs();
+  const { theme: currentTheme } = useTheme();
+  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
   const folder = folders.find(f => f.id.toString() === id?.toString());
   const [title, setTitle] = useState(folder?.title || '');
@@ -31,17 +34,17 @@ export default function FolderDetails() {
 
   if (!folder) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-light-bg">
-        <Text className="text-light-text-body">Folder not found</Text>
+      <SafeAreaView className={`flex-1 items-center justify-center ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
+        <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>Folder not found</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-light-bg">
+    <SafeAreaView className={`flex-1 ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
       <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
         <TouchableOpacity onPress={() => router.back()}>
-          <ChevronLeftIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
+          <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
         </TouchableOpacity>
         <View className="flex-1 mx-2">
           <TextInput
@@ -49,13 +52,13 @@ export default function FolderDetails() {
             onChangeText={setTitle}
             onBlur={handleTitleSave}
             editable={true}
-            className="text-2xl font-semibold text-light-text-header text-left"
+            className={`text-2xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'} text-left`}
             onFocus={() => setEditing(true)}
             selectTextOnFocus
           />
         </View>
         <TouchableOpacity>
-          <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
+          <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -64,13 +67,17 @@ export default function FolderDetails() {
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-            className="px-6 py-4 border-b border-light-surface-2"
+            className={`px-6 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
           >
-            <Text className="text-light-text-body text-lg">{item.title || 'Untitled'}</Text>
+            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18 }}>
+              {item.title || 'Untitled'}
+            </Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <Text className="text-light-text-secondary text-center mt-8">No songs in this folder.</Text>
+          <Text className={currentTheme === 'dark' ? 'text-dark-text-secondary' : 'text-light-text-secondary'} style={{ textAlign: 'center', marginTop: 32 }}>
+            No songs in this folder.
+          </Text>
         }
       />
     </SafeAreaView>
