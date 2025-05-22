@@ -132,7 +132,7 @@ export default function Index() {
 
   // Sort and slice for recent songs
   const recentSongs = [...songs]
-    .sort((a, b) => new Date(b.modifiedDate!).getTime() - new Date(a.modifiedDate!).getTime())
+    .sort((a, b) => new Date(b.date_modified!).getTime() - new Date(a.date_modified!).getTime())
     .slice(0, 8);
 
   // console.log('Available songs:', songs);
@@ -179,7 +179,7 @@ export default function Index() {
           }
         />
         <Text className="text-light-text-placeholder text-md font-semibold px-6 pt-6 pb-1">Folders</Text>
-        <FlatList
+      <FlatList
           data={folders}
           keyExtractor={item => item.id}
           ListHeaderComponent={
