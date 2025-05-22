@@ -1,3 +1,4 @@
+import { MusicalKey } from '@/constants/musicalKeys';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -32,7 +33,7 @@ const NewSong = () => {
                 await updateSong(newSong.id, { 
                     title: title || 'Untitled',
                     content: content || '',
-                    modifiedDate: new Date(),
+                    date_modified: new Date(),
                     folder_id: selectedFolderId
                 });
                 clearInputs();
@@ -106,7 +107,7 @@ const NewSong = () => {
             <SongActionsModal
                 visible={showActions}
                 onClose={() => setShowActions(false)}
-                selectedKey={selectedKey}
+                selectedKey={selectedKey as MusicalKey}
                 onSelectKey={setSelectedKey}
                 mode="keyOnly"
             />
