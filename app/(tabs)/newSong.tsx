@@ -1,19 +1,28 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { ChevronDownIcon, CloseIcon } from '../../components/icons';
+import { FolderDropdown } from '../../components/FolderDropdown';
+import { CloseIcon, KebabIcon } from '../../components/icons';
+import SongActionsModal from '../../components/SongActionsModal';
 import theme from '../../constants/theme';
 import { useSongs } from '../../context/songContext';
 
 const NewSong = () => {
     const { createSong, updateSong } = useSongs();
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
+    const params = useLocalSearchParams();
+    const [title, setTitle] = useState(params.title ? String(params.title) : "");
+    const [content, setContent] = useState(params.content ? String(params.content) : "");
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+        params.folder_id ? String(params.folder_id) : null
+    );
     const router = useRouter();
+    const [showActions, setShowActions] = useState(false);
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
     const clearInputs = () => {
         setTitle("");
         setContent("");
+        setSelectedFolderId(null);
     };
 
     const handleSave = async () => {
@@ -23,7 +32,8 @@ const NewSong = () => {
                 await updateSong(newSong.id, { 
                     title: title || 'Untitled',
                     content: content || '',
-                    modifiedDate: new Date()
+                    modifiedDate: new Date(),
+                    folder_id: selectedFolderId
                 });
                 clearInputs();
                 router.back();
@@ -34,7 +44,7 @@ const NewSong = () => {
     };
 
     const handleDiscard = () => {
-        if (title || content) {
+        if (title || content || selectedFolderId) {
             Alert.alert(
                 "Discard Changes?",
                 "Are you sure you want to discard your changes?",
@@ -65,9 +75,12 @@ const NewSong = () => {
                     <CloseIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
                 </TouchableOpacity>
                 <View className="flex-row items-center gap-2">
-                    <TouchableOpacity className="flex-row items-center gap-1 pt-1 pb-1 pl-3.5 pr-1.5 bg-light-surface-2 rounded-full">
-                        <Text className="text-light-text">Folder</Text>
-                        <ChevronDownIcon width={20} height={20} fill={theme.colors.light.icon.secondary} />
+                    <FolderDropdown 
+                        selectedFolderId={selectedFolderId}
+                        onSelectFolder={setSelectedFolderId}
+                    />
+                    <TouchableOpacity onPress={() => setShowActions(true)}>
+                        <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity onPress={handleSave}>
@@ -76,20 +89,27 @@ const NewSong = () => {
             </View>
             <TextInput 
                 className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
-                placeholder="Untitled" 
+                placeholder="Untitled"
                 value={title} 
-                onChangeText={setTitle} 
+                onChangeText={setTitle}
             />
             <ScrollView className="pl-6 pr-6">
                 <TextInput 
                     className="placeholder:text-light-text-placeholder text-xl font-medium" 
-                    placeholder="I heard there was a secret chord..." 
-                    value={content} 
-                    onChangeText={setContent}
-                    multiline
+                    placeholder="I heard there was a secret chord..."
+                    multiline={true}
                     textAlignVertical="top"
+                    value={content}
+                    onChangeText={setContent}
                 />
             </ScrollView>
+            <SongActionsModal
+                visible={showActions}
+                onClose={() => setShowActions(false)}
+                selectedKey={selectedKey}
+                onSelectKey={setSelectedKey}
+                mode="keyOnly"
+            />
         </SafeAreaView>
     );
 };

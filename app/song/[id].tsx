@@ -1,16 +1,22 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { ChevronDownIcon, ChevronLeftIcon, KebabIcon } from '../../components/icons';
+import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FolderDropdown } from '../../components/FolderDropdown';
+import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
+import SongActionsModal from '../../components/SongActionsModal';
 import theme from '../../constants/theme';
 import { useSongs } from '../../context/songContext';
 
 const Details = () => {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { songs, updateSong } = useSongs();
+    const { songs, updateSong, deleteSong, createSong } = useSongs();
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [showActions, setShowActions] = useState(false);
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
     
     // Convert id to string for comparison and add logging
     console.log('URL ID:', id, 'Type:', typeof id);
@@ -22,18 +28,92 @@ const Details = () => {
         if (song) {
             setTitle(song.title || '');
             setContent(song.content || '');
+            setSelectedFolderId(song.folder_id);
+            setHasUnsavedChanges(false);
         }
     }, [song]);
+
+    useEffect(() => {
+        if (song) {
+            const hasChanges = 
+                title !== (song.title || '') || 
+                content !== (song.content || '') ||
+                selectedFolderId !== song.folder_id;
+            setHasUnsavedChanges(hasChanges);
+        }
+    }, [title, content, selectedFolderId, song]);
 
     const handleSave = async () => {
         if (song) {
             await updateSong(song.id, {
                 title,
                 content,
-                modifiedDate: new Date()
+                modifiedDate: new Date(),
+                folder_id: selectedFolderId
             });
+            setHasUnsavedChanges(false);
             router.back();
         }
+    };
+
+    const handleBack = () => {
+        if (hasUnsavedChanges) {
+            Alert.alert(
+                "Unsaved Changes",
+                "Do you want to save your changes before leaving?",
+                [
+                    {
+                        text: "Don't Save",
+                        style: "destructive",
+                        onPress: () => router.back()
+                    },
+                    {
+                        text: "Cancel",
+                        style: "cancel"
+                    },
+                    {
+                        text: "Save",
+                        onPress: handleSave
+                    }
+                ]
+            );
+        } else {
+            router.back();
+        }
+    };
+
+    // Example handlers
+    const handleSetKey = () => { /* your logic */ setShowActions(false); };
+    const handleMakeCopy = () => {
+        if (!song) return;
+        setShowActions(false);
+        router.push({
+            pathname: '/newSong',
+            params: {
+                title: `Copy of ${song.title || 'Untitled'}`,
+                content: song.content || '',
+                folder_id: song.folder_id || '',
+            },
+        });
+    };
+    const handleDelete = () => {
+        if (!song) return;
+        Alert.alert(
+            "Delete Song",
+            "Are you sure you want to delete this song? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        await deleteSong(song.id);
+                        router.replace('/');
+                    }
+                }
+            ]
+        );
+        setShowActions(false);
     };
 
     if (!song) {
@@ -46,41 +126,52 @@ const Details = () => {
     }
 
     return (
-        <SafeAreaView className="flex-1 items-left justify-left bg-light-bg">
-            <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <ChevronLeftIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
-                </TouchableOpacity>
-                <View className="flex-row items-center gap-2">
-                    <TouchableOpacity className="flex-row items-center gap-1 pt-1 pb-1 pl-3 pr-2 bg-light-surface-2 rounded-full">
-                        <Text className="text-light-text">Folder</Text>
-                        <ChevronDownIcon width={20} height={20} fill={theme.colors.light.icon.secondary} />
+        <>
+            <SafeAreaView className="flex-1 items-left justify-left bg-light-bg">
+                <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
+                    <TouchableOpacity onPress={handleBack}>
+                        <ChevronLeftIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
                     </TouchableOpacity>
-                    <TouchableOpacity className="flex-row items-center rounded-full">
-                        <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
+                    <View className="flex-row items-center gap-2">
+                        <FolderDropdown 
+                            selectedFolderId={selectedFolderId}
+                            onSelectFolder={setSelectedFolderId}
+                        />
+                        <TouchableOpacity onPress={() => setShowActions(true)}>
+                            <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={handleSave}>
+                        <Text className="text-light-text text-lg font-semibold">Save</Text>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={handleSave}>
-                    <Text className="text-light-text text-lg font-semibold">Save</Text>
-                </TouchableOpacity>
-            </View>
-            <TextInput 
-                className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
-                placeholder="Untitled"
-                value={title} 
-                onChangeText={setTitle}
-            />
-            <ScrollView className="pl-6 pr-6">
                 <TextInput 
-                    className="placeholder:text-light-text-placeholder text-xl font-medium" 
-                    placeholder="I heard there was a secret chord..."
-                    multiline={true}
-                    textAlignVertical="top"
-                    value={content}
-                    onChangeText={setContent}
+                    className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
+                    placeholder="Untitled"
+                    value={title} 
+                    onChangeText={setTitle}
                 />
-            </ScrollView>
-        </SafeAreaView>
+                <ScrollView className="pl-6 pr-6">
+                    <TextInput 
+                        className="placeholder:text-light-text-placeholder text-xl font-medium" 
+                        placeholder="I heard there was a secret chord..."
+                        multiline={true}
+                        textAlignVertical="top"
+                        value={content}
+                        onChangeText={setContent}
+                    />
+                </ScrollView>
+            </SafeAreaView>
+
+            <SongActionsModal
+                visible={showActions}
+                onClose={() => setShowActions(false)}
+                selectedKey={selectedKey}
+                onSelectKey={setSelectedKey}
+                onMakeCopy={handleMakeCopy}
+                onDelete={handleDelete}
+            />
+        </>
     );
 };
 
