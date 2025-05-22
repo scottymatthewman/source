@@ -2,6 +2,8 @@ import React from 'react';
 import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MUSICAL_KEYS, MusicalKey } from '../constants/musicalKeys';
+import theme from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface SongActionsModalProps {
   visible: boolean;
@@ -22,9 +24,12 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
   onMakeCopy,
   onDelete,
 }) => {
+  const { theme: currentTheme } = useTheme();
+  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+
   const renderKeySelector = () => (
     <View className="pt-6 pl-6 pr-6 pb-16">
-      <Text className="text-lg font-medium text-light-text-header">Set Key</Text>
+      <Text className={`text-lg font-medium ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}>Set Key</Text>
       <FlatList
         data={MUSICAL_KEYS}
         horizontal
@@ -36,14 +41,14 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             className={`mr-2 px-4 py-2 rounded-lg ${
               selectedKey === item
                 ? 'bg-light-surface-inverted'
-                : 'bg-light-surface-2'
+                : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
             }`}
           >
             <Text
               className={`text-lg ${
                 selectedKey === item
                   ? 'text-white'
-                  : 'text-light-text-body'
+                  : currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'
               }`}
             >
               {item}
@@ -62,36 +67,36 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
           onSelectKey(null);
           onClose();
         }}
-        className="py-3 border-b border-light-surface-2"
+        className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
       >
-        <Text className="text-light-text-body text-lg font-medium">Set Key</Text>
+        <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium`}>Set Key</Text>
         <FlatList
-        data={MUSICAL_KEYS}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="py-1"
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => onSelectKey(selectedKey === item ? null : item)}
-            className={`mr-2 px-4 py-2 rounded-lg ${
-              selectedKey === item
-                ? 'bg-light-surface-inverted'
-                : 'bg-light-surface-2'
-            }`}
-          >
-            <Text
-              className={`text-lg ${
+          data={MUSICAL_KEYS}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="py-1"
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => onSelectKey(selectedKey === item ? null : item)}
+              className={`mr-2 px-4 py-2 rounded-lg ${
                 selectedKey === item
-                  ? 'text-white'
-                  : 'text-light-text-body'
+                  ? 'bg-light-surface-inverted'
+                  : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
               }`}
             >
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item}
-      />
+              <Text
+                className={`text-lg ${
+                  selectedKey === item
+                    ? 'text-white'
+                    : currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'
+                }`}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item}
+        />
       </TouchableOpacity>
       {onMakeCopy && (
         <TouchableOpacity
@@ -99,9 +104,9 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onMakeCopy();
             onClose();
           }}
-          className="py-3 border-b border-light-surface-2"
+          className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
         >
-          <Text className="text-light-text-body text-lg font-medium">Make a Copy</Text>
+          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium`}>Make a Copy</Text>
         </TouchableOpacity>
       )}
       {onDelete && (
@@ -130,7 +135,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
         onPress={onClose}
       >
         <Pressable
-          className="absolute bottom-0 w-full bg-light-bg rounded-t-3xl"
+          className={`absolute bottom-0 w-full ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'} rounded-t-3xl`}
           onPress={(e) => e.stopPropagation()}
         >
           <SafeAreaView edges={['bottom']}>
