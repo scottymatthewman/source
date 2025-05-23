@@ -3,10 +3,12 @@ import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FoldersProvider } from '../context/folderContext';
 import { SongsProvider } from '../context/songContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import './globals.css';
 
 export default function RootLayout() {
   return (
+    <ThemeProvider>
     <SQLiteProvider 
      databaseName="songs"
      options={{
@@ -59,5 +61,6 @@ export default function RootLayout() {
         </SongsProvider>
       </SafeAreaProvider>
     </SQLiteProvider>
+    </ThemeProvider>
   );
 }
