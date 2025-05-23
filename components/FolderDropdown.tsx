@@ -4,7 +4,7 @@ import theme from '../constants/theme';
 import { useFolders } from '../context/folderContext';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../utils/theme';
-import { ChevronDownIcon } from './icons';
+import { FolderIcon } from './icons';
 
 interface FolderDropdownProps {
   selectedFolderId: string | null;
@@ -43,16 +43,12 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
       >
         <Pressable
           onPress={openDropdown}
-          className={`flex-row items-center gap-1 pt-1 pb-1 pl-4 pr-2 ${currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'} rounded-full`}
+          className={`flex-row items-center gap-1 pt-1 pb-1 pl-3 pr-3 ${currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'} rounded-full`}
         >
+          <FolderIcon width={20} height={20} fill={colorPalette.icon.primary} />
           <Text className={classes.text.body}>
             {selectedFolder?.title || 'No Folder'}
           </Text>
-          <ChevronDownIcon
-            width={20}
-            height={20}
-            fill={colorPalette.icon.secondary}
-          />
         </Pressable>
       </View>
       <Modal
