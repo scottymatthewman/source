@@ -30,6 +30,8 @@ export const useThemeClasses = () => {
     },
     button: {
       bg: currentTheme === 'dark' ? 'bg-dark-button-bg' : 'bg-light-button-bg',
+      bgDisabled: currentTheme === 'dark' ? 'bg-dark-button-bg-disabled' : 'bg-light-button-bg-disabled',
+      bgInverted: currentTheme === 'dark' ? 'bg-dark-button-bg-inverted' : 'bg-light-button-bg-inverted',
       bgDestructive: currentTheme === 'dark' ? 'bg-dark-button-bg-destructive' : 'bg-light-button-bg-destructive',
       Border: currentTheme === 'dark' ? 'border-dark-button-border' : 'border-light-button-border',
       BorderDestructive: currentTheme === 'dark' ? 'border-dark-button-border-destructive' : 'border-light-button-border-destructive',

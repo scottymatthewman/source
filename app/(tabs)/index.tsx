@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Modal, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { AddIcon, SearchIcon } from '../../components/icons';
+import { AddIcon, NewFolderIcon, SearchIcon, WriteIcon } from '../../components/icons';
 import MoonIcon from '../../components/icons/MoonIcon';
 import SunIcon from '../../components/icons/SunIcon';
 import theme from '../../constants/theme';
@@ -81,52 +81,54 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
       onRequestClose={handleCancel}
     >
       <Pressable 
-        className="flex-1 bg-black/50 justify-center items-center"
+        className="flex-1 bg-black/50 justify-start items-end pt-28 pr-6"
         onPress={handleCancel}
       >
         <View 
-          className={`${classes.bg.main} rounded-2xl w-[280px] overflow-hidden`}
+          className={`${classes.bg.main} rounded-2xl w-[210px] overflow-hidden`}
           style={{ elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }}
         >
           {!isCreatingFolder ? (
             <>
               <TouchableOpacity 
                 onPress={handleNewSong}
-                className={`px-6 py-4 border-b ${classes.border.border}`}
+                className={`px-5 py-4 flex-row items-center gap-2`}
               >
+                <WriteIcon width={24} height={24} fill={colorPalette.icon.primary} />
                 <Text className={`${classes.text.body} text-lg`}>New Song</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleNewFolder}
-                className="px-6 py-4"
+                className={`px-5 py-4 flex-row items-center gap-2`}
               >
+                <NewFolderIcon width={24} height={24} fill={colorPalette.icon.primary} />
                 <Text className={`${classes.text.body} text-lg`}>New Folder</Text>
               </TouchableOpacity>
             </>
           ) : (
-            <View className="p-4">
-              <Text className={`${classes.text.body} text-lg mb-4`}>Create New Folder</Text>
+            <View className={`px-4 pt-4 pb-2 ${currentTheme === 'dark' ? theme.colors.dark.surface2 : theme.colors.light.surface1} rounded-lg`}>
               <TextInput
-                className={`${classes.bg.surface1} ${classes.text.body} rounded-lg px-4 py-3 mb-4`}
-                placeholder="Folder name"
+                className={`${classes.bg.surface1} ${classes.text.body} rounded-lg px-2 py-3 mb-4`}
+                style={{ fontSize: 16 }}
+                placeholder="New folder name"
                 placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                 value={folderName}
                 onChangeText={setFolderName}
                 autoFocus
               />
-              <View className="flex-row justify-end gap-2">
-                <TouchableOpacity 
+              <View className="flex-row justify-between w-full items-center h-10">
+                  <TouchableOpacity 
                   onPress={handleCancel}
-                  className="px-4 py-2"
+                  className={`px-2 py-2 ${classes.button.bg} items-start justify-center rounded-lg w-1/2 h-10`}
                 >
-                  <Text className={classes.text.body}>Cancel</Text>
+                  <Text className={`${classes.text.body} font-medium`} style={{ fontSize: 14 }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   onPress={handleCreateFolder}
-                  className={`px-4 py-2 ${classes.bg.surface1} rounded-lg`}
+                  className={`px-2 py-2 ${classes.button.bgInverted} items-end justify-center font-medium rounded-lg w-1/2 h-10`}
                   disabled={!folderName.trim()}
                 >
-                  <Text className={classes.text.body}>Create</Text>
+                  <Text className={`${classes.text.body} font-medium`} style={{ fontSize: 14 }}>Create</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -225,7 +227,7 @@ export default function Index() {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-              className={`px-6 py-2 ${classes.border.border}`}
+              className={`px-6 py-2`}
             >
               <Text className={`${classes.text.header} text-lg font-medium`}>{item.title || 'Untitled Folder'}</Text>
             </TouchableOpacity>

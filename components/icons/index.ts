@@ -1,5 +1,5 @@
-export { default as AddFolderIcon } from './AddFolderIcon';
 export { default as AddIcon } from './AddIcon';
+export { default as aIcon } from './aIcon';
 export { default as ChevronDownIcon } from './ChevronDownIcon';
 export { default as ChevronLeftIcon } from './ChevronLeftIcon';
 export { default as ChevronRightIcon } from './ChevronRightIcon';
@@ -12,11 +12,17 @@ export { default as FolderIcon } from './FolderIcon';
 export { default as GoIcon } from './GoIcon';
 export { default as HomeIcon } from './HomeIcon';
 export { default as KebabIcon } from './KebabIcon';
+export { default as leastRecentIcon } from './leastRecentIcon';
 export { default as LoadingIcon } from './LoadingIcon';
 export { default as MicIcon } from './MicIcon';
+export { default as MoonIcon } from './MoonIcon';
+export { default as mostRecentIcon } from './mostRecentIcon';
+export { default as NewFolderIcon } from './newFolderIcon';
 export { default as PauseIcon } from './PauseIcon';
 export { default as PlayIcon } from './PlayIcon';
 export { default as RedoIcon } from './RedoIcon';
 export { default as SearchIcon } from './SearchIcon';
+export { default as SunIcon } from './SunIcon';
 export { default as WriteIcon } from './WriteIcon';
+export { default as zIcon } from './zIcon';
 
