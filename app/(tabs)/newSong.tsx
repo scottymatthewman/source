@@ -1,3 +1,4 @@
+import DOMComponent from '@/components/RichTextEditor';
 import { MusicalKey } from '@/constants/musicalKeys';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -107,6 +108,9 @@ const NewSong = () => {
                     textAlignVertical="top"
                     value={content}
                     onChangeText={setContent}
+                />
+                <DOMComponent 
+                    className="text-xl/9 font-normal"
                 />
             </ScrollView>
             <SongActionsModal
