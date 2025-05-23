@@ -7,6 +7,7 @@ import { CloseIcon, KebabIcon } from '../../components/icons';
 import SongActionsModal from '../../components/SongActionsModal';
 import theme from '../../constants/theme';
 import { useSongs } from '../../context/songContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const NewSong = () => {
     const { createSong, updateSong } = useSongs();
@@ -18,12 +19,15 @@ const NewSong = () => {
     );
     const router = useRouter();
     const [showActions, setShowActions] = useState(false);
-    const [selectedKey, setSelectedKey] = useState<string | null>(null);
+    const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
+    const { theme: currentTheme } = useTheme();
+    const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
     const clearInputs = () => {
         setTitle("");
         setContent("");
         setSelectedFolderId(null);
+        setSelectedKey(null);
     };
 
     const handleSave = async () => {
@@ -34,7 +38,8 @@ const NewSong = () => {
                     title: title || 'Untitled',
                     content: content || '',
                     date_modified: new Date(),
-                    folder_id: selectedFolderId
+                    folder_id: selectedFolderId,
+                    key: selectedKey
                 });
                 clearInputs();
                 router.back();
@@ -45,7 +50,7 @@ const NewSong = () => {
     };
 
     const handleDiscard = () => {
-        if (title || content || selectedFolderId) {
+        if (title || content || selectedFolderId || selectedKey) {
             Alert.alert(
                 "Discard Changes?",
                 "Are you sure you want to discard your changes?",
@@ -70,10 +75,10 @@ const NewSong = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 items-left justify-left bg-light-bg">
+        <SafeAreaView className={`flex-1 items-left justify-left ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
             <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
                 <TouchableOpacity onPress={handleDiscard}>
-                    <CloseIcon width={28} height={28} fill={theme.colors.light.icon.primary} />
+                    <CloseIcon width={28} height={28} fill={colorPalette.icon.primary} />
                 </TouchableOpacity>
                 <View className="flex-row items-center gap-2">
                     <FolderDropdown 
@@ -81,22 +86,22 @@ const NewSong = () => {
                         onSelectFolder={setSelectedFolderId}
                     />
                     <TouchableOpacity onPress={() => setShowActions(true)}>
-                        <KebabIcon width={28} height={28} fill={theme.colors.light.icon.secondary} />
+                        <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity onPress={handleSave}>
-                    <Text className="text-light-text text-lg font-semibold">Save</Text>
+                    <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
                 </TouchableOpacity>
             </View>
             <TextInput 
-                className="placeholder:text-light-text-placeholder text-3xl font-semibold pt-4 pl-6 pr-6 pb-3" 
+                className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold pt-4 pl-6 pr-6 pb-3 ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                 placeholder="Untitled"
                 value={title} 
                 onChangeText={setTitle}
             />
             <ScrollView className="pl-6 pr-6">
                 <TextInput 
-                    className="placeholder:text-light-text-placeholder text-xl font-medium" 
+                    className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text placeholder:text-dark-text-placeholder' : 'text-light-text placeholder:text-light-text-placeholder'} ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                     placeholder="I heard there was a secret chord..."
                     multiline={true}
                     textAlignVertical="top"
@@ -107,7 +112,7 @@ const NewSong = () => {
             <SongActionsModal
                 visible={showActions}
                 onClose={() => setShowActions(false)}
-                selectedKey={selectedKey as MusicalKey}
+                selectedKey={selectedKey}
                 onSelectKey={setSelectedKey}
                 mode="keyOnly"
             />
