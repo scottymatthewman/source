@@ -42,11 +42,11 @@ export default function FolderDetails() {
 
   return (
     <SafeAreaView className={`flex-1 ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
-      <View className={`flex-row pl-6 pr-6 pt-4 pb-3 items-center justify-between border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
+      <View className={`flex-row pl-6 pr-6 pt-4 pb-3 items-start justify-between gap-2 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
         </TouchableOpacity>
-        <View className="flex-1 mx-2">
+        <View className="flex-row items-center justify-start gap-2 w-full flex-1">
           <TextInput
             value={title}
             onChangeText={setTitle}
@@ -68,7 +68,7 @@ export default function FolderDetails() {
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-            className={`px-6 py-2`}
+            className={`px-6 py-2 flex-row items-center gap-2`}
           >
             <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 16, fontWeight: '500' }}>
               {item.title || 'Untitled'}

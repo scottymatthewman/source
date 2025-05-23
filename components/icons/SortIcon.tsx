@@ -7,7 +7,7 @@ interface SortIconProps {
   fill?: string;
 }
 
-export const SortIcon: React.FC<SortIconProps> = ({ width = 10, height = 18, fill = '#000000' }) => {
+export default function SortIcon({ width = 10, height = 18, fill = '#000000' }: SortIconProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 10 18" fill="none">
       <Path d="M2.12902 6.64756L4.61061 3.81146C4.81675 3.57587 5.18325 3.57587 5.38939 3.81146L7.87098 6.64756C8.1637 6.9821 7.92612 7.50567 7.48159 7.50567H2.51841C2.07388 7.50567 1.8363 6.9821 2.12902 6.64756Z" fill={fill} />
