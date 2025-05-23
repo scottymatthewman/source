@@ -199,7 +199,7 @@ export default function Index() {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-              className={`mr-4 ${classes.bg.surface2} rounded-xl p-4 w-48 h-32 flex-col justify-end`}
+              className={`mr-4 ${classes.bg.surface2} rounded-xl px-4 py-3 w-40 h-28 flex-col justify-end`}
             >
               <Text className={`text-lg font-semibold ${classes.text.header} mt-auto`} numberOfLines={2}>
                 {item.title || 'Untitled'}

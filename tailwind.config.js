@@ -35,10 +35,10 @@ module.exports = {
           },
         },
         'light': {
-          'bg': '#FAFAFA',
+          'bg': '#FCFBFA',
           'border': '#EEEEEE',
           'surface-1': '#FFFFFF',
-          'surface-2': '#ECECEC',
+          'surface-2': '#F3F0EE',
           'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
           'highlight-annotation': '#E3E3E3',
