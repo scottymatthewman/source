@@ -90,18 +90,18 @@ const NewSong = () => {
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity onPress={handleSave}>
-                    <Text className={currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
+                    <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
                 </TouchableOpacity>
             </View>
             <TextInput 
-                className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold pt-4 pl-6 pr-6 pb-3 ${currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'}`}
+                className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold pt-4 pl-6 pr-6 pb-3 ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                 placeholder="Untitled"
                 value={title} 
                 onChangeText={setTitle}
             />
             <ScrollView className="pl-6 pr-6">
                 <TextInput 
-                    className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-xl font-medium ${currentTheme === 'dark' ? 'text-dark-text' : 'text-light-text'}`}
+                    className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text placeholder:text-dark-text-placeholder' : 'text-light-text placeholder:text-light-text-placeholder'} ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                     placeholder="I heard there was a secret chord..."
                     multiline={true}
                     textAlignVertical="top"
