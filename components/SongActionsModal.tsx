@@ -29,7 +29,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
 
   const renderKeySelector = () => (
     <View className="pt-6 pl-6 pr-6 pb-16">
-      <Text className={`text-lg font-medium ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}>Set Key</Text>
+      <Text className={`text-lg font-medium pb-1 ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}>Set Key</Text>
       <FlatList
         data={MUSICAL_KEYS}
         horizontal
@@ -40,15 +40,15 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onPress={() => onSelectKey(selectedKey === item ? null : item)}
             className={`mr-2 px-4 py-2 rounded-lg ${
               selectedKey === item
-                ? 'bg-light-surface-inverted'
+                ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
                 : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
             }`}
           >
             <Text
-              className={`text-lg ${
+              className={`text-lg font-medium ${
                 selectedKey === item
-                  ? 'text-white'
-                  : currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'
+                  ? currentTheme === 'dark' ? 'text-dark-text-inverted' : 'text-light-text-inverted'
+                  : currentTheme === 'dark' ? 'text-light-text-inverted' : 'text-dark-text-inverted'
               }`}
             >
               {item}
@@ -67,9 +67,9 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
           onSelectKey(null);
           onClose();
         }}
-        className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+        className={`py-3 ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
       >
-        <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium`}>Set Key</Text>
+        <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium pb-1`}>Set Key</Text>
         <FlatList
           data={MUSICAL_KEYS}
           horizontal
@@ -80,14 +80,14 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
               onPress={() => onSelectKey(selectedKey === item ? null : item)}
               className={`mr-2 px-4 py-2 rounded-lg ${
                 selectedKey === item
-                  ? 'bg-light-surface-inverted'
+                  ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
                   : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
               }`}
             >
               <Text
                 className={`text-lg ${
                   selectedKey === item
-                    ? 'text-white'
+                    ? currentTheme === 'dark' ? 'text-dark-text-inverted' : 'text-light-text-inverted'
                     : currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'
                 }`}
               >
@@ -104,7 +104,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onMakeCopy();
             onClose();
           }}
-          className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`py-4 ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
         >
           <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium`}>Make a Copy</Text>
         </TouchableOpacity>
@@ -115,9 +115,9 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onDelete();
             onClose();
           }}
-          className="py-3"
+          className="py-4"
         >
-          <Text className="text-light-text-destructive text-lg font-medium">Delete Song</Text>
+          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive'} text-lg font-medium`}>Delete Song</Text>
         </TouchableOpacity>
       )}
     </View>

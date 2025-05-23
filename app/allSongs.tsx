@@ -2,7 +2,7 @@ import { ChevronLeftIcon } from '@/components/icons';
 import theme from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -14,26 +14,24 @@ export default function AllSongs() {
 
   return (
     <SafeAreaView className={`flex-1 ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
-      <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
+      <View className={`flex-row pl-6 pr-6 pt-4 pb-3 items-center justify-between border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
         </TouchableOpacity>
         <View className="flex-1 mx-2">
-          <TextInput
-            value="All Songs"
-            className={`text-2xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'} text-left`}
-          />
+          <Text className={`text-2xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'} text-left`}>All Songs</Text>
         </View>
       </View>
       <FlatList
         data={songs}
         keyExtractor={item => item.id}
+        className={`px-2 pt-4`}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-            className={`px-6 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+            className={`px-6 py-2`}
           >
-            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18 }}>
+            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 16, fontWeight: '500' }}>
               {item.title || 'Untitled'}
             </Text>
           </TouchableOpacity>
