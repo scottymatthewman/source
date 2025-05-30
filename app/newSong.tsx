@@ -130,7 +130,7 @@ const NewSong = () => {
             )}
             <ScrollView className="px-6 pt-1">
                 <TextInput 
-                    className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text placeholder:text-dark-text-placeholder' : 'text-light-text placeholder:text-light-text-placeholder'} ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                    className={`text-xl font-normal ${currentTheme === 'dark' ? 'text-dark-text placeholder:text-dark-text-placeholder' : 'text-light-text placeholder:text-light-text-placeholder'} ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                     placeholder="I heard there was a secret chord..."
                     multiline={true}
                     textAlignVertical="top"
