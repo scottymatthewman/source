@@ -26,6 +26,7 @@ interface ColorScheme {
     tertiary: string;
     inactive: string;
     destructive: string;
+    inverted: string;
   };
 }
 
@@ -65,6 +66,7 @@ const colors: ThemeColors = {
       tertiary: '#E4E4E4',
       inactive: '#8C8C8C',
       destructive: '#FF4747',
+      inverted: "#FAFAFA"
     },
   },
   dark: {
@@ -92,6 +94,7 @@ const colors: ThemeColors = {
       tertiary: '#484848',
       inactive: '#8C8C8C',
       destructive: '#FF8080',
+      inverted: '#1A1A1A'
     },
   },
 };
