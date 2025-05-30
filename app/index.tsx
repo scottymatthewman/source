@@ -5,6 +5,7 @@ import { FlatList, Keyboard, Modal, Platform, Pressable, SafeAreaView, Text, Tex
 import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
+import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
 import { Song, useSongs } from '../context/songContext';
@@ -254,19 +255,12 @@ export default function Index() {
         <FlatList
           data={folders}
           keyExtractor={item => item.id}
-          ListHeaderComponent={
-            <TouchableOpacity
-              onPress={() => router.push('/allSongs')}
-              className={`px-6 py-2`}
-            >
-              <Text className={`${classes.text.header} text-lg font-medium`}>All Songs</Text>
-            </TouchableOpacity>
-          }
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-              className={`px-6 py-2`}
+              className={`pr-6 py-2 flex-row items-center gap-1.5`}
             >
+              <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
               <Text className={`${classes.text.header} text-lg font-medium`}>{item.title || 'Untitled Folder'}</Text>
             </TouchableOpacity>
           )}
