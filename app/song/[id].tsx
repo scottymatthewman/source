@@ -160,7 +160,7 @@ const Details = () => {
                         <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
-                <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-3">
+                <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
                     <TextInput 
                         className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                         placeholder="Untitled"
@@ -174,7 +174,7 @@ const Details = () => {
                     </TouchableOpacity>
                 </View>
                 {isDropdownOpen && (
-                    <View className={`pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
+                    <View className={`mt-2 pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
                         <View className="px-6 pb-4 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
                             <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Attachments</Text>
                             <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>6</Text>
@@ -192,7 +192,7 @@ const Details = () => {
                         </View>
                     </View>
                 )}
-                <ScrollView className="px-6 pt-2">
+                <ScrollView className="px-6 pt-1">
                     <TextInput 
                         className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                         placeholder="I heard there was a secret chord..."
