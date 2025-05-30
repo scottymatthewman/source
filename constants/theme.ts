@@ -44,7 +44,7 @@ const colors: ThemeColors = {
   light: {
     bg: '#FAFAFA',
     border: '#EEEEEE',
-    surface1: '#FFFFFF',
+    surface1: '#D7D0CB',
     surface2: '#ECECEC',
     highlightCaption: '#E3E3E3',
     highlightAnnotation: '#E3E3E3',
@@ -63,7 +63,7 @@ const colors: ThemeColors = {
     icon: {
       primary: '#1A1A1A',
       secondary: '#333333',
-      tertiary: '#E4E4E4',
+      tertiary: '#CCCCCC',
       inactive: '#8C8C8C',
       destructive: '#FF4747',
       inverted: "#FAFAFA"

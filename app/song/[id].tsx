@@ -1,3 +1,4 @@
+import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -8,12 +9,14 @@ import { MusicalKey } from '../../constants/musicalKeys';
 import theme from '../../constants/theme';
 import { useSongs } from '../../context/songContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useThemeClasses } from '../../utils/theme';
 
 const Details = () => {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const { songs, updateSong, deleteSong, createSong } = useSongs();
     const { theme: currentTheme } = useTheme();
+    const classes = useThemeClasses();
     const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -21,6 +24,7 @@ const Details = () => {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     // Convert id to string for comparison and add logging
     console.log('URL ID:', id, 'Type:', typeof id);
@@ -156,13 +160,39 @@ const Details = () => {
                         <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
-                <TextInput 
-                    className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold pt-4 pl-6 pr-6 pb-3 ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
-                    placeholder="Untitled"
-                    value={title} 
-                    onChangeText={setTitle}
-                />
-                <ScrollView className="pl-6 pr-6">
+                <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-3">
+                    <TextInput 
+                        className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                        placeholder="Untitled"
+                        value={title} 
+                        onChangeText={setTitle}
+                    />
+                    <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
+                        <View style={{ transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] }}>
+                            <DropdownOutlineDownIcon width={28} height={28} fill={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder} />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                {isDropdownOpen && (
+                    <View className={`pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
+                        <View className="px-6 pb-4 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
+                            <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Attachments</Text>
+                            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>6</Text>
+                        </View>
+                        <View className="px-6 flex-row justify-stretch items-center gap-4">
+                            <View className="flex-row py-3 grow items-center justify-between">
+                                <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Key</Text>
+                                <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>C Major</Text>
+                            </View>
+                            <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
+                            <View className="flex-row py-4 grow items-center justify-between">
+                                <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>BPM</Text>
+                                <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>120</Text>
+                            </View>
+                        </View>
+                    </View>
+                )}
+                <ScrollView className="px-6 pt-2">
                     <TextInput 
                         className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                         placeholder="I heard there was a secret chord..."
