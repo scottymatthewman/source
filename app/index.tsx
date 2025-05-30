@@ -1,14 +1,15 @@
+import NoteIcon from '@/components/icons/NoteIcon';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { FlatList, Modal, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { AddIcon, NewFolderIcon, SearchIcon, WriteIcon } from '../../components/icons';
-import MoonIcon from '../../components/icons/MoonIcon';
-import SunIcon from '../../components/icons/SunIcon';
-import theme from '../../constants/theme';
-import { Folder, useFolders } from '../../context/folderContext';
-import { Song, useSongs } from '../../context/songContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeClasses } from '../../utils/theme';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Keyboard, Modal, Platform, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
+import MoonIcon from '../components/icons/MoonIcon';
+import SunIcon from '../components/icons/SunIcon';
+import theme from '../constants/theme';
+import { Folder, useFolders } from '../context/folderContext';
+import { Song, useSongs } from '../context/songContext';
+import { useTheme } from '../context/ThemeContext';
+import { useThemeClasses } from '../utils/theme';
 
 const SongItem = ({ song }: { song: Song }) => {
   const router = useRouter();
@@ -45,9 +46,28 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
   const { createFolder } = useFolders();
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [folderName, setFolderName] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, [visible]);
 
   const handleNewSong = () => {
     onClose();
@@ -81,12 +101,16 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
       onRequestClose={handleCancel}
     >
       <Pressable 
-        className="flex-1 bg-black/50 justify-start items-end pt-28 pr-6"
+        className="flex-1 bg-black/70 justify-end items-start"
+        style={{ paddingBottom: isCreatingFolder ? keyboardHeight + 16 : 112, paddingLeft: 22, paddingRight: 22 }}
         onPress={handleCancel}
       >
         <View 
-          className={`${classes.bg.main} rounded-2xl w-[210px] overflow-hidden`}
-          style={{ elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }}
+          className={`${classes.bg.main} rounded-2xl overflow-hidden`}
+          style={[
+            { elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 },
+            isCreatingFolder ? { width: '100%', alignSelf: 'center' } : { width: 210 }
+          ]}
         >
           {!isCreatingFolder ? (
             <>
@@ -104,18 +128,27 @@ const CreateOverlay = ({ visible, onClose }: { visible: boolean; onClose: () => 
                 <NewFolderIcon width={24} height={24} fill={colorPalette.icon.primary} />
                 <Text className={`${classes.text.body} text-lg`}>New Folder</Text>
               </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleNewFolder}
+                className={`px-5 py-4 flex-row items-center gap-2`}
+              >
+                <MicIcon width={24} height={24} fill={colorPalette.icon.primary} />
+                <Text className={`${classes.text.body} text-lg`}>Record</Text>
+              </TouchableOpacity>
             </>
           ) : (
-            <View className={`px-4 pt-4 pb-2 ${currentTheme === 'dark' ? theme.colors.dark.surface2 : theme.colors.light.surface1} rounded-lg`}>
-              <TextInput
-                className={`${classes.bg.surface1} ${classes.text.body} rounded-lg px-2 py-3 mb-4`}
-                style={{ fontSize: 16 }}
-                placeholder="New folder name"
-                placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
-                value={folderName}
-                onChangeText={setFolderName}
-                autoFocus
-              />
+            <View className={`px-4 pt-5 pb-3 ${currentTheme === 'dark' ? theme.colors.dark.surface2 : theme.colors.light.surface1} rounded-lg`}>
+              <View className="flex-row gap-0 items-left">
+                <FolderIcon width={28} height={28} fill={colorPalette.textPlaceholder} />
+                <TextInput 
+                  className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl px-2 pb-2 font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                  placeholder="Folder name"
+                  placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
+                  value={folderName}
+                  onChangeText={setFolderName}
+                  autoFocus
+                />
+              </View>
               <View className="flex-row justify-between w-full items-center h-10">
                   <TouchableOpacity 
                   onPress={handleCancel}
@@ -157,32 +190,34 @@ export default function Index() {
 
   return (
     <SafeAreaView className={`${classes.bg.main} flex-1`}>
+      <View className={`absolute bottom-12 left-7 w-16 h-16 rounded-full ${classes.bg.inverted} items-center justify-center`}>
+        <TouchableOpacity onPress={() => setShowCreateOverlay(true)}>
+          <AddIcon width={28} height={28} fill={colorPalette.icon.inverted} />
+        </TouchableOpacity>
+      </View>
       <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
         <View className="flex-row items-center">
           <Text className={classes.text.header} style={{ fontSize: 32, fontWeight: 'bold' }}>
             Home
           </Text>
-          <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
+        </View>
+        <View className="flex-row items-center gap-4">
+        <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
             {currentTheme === 'dark' ? 
               <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
               <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
             }
           </TouchableOpacity>
         </View>
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity>
-            <SearchIcon width={24} height={24} fill={colorPalette.icon.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowCreateOverlay(true)}>
-            <AddIcon width={24} height={24} fill={colorPalette.icon.primary} />
-          </TouchableOpacity>
-        </View>
       </View>
       <View>
-        <View className="flex-row items-bottom justify-between px-6 pt-4 pb-2">
-        <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
-            Recent Songs
-          </Text>
+        <View className="flex-row items-bottom justify-between pl-5 pr-6 pt-4 pb-2">
+          <View className="flex-row items-center justify start gap-1">
+            <NoteIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
+            <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
+                Recent Songs
+              </Text>
+          </View>
           <TouchableOpacity onPress={() => router.push('/allSongs')}>
             <Text className={`${classes.text.header} text-base font-semibold`}>
               View All
@@ -210,9 +245,12 @@ export default function Index() {
             <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
           }
         />
-        <Text className={`${classes.text.placeholder} text-base font-medium px-6 pt-6 pb-1`}>
-          Folders
-        </Text>
+        <View className="flex-row items-center justify-start gap-1 pl-5 pr-6 pt-6 pb-1">
+          <FolderIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
+          <Text className={`${classes.text.placeholder} text-base font-medium`}>
+            Folders
+          </Text>
+        </View>
         <FlatList
           data={folders}
           keyExtractor={item => item.id}

@@ -3,12 +3,12 @@ import { MusicalKey } from '@/constants/musicalKeys';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { FolderDropdown } from '../../components/FolderDropdown';
-import { CloseIcon, KebabIcon } from '../../components/icons';
-import SongActionsModal from '../../components/SongActionsModal';
-import theme from '../../constants/theme';
-import { useSongs } from '../../context/songContext';
-import { useTheme } from '../../context/ThemeContext';
+import { FolderDropdown } from '../components/FolderDropdown';
+import { CloseIcon, KebabIcon } from '../components/icons';
+import SongActionsModal from '../components/SongActionsModal';
+import theme from '../constants/theme';
+import { useSongs } from '../context/songContext';
+import { useTheme } from '../context/ThemeContext';
 
 const NewSong = () => {
     const { createSong, updateSong } = useSongs();
