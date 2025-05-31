@@ -12,6 +12,9 @@ export const useThemeClasses = () => {
       inverted: currentTheme === 'dark' ? 'text-dark-text-inverted' : 'text-light-text-inverted',
       destructive: currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive',
     },
+    textSize: (size: string, type: 'header' | 'body' | 'secondary' | 'placeholder' | 'inverted' | 'destructive' = 'body') => {
+      return `${size} ${currentTheme === 'dark' ? `text-dark-text-${type}` : `text-light-text-${type}`}`;
+    },
     bg: {
       main: currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg',
       surface1: currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1',

@@ -10,6 +10,7 @@ import SongActionsModal from '../components/SongActionsModal';
 import theme from '../constants/theme';
 import { useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
+import { useThemeClasses } from '../utils/theme';
 
 const NewSong = () => {
     const { createSong, updateSong } = useSongs();
@@ -25,6 +26,7 @@ const NewSong = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const { theme: currentTheme } = useTheme();
     const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+    const classes = useThemeClasses();
 
     const clearInputs = () => {
         setTitle("");
@@ -111,22 +113,25 @@ const NewSong = () => {
             </View>
             {isDropdownOpen && (
                 <View className={`mt-2 pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
-                    <View className="px-6 pb-4 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
-                        <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Attachments</Text>
-                        <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>0</Text>
+                <View className="px-6 pb-4 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
+                    <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
+                    <Text className={classes.textSize('text-lg')}>0</Text>  
+                </View>
+                <View className="px-6 flex-row justify-stretch items-center gap-4">
+                    <View className="flex-row py-3 grow items-center justify-between">
+                        <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>  
+                        <Text className={classes.textSize('text-lg')}>Cmaj</Text>  
                     </View>
-                    <View className="px-6 flex-row justify-stretch items-center gap-4">
-                        <View className="flex-row py-3 grow items-center justify-between">
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Key</Text>
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>{selectedKey || 'None'}</Text>
-                        </View>
-                        <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
-                        <View className="flex-row py-4 grow items-center justify-between">
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>BPM</Text>
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>120</Text>
+                    <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
+                    <View className="flex-row py-4 grow items-center justify-between">
+                        <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Tempo</Text>
+                        <View className="flex-row gap-1">
+                            <Text className={classes.textSize('text-lg')}>84</Text>  
+                            <Text className={classes.textSize('text-lg', 'placeholder')}>BPM</Text>  
                         </View>
                     </View>
                 </View>
+            </View>
             )}
             <ScrollView className="px-6 pt-1">
                 <TextInput 

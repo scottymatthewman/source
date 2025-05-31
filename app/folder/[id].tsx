@@ -76,7 +76,7 @@ export default function FolderDetails() {
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <Text className={currentTheme === 'dark' ? 'text-dark-text-secondary' : 'text-light-text-secondary'} style={{ textAlign: 'center', marginTop: 32 }}>
+          <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} style={{ textAlign: 'center', marginTop: 32 }}>
             No songs in this folder.
           </Text>
         }

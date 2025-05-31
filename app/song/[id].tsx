@@ -157,7 +157,7 @@ const Details = () => {
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={handleSave}>
-                        <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} style={{ fontSize: 18, fontWeight: '600' }}>Save</Text>
+                        <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>
                     </TouchableOpacity>
                 </View>
                 <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
@@ -176,18 +176,21 @@ const Details = () => {
                 {isDropdownOpen && (
                     <View className={`mt-2 pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
                         <View className="px-6 pb-4 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Attachments</Text>
-                            <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>6</Text>
+                        <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
+                            <Text className={classes.textSize('text-lg')}>6</Text>  
                         </View>
                         <View className="px-6 flex-row justify-stretch items-center gap-4">
                             <View className="flex-row py-3 grow items-center justify-between">
-                                <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Key</Text>
-                                <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>C Major</Text>
+                                <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>  
+                                <Text className={classes.textSize('text-lg')}>Cmaj</Text>  
                             </View>
                             <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
                             <View className="flex-row py-4 grow items-center justify-between">
-                                <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>BPM</Text>
-                                <Text className={currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}>120</Text>
+                                <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Tempo</Text>
+                                <View className="flex-row gap-1">
+                                    <Text className={classes.textSize('text-lg')}>120</Text>  
+                                    <Text className={classes.textSize('text-lg', 'placeholder')}>BPM</Text>  
+                                </View>
                             </View>
                         </View>
                     </View>
