@@ -37,8 +37,8 @@ module.exports = {
         'light': {
           'bg': '#FCFBFA',
           'border': '#EEEEEE',
-          'surface-1': '#FFFFFF',
-          'surface-2': '#F3F0EE',
+          'surface-1': '#F3F0EE',
+          'surface-2': '#D7D0CB',
           'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
           'highlight-annotation': '#E3E3E3',

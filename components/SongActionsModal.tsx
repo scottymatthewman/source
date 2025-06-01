@@ -41,7 +41,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             className={`mr-2 px-4 py-2 rounded-lg ${
               selectedKey === item
                 ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
-                : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
+                : currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'
             }`}
           >
             <Text
@@ -81,7 +81,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
               className={`mr-2 px-4 py-2 rounded-lg ${
                 selectedKey === item
                   ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
-                  : currentTheme === 'dark' ? 'bg-dark-surface-2' : 'bg-light-surface-2'
+                  : currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'
               }`}
             >
               <Text
