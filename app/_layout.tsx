@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ClipsProvider } from '../context/clipContext';
+import { ColorProvider } from '../context/colorContext';
 import { FoldersProvider } from '../context/folderContext';
 import { SongsProvider } from '../context/songContext';
 import { ThemeProvider } from '../context/ThemeContext';
@@ -39,8 +41,32 @@ export default function RootLayout() {
             );
           `);
 
+          await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS clips (
+              id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              title TEXT,
+              file_path TEXT NOT NULL,
+              file_name TEXT NOT NULL,
+              date_created TEXT,
+              duration INTEGER,
+              mime_type TEXT NOT NULL,
+              size INTEGER NOT NULL,
+              metadata TEXT
+            );
+          `);
+
+          await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS song_clip_rel (
+              song_id INTEGER NOT NULL,
+              clip_id INTEGER NOT NULL,
+              PRIMARY KEY (song_id, clip_id),
+              FOREIGN KEY (song_id) REFERENCES songs(id),
+              FOREIGN KEY (clip_id) REFERENCES clips(id)
+            );
+          `);
+
           // Set version to latest
-          await db.execAsync(`PRAGMA user_version = 3`);
+          await db.execAsync(`PRAGMA user_version = 4`);
 
           // Temporarily disabled sync
           // try {
@@ -56,7 +82,26 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <SongsProvider>
           <FoldersProvider>
-            <Stack screenOptions={{ headerShown: false }} />
+            <ClipsProvider>
+              <ColorProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen 
+                    name="index" 
+                    options={{ 
+                      title: 'Songs',
+                      headerShown: false 
+                    }} 
+                  />
+                  <Stack.Screen 
+                    name="song/[id]" 
+                    options={{ 
+                      title: 'Song Details',
+                      headerShown: false 
+                    }} 
+                  />
+                </Stack>
+              </ColorProvider>
+            </ClipsProvider>
           </FoldersProvider>
         </SongsProvider>
       </SafeAreaProvider>
