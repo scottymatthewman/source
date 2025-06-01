@@ -49,6 +49,12 @@
         {
           "useLibSQL": true
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow Wright to access your microphone."
+        }
       ]
     ],
     "experiments": {
