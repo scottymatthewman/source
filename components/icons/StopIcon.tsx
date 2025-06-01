@@ -7,10 +7,10 @@ interface IconProps {
   fill?: string;
 }
 
-export default function VerticalBarIcon({ width = 24, height = 24, fill = '#242424' }: IconProps) {
+export default function StopIcon({ width = 28, height = 28, fill = '#242424' }: IconProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
-      <Rect x="10" y="7" width="3" height="10" rx="1.5" fill={fill} />
+      <Rect x="8" y="8" width="12" height="12" rx="1" fill={fill} />
     </Svg>
   );
 }

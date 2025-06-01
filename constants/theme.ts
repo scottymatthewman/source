@@ -17,6 +17,7 @@ interface ColorScheme {
   button: {
     bg: string;
     bgDestructive: string;
+    bgInverted: string;
     border: string;
     borderDestructive: string;
   };
@@ -44,8 +45,8 @@ const colors: ThemeColors = {
   light: {
     bg: '#FAFAFA',
     border: '#EEEEEE',
-    surface1: '#D7D0CB',
-    surface2: '#ECECEC',
+    surface1: '#F3F0EE',
+    surface2: '#D7D0CB',
     highlightCaption: '#E3E3E3',
     highlightAnnotation: '#E3E3E3',
     textHeader: '#1A1A1A',
@@ -57,6 +58,7 @@ const colors: ThemeColors = {
     button: {
       bg: '#FDFDFD',
       bgDestructive: '#FFEDED',
+      bgInverted: '#1A1A1A',
       border: '#CACACA',
       borderDestructive: '#FFA3A3',
     },
@@ -85,6 +87,7 @@ const colors: ThemeColors = {
     button: {
       bg: '#222222',
       bgDestructive: '#4B000D',
+      bgInverted: '#FAFAFA',
       border: '#666666',
       borderDestructive: '#FF8080',
     },
