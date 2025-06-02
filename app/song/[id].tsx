@@ -494,6 +494,8 @@ const Details = () => {
                 onClose={() => setShowSaveClipModal(false)}
                 onSave={handleSaveClip}
                 songs={songs}
+                mode="songContext"
+                currentSongId={song.id}
             />
 
             <ClipListModal 
