@@ -22,8 +22,20 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'default', curr
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
+  const resetState = () => {
+    setTitle('');
+    if (mode === 'songContext' && currentSongId) {
+      setSelectedSongIds([currentSongId]);
+    } else {
+      setSelectedSongIds([]);
+    }
+  };
+
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      resetState();
+      return;
+    }
 
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -38,23 +50,17 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'default', curr
       keyboardWillShow.remove();
       keyboardWillHide.remove();
     };
-  }, [visible]);
-
-  useEffect(() => {
-    if (visible) {
-      // Reset state when modal opens
-      setTitle('');
-      if (mode === 'songContext' && currentSongId) {
-        setSelectedSongIds([currentSongId]);
-      } else {
-        setSelectedSongIds([]);
-      }
-    }
   }, [visible, mode, currentSongId]);
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
 
   const handleSave = () => {
     if (title.trim()) {
       onSave(title.trim(), selectedSongIds);
+      resetState();
     }
   };
 
@@ -71,7 +77,7 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'default', curr
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <Pressable 
         className="flex-1 bg-black/70 justify-end items-start"
@@ -80,7 +86,7 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'default', curr
           paddingRight: 22, 
           paddingBottom: Platform.OS === 'ios' ? keyboardHeight + 16 : 16 
         }}
-        onPress={onClose}
+        onPress={handleClose}
       >
         <View 
           className={`${classes.bg.main} rounded-2xl overflow-hidden w-full`}
@@ -105,7 +111,7 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'default', curr
             </View>
             <View className="flex-row justify-between w-full items-center h-10">
               <TouchableOpacity 
-                onPress={onClose}
+                onPress={handleClose}
                 className={`px-2 py-2 ${classes.button.bg} items-start justify-center rounded-lg w-1/2 h-10`}
               >
                 <Text className={`${classes.text.body} font-medium`} style={{ fontSize: 14 }}>Cancel</Text>

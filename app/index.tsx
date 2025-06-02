@@ -199,8 +199,16 @@ const SaveClipModal = ({
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
+  const resetState = () => {
+    setClipTitle('');
+    setSelectedSongs([]);
+  };
+
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      resetState();
+      return;
+    }
 
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -225,9 +233,15 @@ const SaveClipModal = ({
     );
   };
 
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
+
   const handleSave = () => {
     if (clipTitle.trim()) {
       onSave(clipTitle.trim(), selectedSongs);
+      resetState();
     }
   };
 
@@ -236,12 +250,12 @@ const SaveClipModal = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <Pressable 
         className="flex-1 bg-black/70 justify-end items-start"
         style={{ paddingLeft: 22, paddingRight: 22, paddingBottom: 32 }}
-        onPress={onClose}
+        onPress={handleClose}
       >
         <View 
           className={`${classes.bg.main} rounded-2xl overflow-hidden w-full`}
@@ -256,7 +270,7 @@ const SaveClipModal = ({
         >
           <View className="p-4 flex-1">
             <View className="flex-row gap-0 items-center justify-between w-full">
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={handleClose}>
                 <ChevronLeftIcon width={24} height={24} fill={colorPalette.icon.primary} />
               </TouchableOpacity>
               <TextInput 
