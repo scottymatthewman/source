@@ -102,4 +102,3 @@ The app uses `expo-audio` for high-quality audio recording with the following fe
 ## Contact
 
 [Your contact information]
-

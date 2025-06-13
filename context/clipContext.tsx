@@ -76,11 +76,12 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
       const result = await db.runAsync(
         `INSERT INTO clips (
-          title, file_path, file_name, date_created, duration, 
+          title, uri, file_path, file_name, date_created, duration, 
           mime_type, size, metadata
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         newClip.title,
-        newClip.file_path,
+        filePath,
+        filePath,
         newClip.file_name,
         newClip.date_created.toISOString(),
         newClip.duration,
