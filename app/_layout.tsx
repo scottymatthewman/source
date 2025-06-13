@@ -45,6 +45,7 @@ export default function RootLayout() {
             CREATE TABLE IF NOT EXISTS clips (
               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
               title TEXT,
+              uri TEXT NOT NULL,
               file_path TEXT NOT NULL,
               file_name TEXT NOT NULL,
               date_created TEXT,
