@@ -1,10 +1,12 @@
 import NoteIcon from '@/components/icons/NoteIcon';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { FlatList, Keyboard, Modal, Platform, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useAudioRecorder } from '../components/audio/useAudioRecorder';
-import { AddIcon, ChevronLeftIcon, FolderIcon, MicIcon, NewFolderIcon, PlayIcon, WriteIcon } from '../components/icons';
-import GoArrowRightIcon from '../components/icons/goArrowRightIcon';
+import { useSQLiteContext } from 'expo-sqlite';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Dimensions, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { RecordingControls } from '../components/audio/RecordingControls';
+import SaveClipModal from '../components/audio/SaveClipModal';
+import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
@@ -12,6 +14,7 @@ import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
 import { Song, useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAudioRecording } from '../hooks/useAudioRecording';
 import { useThemeClasses } from '../utils/theme';
 
 const SongItem = ({ song }: { song: Song }) => {
@@ -49,28 +52,9 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
   const { createFolder } = useFolders();
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [folderName, setFolderName] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
-
-  useEffect(() => {
-    if (!visible) return;
-
-    const keyboardWillShow = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
-    );
-    const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
-    );
-
-    return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
-    };
-  }, [visible]);
 
   const handleNewSong = () => {
     onClose();
@@ -109,15 +93,24 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
       onRequestClose={handleCancel}
     >
       <Pressable 
-        className="flex-1 bg-black/70 justify-end items-start"
-        style={{ paddingBottom: isCreatingFolder ? keyboardHeight + 16 : 108, paddingLeft: 22, paddingRight: 22 }}
+        className="flex-1 bg-black/70"
         onPress={handleCancel}
       >
         <View 
           className={`${classes.bg.main} rounded-2xl overflow-hidden`}
           style={[
-            { elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 },
-            isCreatingFolder ? { width: '100%', alignSelf: 'center' } : { width: 210 }
+            { 
+              elevation: 5, 
+              shadowColor: '#000', 
+              shadowOffset: { width: 0, height: 2 }, 
+              shadowOpacity: 0.25, 
+              shadowRadius: 3.84,
+              position: 'absolute',
+              left: 24,
+              bottom: 108,
+              width: isCreatingFolder ? '90%' : 210,
+              alignSelf: 'flex-start'
+            }
           ]}
         >
           {!isCreatingFolder ? (
@@ -158,7 +151,7 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
                 />
               </View>
               <View className="flex-row justify-between w-full items-center h-10">
-                  <TouchableOpacity 
+                <TouchableOpacity 
                   onPress={handleCancel}
                   className={`px-2 py-2 ${classes.button.bg} items-start justify-center rounded-lg w-1/2 h-10`}
                 >
@@ -180,150 +173,19 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
   );
 };
 
-const SaveClipModal = ({ 
-  visible, 
-  onClose, 
-  onSave,
-  songs,
-}: { 
-  visible: boolean; 
-  onClose: () => void; 
-  onSave: (title: string, selectedSongIds: string[]) => void;
-  songs: Song[];
-}) => {
-  const router = useRouter();
-  const [clipTitle, setClipTitle] = useState('');
-  const [selectedSongs, setSelectedSongs] = useState<string[]>([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const { theme: currentTheme } = useTheme();
-  const classes = useThemeClasses();
-  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
-
-  const resetState = () => {
-    setClipTitle('');
-    setSelectedSongs([]);
-  };
-
-  useEffect(() => {
-    if (!visible) {
-      resetState();
-      return;
-    }
-
-    const keyboardWillShow = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
-    );
-    const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
-    );
-
-    return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
-    };
-  }, [visible]);
-
-  const toggleSongSelection = (songId: string) => {
-    setSelectedSongs(prev => 
-      prev.includes(songId) 
-        ? prev.filter(id => id !== songId)
-        : [...prev, songId]
-    );
-  };
-
-  const handleClose = () => {
-    resetState();
-    onClose();
-  };
-
-  const handleSave = () => {
-    if (clipTitle.trim()) {
-      onSave(clipTitle.trim(), selectedSongs);
-      resetState();
-    }
-  };
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
-      <Pressable 
-        className="flex-1 bg-black/70 justify-end items-start"
-        style={{ paddingLeft: 22, paddingRight: 22, paddingBottom: 32 }}
-        onPress={handleClose}
-      >
-        <View 
-          className={`${classes.bg.main} rounded-2xl overflow-hidden w-full`}
-          style={{ 
-            elevation: 5, 
-            shadowColor: '#000', 
-            shadowOffset: { width: 0, height: 2 }, 
-            shadowOpacity: 0.25, 
-            shadowRadius: 3.84,
-            height: '75%'
-          }}
-        >
-          <View className="p-4 flex-1">
-            <View className="flex-row gap-0 items-center justify-between w-full">
-              <TouchableOpacity onPress={handleClose}>
-                <ChevronLeftIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              </TouchableOpacity>
-              <TextInput 
-                className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl px-2 pb-2 font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
-                style={{ flex: 1 }}
-                placeholder="Clip title"
-                placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
-                value={clipTitle}
-                onChangeText={setClipTitle}
-                autoFocus
-              />
-              <TouchableOpacity
-                onPress={handleSave}
-                disabled={!clipTitle.trim()}
-                className={`flex-row py-3 rounded-lg ${classes.button.bgInverted} items-center justify-end`}
-              >
-                <Text className={`${classes.text.body} font-medium`}>Save</Text>
-              </TouchableOpacity>
-            </View>
-            
-            {/* Song Selection */}
-            <View className="flex-1 mt-4">
-              <FlatList
-                data={songs}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => toggleSongSelection(item.id)}
-                    className={`px-4 py-3 flex-row items-center justify-between ${classes.bg.surface1} rounded-lg mb-2`}
-                  >
-                    <Text className={`${classes.text.body} text-lg`}>{item.title || 'Untitled'}</Text>
-                    {selectedSongs.includes(item.id) && (
-                      <View style={{ 
-                        width: 20, 
-                        height: 20, 
-                        backgroundColor: colorPalette.button.bgInverted,
-                        borderRadius: 10,
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}>
-                        <Text style={{ color: colorPalette.textInverted }}>✓</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </View>
-        </View>
-      </Pressable>
-    </Modal>
-  );
-};
+const styles = StyleSheet.create({
+  recordingContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+});
 
 export default function Index() {
   const { songs } = useSongs();
@@ -333,19 +195,78 @@ export default function Index() {
   const { theme: currentTheme, toggleTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
-  const {
-    state: recorderState,
+  const { 
+    startRecording, 
+    stopRecording, 
+    isRecording,
+    isPlaying,
     duration,
-    waveform,
-    startRecording,
-    stopRecording,
     saveRecording,
-    reset: resetRecorder,
-  } = useAudioRecorder();
+    stopPlayback,
+    playRecording,
+    pauseRecording,
+    audioUri, 
+    cleanupRecording,
+    setIsRecording
+  } = useAudioRecording();
   const [showSaveClipModal, setShowSaveClipModal] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [showRecordingControls, setShowRecordingControls] = useState(false);
+  const insets = useSafeAreaInsets();
+  const windowHeight = Dimensions.get('window').height;
+  const RECORDING_PANEL_HEIGHT = 120;
+  const RECORDING_PANEL_MARGIN = 24;
+  const bottomSafeArea = insets.bottom;
+  const shrunkHeight = windowHeight - (RECORDING_PANEL_HEIGHT + RECORDING_PANEL_MARGIN + 12);
+  const heightAnim = useRef(new Animated.Value(-1)).current;
+  const [clipTitle, setClipTitle] = useState('');
+  const [selectedSongs, setSelectedSongs] = useState<string[]>([]);
+  const db = useSQLiteContext();
+
+  useEffect(() => {
+    if (showRecordingControls) {
+      Animated.timing(heightAnim, {
+        toValue: shrunkHeight,
+        duration: 350,
+        useNativeDriver: false,
+      }).start();
+      if (!isRecording && !isPlaying) {
+        startRecording();
+      }
+    } else {
+      Animated.timing(heightAnim, {
+        toValue: -1,
+        duration: 350,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [showRecordingControls, shrunkHeight]);
+
+  // When user taps Record in the create menu
+  const handleStartRecording = () => {
+    setShowCreateOverlay(false);
+    setShowRecordingControls(true);
+  };
+
+  // When user closes the recording controls
+  const handleCloseRecordingControls = () => {
+    setShowRecordingControls(false);
+    if (isRecording) {
+      stopRecording();
+    }
+    if (isPlaying) {
+      stopPlayback();
+    }
+    cleanupRecording();
+  };
+
+  // Animated style for main content
+  const mainContentStyle = showRecordingControls
+    ? { height: heightAnim }
+    : { flex: 1 };
 
   // Show recorder UI if not idle
-  const showRecorder = recorderState !== 'idle';
+  const showRecorder = isRecording || isPlaying;
 
   // Sort and slice for recent songs
   const recentSongs = [...songs]
@@ -356,202 +277,245 @@ export default function Index() {
 
   const handleSaveClip = async (title: string, selectedSongIds: string[]) => {
     try {
-      // Always close the UI first
-      setShowSaveClipModal(false);
-
-      const clip = await saveRecording(title);
-      if (!clip) {
-        console.error('Failed to save clip');
-        resetRecorder();
+      if (!audioUri) {
+        console.error('No audio URI available to save');
+        Alert.alert('Error', 'No recording available to save');
         return;
       }
 
-      // TODO: Create song-clip relationships
-      resetRecorder();
+      // Save the recording with the correct audioUri
+      const clip = await saveRecording(title, audioUri);
+      if (!clip) {
+        console.error('Failed to save clip');
+        cleanupRecording();
+        return;
+      }
+      console.log('[handleSaveClip] new clip id:', clip.id);
+
+      // Create relationships for each selected song
+      for (const songId of selectedSongIds) {
+        console.log('[handleSaveClip] Inserting into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
+        try {
+          await db.runAsync(
+            'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
+            [songId, clip.id]
+          );
+          console.log('[handleSaveClip] Successfully inserted into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
+        } catch (e) {
+          console.error('[handleSaveClip] Failed to insert into song_clip_rel:', e);
+        }
+      }
+
+      // Clean up recording state and hide controls
+      await cleanupRecording();
+      setIsRecording(false);
+      setShowSaveClipModal(false);
     } catch (error) {
       console.error('Error saving clip:', error);
-      resetRecorder();
+      Alert.alert('Error', 'Failed to save clip');
+      // Also clean up on error
+      await cleanupRecording();
+      setIsRecording(false);
     }
   };
 
+  // Button and menu positions
+  const CREATE_BUTTON_SIZE = 56;
+  const CREATE_BUTTON_LEFT = 24;
+  const MENU_GAP = 12;
+
   return (
-    <SafeAreaView className={`${classes.bg.main} flex-1`}>
-      <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
-        <View className="flex-row items-center">
-          <Text className={classes.text.header} style={{ fontSize: 32, fontWeight: 'bold' }}>
-            Home
-          </Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-        <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
-            {currentTheme === 'dark' ? 
-              <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-              <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-            }
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View>
-        <View className="flex-row items-bottom justify-between pl-5 pr-6 pt-4 pb-2">
-          <View className="flex-row items-center justify start gap-1">
-            <NoteIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
-            <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
-                Recent Songs
-              </Text>
-          </View>
-          <TouchableOpacity onPress={() => router.push('/allSongs')}>
-            <Text className={`${classes.text.header} text-base font-semibold`}>
-              View All
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={recentSongs}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingHorizontal: 18, }}
-          className="pb-2"
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-              className={`mr-4 ${classes.bg.surface1} rounded-xl px-4 py-3 w-40 h-28 flex-col justify-end`}
-            >
-              <Text className={`text-lg font-semibold ${classes.text.header} mt-auto`} numberOfLines={2}>
-                {item.title || 'Untitled'}
-              </Text>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
-          }
-        />
-        <View className="flex-row items-center justify-start gap-1 pl-5 pr-6 pt-6 pb-1">
-          <FolderIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
-          <Text className={`${classes.text.placeholder} text-base font-medium`}>
-            Folders
-          </Text>
-        </View>
-        <FlatList
-          data={folders}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-              className={`pr-6 py-2 flex-row items-center`}
-            >
-              <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
-              <Text className={`${classes.text.header} text-lg font-medium`}>{item.title || 'Untitled Folder'}</Text>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
-          }
-        />
-      </View>
-      <CreateOverlay 
-        visible={showCreateOverlay} 
-        onClose={() => setShowCreateOverlay(false)} 
-        onStartRecording={() => startRecording()}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+      {/* Recording Controls Panel */}
+      <RecordingControls
+        isRecording={isRecording}
+        isPlaying={isPlaying}
+        duration={duration}
+        onStartRecording={startRecording}
+        onStopRecording={stopRecording}
+        onPlayRecording={playRecording}
+        onPauseRecording={pauseRecording}
+        onStopPlayback={stopPlayback}
+        onSaveRecording={() => setShowSaveClipModal(true)}
+        onCancelRecording={handleCloseRecordingControls}
+        showControls={showRecordingControls}
       />
 
-      {/* Bottom bar with create/close button, waveform, and stop button */}
-      <View
+      {/* Main content: flex: 1 by default, animates to height when controls are shown */}
+      <Animated.View
         style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 36,
-          paddingHorizontal: 24,
-          flexDirection: 'row',
-          alignItems: 'center',
-          zIndex: 1000,
+          ...mainContentStyle,
+          borderBottomLeftRadius: showRecordingControls ? 32 : 0,
+          borderBottomRightRadius: showRecordingControls ? 32 : 0,
+          overflow: 'hidden',
+          backgroundColor: colorPalette.bg,
+          shadowColor: showRecordingControls ? '#000' : 'transparent',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: showRecordingControls ? 0.12 : 0,
+          shadowRadius: showRecordingControls ? 12 : 0,
+          position: 'relative',
+          zIndex: 1, // Main content above controls
         }}
       >
-        {/* Create/Close Button (always visible) */}
-        <TouchableOpacity
-          onPress={recorderState === 'idle' ? () => setShowCreateOverlay(true) : resetRecorder}
-          style={{
-            backgroundColor: colorPalette.button.bgInverted,
-            borderRadius: 9999,
-            width: 56,
-            height: 56,
-            alignItems: 'center',
-            justifyContent: 'center',
-            transform: [{ rotate: recorderState === 'idle' ? '0deg' : '45deg' }],
-          }}
-        >
-          <AddIcon width={28} height={28} fill={colorPalette.icon.inverted} />
-        </TouchableOpacity>
-
-        {/* Only show waveform and stop/next button when recording or stopped */}
-        {(recorderState === 'recording' || recorderState === 'stopped') && (
-          <>
-            {/* Waveform placeholder (with PlayIcon if stopped) */}
-            <View style={{
-              flex: 1,
-              height: 56,
-              paddingLeft: 12,
-              backgroundColor: colorPalette.button.bgInverted,
-              marginHorizontal: 8,
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              borderRadius: 40,
-              flexDirection: 'row',
-            }}>
-              {recorderState === 'recording' ? (
-                <Text style={{ color: colorPalette.textInverted }}>
-                  Recording...
+        <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
+          <View className="flex-row items-center">
+            <Text className={classes.text.header} style={{ fontSize: 32, fontWeight: 'bold' }}>
+              Home
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
+              {currentTheme === 'dark' ? 
+                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View>
+          <View className="flex-row items-bottom justify-between pl-5 pr-6 pt-4 pb-2">
+            <View className="flex-row items-center justify start gap-1">
+              <NoteIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
+              <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
+                  Recent Songs
                 </Text>
-              ) : (
-                <PlayIcon width={32} height={32} fill={colorPalette.icon.inverted} />
-              )}
             </View>
-            {/* Stop button */}
-            {recorderState === 'recording' ? (
+            <TouchableOpacity onPress={() => router.push('/allSongs')}>
+              <Text className={`${classes.text.header} text-base font-semibold`}>
+                View All
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={recentSongs}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingHorizontal: 18, }}
+            className="pb-2"
+            renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={stopRecording}
-                style={{ 
-                  height: 56, 
-                  width: 56, 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  backgroundColor: colorPalette.button.bgInverted,
-                  borderRadius: 40 
-                }}
+                onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
+                className={`mr-4 ${classes.bg.surface1} rounded-xl px-4 py-3 w-40 h-28 flex-col justify-end`}
               >
-                <View style={{ width: 14, height: 14, backgroundColor: colorPalette.icon.inverted, borderRadius: 1 }} />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => setShowSaveClipModal(true)}
-                style={{ 
-                  height: 56, 
-                  width: 56, 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  backgroundColor: colorPalette.button.bgInverted,
-                  borderRadius: 40 
-                }}
-              >
-                <GoArrowRightIcon width={28} height={28} fill={colorPalette.icon.inverted} />
+                <Text className={`text-lg font-semibold ${classes.text.header} mt-auto`} numberOfLines={2}>
+                  {item.title || 'Untitled'}
+                </Text>
               </TouchableOpacity>
             )}
-          </>
-        )}
-      </View>
+            ListEmptyComponent={
+              <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
+            }
+          />
+          <View className="flex-row items-center justify-start gap-1 pl-5 pr-6 pt-6 pb-1">
+            <FolderIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
+            <Text className={`${classes.text.placeholder} text-base font-medium`}>
+              Folders
+            </Text>
+          </View>
+          <FlatList
+            data={folders}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
+                className={`pr-6 py-2 flex-row items-center`}
+              >
+                <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
+                <Text className={`${classes.text.header} text-lg font-medium`}>{item.title || 'Untitled Folder'}</Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
+            }
+          />
+        </View>
 
-      <CreateOverlay 
-        visible={showCreateOverlay} 
-        onClose={() => setShowCreateOverlay(false)} 
-        onStartRecording={() => startRecording()}
-      />
+        {/* Create Menu (absolutely positioned above the button) */}
+        {showCreateOverlay && (
+          <View
+            style={{
+              position: 'absolute',
+              left: CREATE_BUTTON_LEFT - 4,
+              bottom: CREATE_BUTTON_SIZE + MENU_GAP,
+              zIndex: 1001,
+              backgroundColor: colorPalette.button.bgInverted,
+              borderRadius: 16,
+              elevation: 5,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              width: 210,
+              alignSelf: 'flex-start',
+            }}
+          >
+            <TouchableOpacity 
+              onPress={() => {
+                setShowCreateOverlay(false);
+                router.push('/newSong');
+              }}
+              style={{ flexDirection: 'row', alignItems: 'center', paddingTop: 16, paddingBottom: 12, paddingHorizontal: 20 }}
+            >
+              <WriteIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>New Song</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => setIsCreatingFolder(true)}
+              style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20 }}
+            >
+              <NewFolderIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>New Folder</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={handleStartRecording}
+              style={{ flexDirection: 'row', alignItems: 'center', paddingTop: 12, paddingBottom: 16, paddingHorizontal: 20 }}
+            >
+              <MicIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>Record</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </Animated.View>
+
+      {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
+      {!showRecordingControls && (
+        <TouchableOpacity 
+          onPress={() => setShowCreateOverlay((v) => !v)}
+          style={{
+            position: 'absolute',
+            left: CREATE_BUTTON_LEFT,
+            bottom: bottomSafeArea,
+            width: CREATE_BUTTON_SIZE,
+            height: CREATE_BUTTON_SIZE,
+            borderRadius: CREATE_BUTTON_SIZE / 2,
+            backgroundColor: colorPalette.button.bgInverted,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 2,
+          }}
+        >
+          <View style={showCreateOverlay ? { transform: [{ rotate: '45deg' }] } : undefined}>
+            <AddIcon 
+              width={28} 
+              height={28} 
+              fill={colorPalette.icon.inverted} 
+            />
+          </View>
+        </TouchableOpacity>
+      )}
 
       <SaveClipModal
         visible={showSaveClipModal}
         onClose={() => setShowSaveClipModal(false)}
         onSave={handleSaveClip}
         songs={songs}
+        mode="index"
       />
     </SafeAreaView>
   );

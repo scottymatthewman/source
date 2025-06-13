@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+# Wright - Audio Recording App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern React Native application built with Expo for audio recording and management. Wright provides a seamless experience for recording, playing, and managing audio clips with a beautiful and intuitive user interface.
 
-## Get started
+## Features
 
-1. Install dependencies
+- 🎙️ High-quality audio recording
+- 🎵 Audio playback with waveform visualization
+- 💾 Local storage of audio clips
+- 🎨 Modern UI with NativeWind (Tailwind CSS)
+- 📱 Cross-platform support (iOS, Android, Web)
+- 🔄 Real-time audio metering
+- 🎯 Type-safe development with TypeScript
 
+## Tech Stack
+
+- **Framework**: React Native with Expo (SDK 53)
+- **Language**: TypeScript
+- **Styling**: NativeWind (Tailwind CSS)
+- **Navigation**: Expo Router
+- **Database**: libSQL (via expo-sqlite)
+- **Audio**: expo-audio
+- **State Management**: React Context
+- **Icons**: @expo/vector-icons
+
+## Prerequisites
+
+- Node.js (LTS version recommended)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development)
+- Android Studio & Android SDK (for Android development)
+
+## Getting Started
+
+1. Clone the repository
+   ```bash
+   git clone [your-repo-url]
+   cd Wright
+   ```
+
+2. Install dependencies
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. Start the development server
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. Run on your preferred platform
+   - Press `i` for iOS simulator
+   - Press `a` for Android emulator
+   - Press `w` for web browser
+   - Scan QR code with Expo Go app for physical device
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Project Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+├── app/           # Main application code (Expo Router)
+├── components/    # Reusable UI components
+├── hooks/         # Custom React hooks
+├── context/       # React Context providers
+├── constants/     # Application constants
+├── utils/         # Utility functions
+├── types/         # TypeScript type definitions
+└── assets/        # Static assets (images, fonts)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Development
 
-## Learn more
+### Available Scripts
 
-To learn more about developing your project with Expo, look at the following resources:
+- `npm start` - Start the Expo development server
+- `npm run android` - Start the app on Android
+- `npm run ios` - Start the app on iOS
+- `npm run web` - Start the app in web browser
+- `npm run lint` - Run ESLint
+- `npm run reset-project` - Reset the project to a clean state
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Audio Recording
 
-## Join the community
+The app uses `expo-audio` for high-quality audio recording with the following features:
+- Configurable audio quality
+- Real-time metering
+- Background audio support
+- File system integration
 
-Join our community of developers creating universal apps.
+## Contributing
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+[Your chosen license]
+
+## Contact
+
+[Your contact information]
