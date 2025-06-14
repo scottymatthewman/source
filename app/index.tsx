@@ -2,7 +2,7 @@ import NoteIcon from '@/components/icons/NoteIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
@@ -55,6 +55,22 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
   const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const keyboardWillHide = Keyboard.addListener('keyboardWillHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
 
   const handleNewSong = () => {
     onClose();
@@ -106,9 +122,9 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
               shadowOpacity: 0.25, 
               shadowRadius: 3.84,
               position: 'absolute',
-              left: 24,
-              bottom: 108,
-              width: isCreatingFolder ? '90%' : 210,
+              left: 20,
+              right: 20,
+              bottom: isCreatingFolder ? keyboardHeight + 20 : 108,
               alignSelf: 'flex-start'
             }
           ]}
@@ -430,53 +446,14 @@ export default function Index() {
             }
           />
         </View>
-
-        {/* Create Menu (absolutely positioned above the button) */}
-        {showCreateOverlay && (
-          <View
-            style={{
-              position: 'absolute',
-              left: CREATE_BUTTON_LEFT - 4,
-              bottom: CREATE_BUTTON_SIZE + MENU_GAP,
-              zIndex: 1001,
-              backgroundColor: colorPalette.button.bgInverted,
-              borderRadius: 16,
-              elevation: 5,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              width: 210,
-              alignSelf: 'flex-start',
-            }}
-          >
-            <TouchableOpacity 
-              onPress={() => {
-                setShowCreateOverlay(false);
-                router.push('/newSong');
-              }}
-              style={{ flexDirection: 'row', alignItems: 'center', paddingTop: 16, paddingBottom: 12, paddingHorizontal: 20 }}
-            >
-              <WriteIcon width={24} height={24} fill={colorPalette.icon.inverted} />
-              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>New Song</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => setIsCreatingFolder(true)}
-              style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20 }}
-            >
-              <NewFolderIcon width={24} height={24} fill={colorPalette.icon.inverted} />
-              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>New Folder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleStartRecording}
-              style={{ flexDirection: 'row', alignItems: 'center', paddingTop: 12, paddingBottom: 16, paddingHorizontal: 20 }}
-            >
-              <MicIcon width={24} height={24} fill={colorPalette.icon.inverted} />
-              <Text style={{ color: colorPalette.textInverted, fontSize: 18, marginLeft: 12 }}>Record</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </Animated.View>
+
+      {/* Create Overlay */}
+      <CreateOverlay
+        visible={showCreateOverlay}
+        onClose={() => setShowCreateOverlay(false)}
+        onStartRecording={handleStartRecording}
+      />
 
       {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
       {!showRecordingControls && (
