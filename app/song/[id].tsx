@@ -429,8 +429,9 @@ const Details = () => {
                     </View>
                     <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
                         <TextInput 
-                            className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                            className={`text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                             placeholder="Untitled"
+                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             value={title} 
                             onChangeText={setTitle}
                         />
@@ -527,8 +528,9 @@ const Details = () => {
                     )}
                     <ScrollView className="px-6 pt-1">
                         <TextInput 
-                            className={`placeholder:${currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'} text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
+                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             multiline={true}
                             textAlignVertical="top"
                             value={content}
