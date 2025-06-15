@@ -1,5 +1,7 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
+import 'fast-text-encoding';
+import 'react-native-get-random-values';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClipsProvider } from '../context/clipContext';
 import { ColorProvider } from '../context/colorContext';
