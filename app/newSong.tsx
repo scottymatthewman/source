@@ -20,7 +20,7 @@ import { useAudioRecording } from '../hooks/useAudioRecording';
 import { useThemeClasses } from '../utils/theme';
 
 const NewSong = () => {
-    const { createSong, updateSong, songs } = useSongs();
+    const { createSong, updateSong, songs, deleteSong } = useSongs();
     const params = useLocalSearchParams();
     const [title, setTitle] = useState(params.title ? String(params.title) : "");
     const [content, setContent] = useState(params.content ? String(params.content) : "");
@@ -186,7 +186,10 @@ const NewSong = () => {
                     {
                         text: "Don't Save",
                         style: "destructive",
-                        onPress: () => {
+                        onPress: async () => {
+                            if (newSongId) {
+                                await deleteSong(newSongId);
+                            }
                             cleanupRecording();
                             router.back();
                         }
@@ -205,6 +208,9 @@ const NewSong = () => {
                 ]
             );
         } else {
+            if (newSongId) {
+                deleteSong(newSongId);
+            }
             cleanupRecording();
             router.back();
         }
