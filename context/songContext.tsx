@@ -1,3 +1,4 @@
+import * as FileSystem from 'expo-file-system';
 import { useSQLiteContext } from 'expo-sqlite';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { MusicalKey } from '../constants/musicalKeys';
@@ -143,9 +144,40 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
     fetchSongs();
   };
 
-  const deleteSong = (id: string) => {
-    db.runAsync('DELETE FROM songs WHERE id = ?', id);
-    fetchSongs();
+  const deleteSong = async (id: string) => {
+    try {
+      // First, get all clip IDs associated with this song
+      const clipRelations = await db.getAllAsync<{ clip_id: string }>(
+        'SELECT clip_id FROM song_clip_rel WHERE song_id = ?',
+        [id]
+      );
+
+      // Delete the relationships first
+      await db.runAsync('DELETE FROM song_clip_rel WHERE song_id = ?', id);
+
+      // Delete each associated clip
+      for (const relation of clipRelations) {
+        // Get the clip details to delete the file
+        const clip = await db.getFirstAsync<{ file_path: string }>(
+          'SELECT file_path FROM clips WHERE id = ?',
+          [relation.clip_id]
+        );
+
+        if (clip) {
+          // Delete the audio file
+          await FileSystem.deleteAsync(clip.file_path, { idempotent: true });
+          
+          // Delete the clip record
+          await db.runAsync('DELETE FROM clips WHERE id = ?', relation.clip_id);
+        }
+      }
+
+      // Finally, delete the song
+      await db.runAsync('DELETE FROM songs WHERE id = ?', id);
+      fetchSongs();
+    } catch (error) {
+      console.error('Error deleting song:', error);
+    }
   };
 
   return (
