@@ -7,18 +7,20 @@ import { Alert, Animated, Dimensions, SafeAreaView, ScrollView, Text, TextInput,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
+import { ClipListModal } from '../components/ClipListModal';
 import { FolderDropdown } from '../components/FolderDropdown';
 import { CloseIcon, KebabIcon, MicIcon } from '../components/icons';
 import ClipIcon from '../components/icons/ClipIcon';
 import SongActionsModal from '../components/SongActionsModal';
 import theme from '../constants/theme';
+import { Clip } from '../context/clipContext';
 import { useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAudioRecording } from '../hooks/useAudioRecording';
 import { useThemeClasses } from '../utils/theme';
 
 const NewSong = () => {
-    const { createSong, updateSong, songs } = useSongs();
+    const { createSong, updateSong, songs, deleteSong } = useSongs();
     const params = useLocalSearchParams();
     const [title, setTitle] = useState(params.title ? String(params.title) : "");
     const [content, setContent] = useState(params.content ? String(params.content) : "");
@@ -60,6 +62,7 @@ const NewSong = () => {
     const heightAnim = useRef(new Animated.Value(-1)).current;
     const hasStartedRecordingRef = useRef(false);
     const [newSongId, setNewSongId] = useState<string | null>(null);
+    const [relatedClips, setRelatedClips] = useState<Clip[]>([]);
 
     // Create the song as soon as the page mounts
     useEffect(() => {
@@ -88,6 +91,29 @@ const NewSong = () => {
             }
         };
         fetchClipCount();
+    }, [newSongId, showSaveClipModal]);
+
+    // Fetch related clips for this song
+    useEffect(() => {
+        const fetchRelatedClips = async () => {
+            if (newSongId) {
+                const rows = await db.getAllAsync<{ clip_id: string }>(
+                    'SELECT clip_id FROM song_clip_rel WHERE song_id = ?',
+                    [newSongId]
+                );
+                if (rows && rows.length > 0) {
+                    const ids = rows.map(r => r.clip_id);
+                    const clips = await db.getAllAsync<Clip>(
+                        `SELECT * FROM clips WHERE id IN (${ids.map(() => '?').join(',')})`,
+                        ...ids
+                    );
+                    setRelatedClips(clips);
+                } else {
+                    setRelatedClips([]);
+                }
+            }
+        };
+        fetchRelatedClips();
     }, [newSongId, showSaveClipModal]);
 
     // Start recording when modal opens (only once per open session)
@@ -160,7 +186,10 @@ const NewSong = () => {
                     {
                         text: "Don't Save",
                         style: "destructive",
-                        onPress: () => {
+                        onPress: async () => {
+                            if (newSongId) {
+                                await deleteSong(newSongId);
+                            }
                             cleanupRecording();
                             router.back();
                         }
@@ -179,6 +208,9 @@ const NewSong = () => {
                 ]
             );
         } else {
+            if (newSongId) {
+                deleteSong(newSongId);
+            }
             cleanupRecording();
             router.back();
         }
@@ -214,6 +246,26 @@ const NewSong = () => {
         } catch (error) {
             console.error('Error saving clip:', error);
             cleanupRecording();
+        }
+    };
+
+    const handleDeleteClip = async (clipId: string) => {
+        try {
+            // Delete the clip relationship
+            await db.runAsync(
+                'DELETE FROM song_clip_rel WHERE song_id = ? AND clip_id = ?',
+                [newSongId, clipId]
+            );
+            // Update the clip count
+            const result = await db.getFirstAsync(
+                'SELECT COUNT(*) as count FROM song_clip_rel WHERE song_id = ?',
+                [newSongId]
+            ) as { count?: number } | undefined;
+            setClipCount((result && typeof result.count === 'number') ? result.count : 0);
+            // Refresh the clips list
+            setRelatedClips(prev => prev.filter(clip => clip.id !== clipId));
+        } catch (error) {
+            console.error('Error deleting clip:', error);
         }
     };
 
@@ -418,6 +470,14 @@ const NewSong = () => {
                 songs={songs}
                 mode="songDetail"
                 currentSongId={newSongId || undefined}
+            />
+
+            <ClipListModal
+                visible={isClipsModalVisible}
+                onClose={() => setIsClipsModalVisible(false)}
+                title={`Clips (${clipCount})`}
+                clips={relatedClips}
+                onDeleteClip={handleDeleteClip}
             />
         </>
     );

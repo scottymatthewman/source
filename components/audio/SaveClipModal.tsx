@@ -60,11 +60,7 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'index', curren
 
   const handleSave = () => {
     if (title.trim()) {
-      if (mode === 'songDetail' && currentSongId) {
-        onSave(title.trim(), [currentSongId]);
-      } else {
-        onSave(title.trim(), selectedSongIds);
-      }
+      onSave(title.trim(), selectedSongIds);
       resetState();
     }
   };
