@@ -48,11 +48,11 @@ const Details = () => {
         stopPlayback,
         playRecording,
         pauseRecording,
+        audioUri,
     } = useAudioRecording();
     const [isClipsModalVisible, setIsClipsModalVisible] = useState(false);
     const [relatedClips, setRelatedClips] = useState<Clip[]>([]);
     const [selectedSongIds, setSelectedSongIds] = useState<string[]>([]);
-    const [audioUri, setAudioUri] = useState<string>('');
     const insets = useSafeAreaInsets();
     const windowHeight = Dimensions.get('window').height;
     const RECORDING_PANEL_HEIGHT = 120;
@@ -191,7 +191,7 @@ const Details = () => {
         // setShowRecorder(false);
     };
 
-    const handleSaveClip = async () => {
+    const handleSaveClip = async (title: string, selectedSongIds: string[]) => {
         console.log('[handleSaveClip] called with selectedSongIds:', selectedSongIds);
         if (!title.trim()) {
             Alert.alert('Error', 'Please enter a title for the clip');
@@ -200,6 +200,12 @@ const Details = () => {
 
         if (selectedSongIds.length === 0) {
             Alert.alert('Error', 'Please select at least one song to attach the clip to');
+            return;
+        }
+
+        if (!audioUri) {
+            Alert.alert('Error', 'No recording available to save');
+            cleanupRecording();
             return;
         }
 
@@ -238,6 +244,7 @@ const Details = () => {
 
             // Clean up recording state
             cleanupRecording();
+            setShowSaveClipModal(false);
         } catch (error) {
             console.error('Error saving clip:', error);
             Alert.alert('Error', 'Failed to save clip');
