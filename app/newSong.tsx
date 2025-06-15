@@ -11,6 +11,7 @@ import { ClipListModal } from '../components/ClipListModal';
 import { FolderDropdown } from '../components/FolderDropdown';
 import { CloseIcon, KebabIcon, MicIcon } from '../components/icons';
 import ClipIcon from '../components/icons/ClipIcon';
+import RichTextEditor from '../components/RichTextEditor';
 import SongActionsModal from '../components/SongActionsModal';
 import theme from '../constants/theme';
 import { Clip } from '../context/clipContext';
@@ -18,6 +19,24 @@ import { useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAudioRecording } from '../hooks/useAudioRecording';
 import { useThemeClasses } from '../utils/theme';
+
+// Add this interface after imports
+interface RichTextEditorWrapperProps {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    className?: string;
+    isDarkMode?: boolean;
+}
+
+const RichTextEditorWrapper = (props: RichTextEditorWrapperProps) => {
+    'use dom';
+    return (
+        <div style={{ flex: 1, minHeight: 300, display: "flex" }}>
+            <RichTextEditor {...props} />
+        </div>
+    );
+};
 
 const NewSong = () => {
     const { createSong, updateSong, songs, deleteSong } = useSongs();
@@ -441,16 +460,16 @@ const NewSong = () => {
                             </ScrollView>
                         </View>
                     )}
-                    <ScrollView className="px-6 pt-1">
-                        <TextInput 
-                            className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
-                            placeholder="I heard there was a secret chord..."
-                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
-                            multiline={true}
-                            textAlignVertical="top"
-                            value={content}
-                            onChangeText={setContent}
-                        />
+                    <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
+                        <View style={{ flex: 1 }}>
+                            <RichTextEditor
+                                value={content}
+                                onChange={setContent}
+                                placeholder="I heard there was a secret chord..."
+                                className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                                isDarkMode={currentTheme === 'dark'}
+                            />
+                        </View>
                     </ScrollView>
                 </Animated.View>
             </SafeAreaView>
