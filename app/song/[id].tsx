@@ -32,6 +32,7 @@ const Details = () => {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
+    const [bpm, setBpm] = useState<number | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showKeyPicker, setShowKeyPicker] = useState(false);
     const [kebabButtonLayout, setKebabButtonLayout] = useState<LayoutRectangle | null>(null);
@@ -80,6 +81,7 @@ const Details = () => {
             setContent(song.content || '');
             setSelectedFolderId(song.folder_id);
             setSelectedKey(song.key);
+            setBpm(song.bpm);
             setHasUnsavedChanges(false);
         }
     }, [song]);
@@ -90,10 +92,11 @@ const Details = () => {
                 title !== (song.title || '') || 
                 content !== (song.content || '') ||
                 selectedFolderId !== song.folder_id ||
-                selectedKey !== song.key;
+                selectedKey !== song.key ||
+                bpm !== song.bpm;
             setHasUnsavedChanges(hasChanges);
         }
-    }, [title, content, selectedFolderId, selectedKey, song]);
+    }, [title, content, selectedFolderId, selectedKey, bpm, song]);
 
     useEffect(() => {
         if (!song) return;
@@ -175,15 +178,20 @@ const Details = () => {
 
     const handleSave = async () => {
         if (song) {
+            console.log('Save pressed', { title, content, selectedFolderId, selectedKey, bpm });
             await updateSong(song.id, {
                 title,
                 content,
                 date_modified: new Date(),
                 folder_id: selectedFolderId,
-                key: selectedKey
+                key: selectedKey,
+                bpm: bpm !== null && !isNaN(bpm) ? bpm : null,
             });
             setHasUnsavedChanges(false);
-            router.back();
+            // Wait for the songs to be refreshed, then navigate back
+            setTimeout(() => {
+                router.back();
+            }, 200);
         }
     };
 
@@ -448,15 +456,17 @@ const Details = () => {
                             <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>
                         </TouchableOpacity>
                     </View>
-                    <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
-                        <TextInput 
-                            className={`text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                    <View className="flex-row items-center w-full pt-6 pl-6 pr-4 pb-2">
+                        <TextInput
+                            className={`flex-1 text-3xl font-semibold ${
+                                currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'
+                            }`}
                             placeholder="Untitled"
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
-                            value={title} 
+                            value={title}
                             onChangeText={setTitle}
                         />
-                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
+                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)} className="ml-2">
                             <View style={{ transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] }}>
                                 <DropdownOutlineDownIcon width={28} height={28} fill={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder} />
                             </View>
@@ -482,8 +492,8 @@ const Details = () => {
                                 </View>
                             </View>
                             <View className="px-6 flex-row justify-stretch items-center gap-4">
-                                <View className="flex-row py-3 grow items-center justify-between">
-                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>  
+                                <View className="flex-1 flex-row py-3 items-center justify-between">
+                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>
                                     <TouchableOpacity
                                         className="flex-row items-center justify-center gap-1 h-9 rounded-lg w-12"
                                         style={{ backgroundColor: colorPalette.surface1 }}
@@ -494,12 +504,43 @@ const Details = () => {
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
-                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
-                                <View className="flex-row py-4 grow items-center justify-between">
+                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }} />
+                                <View className="flex-1 flex-row py-4 items-center justify-between">
                                     <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Tempo</Text>
-                                    <View className="flex-row gap-1">
-                                        <Text className={classes.textSize('text-lg')}>120</Text>  
-                                        <Text className={classes.textSize('text-lg', 'placeholder')}>BPM</Text>  
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                        <TextInput
+                                            className={classes.textSize('text-lg')}
+                                            placeholder="-"
+                                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
+                                            value={bpm?.toString() || ''}
+                                            onChangeText={(text) => {
+                                                const sanitized = text.replace(/[^0-9]/g, '').slice(0, 3);
+                                                setBpm(sanitized ? parseInt(sanitized) : null);
+                                            }}
+                                            keyboardType="number-pad"
+                                            maxLength={3}
+                                            style={{
+                                                color: bpm ? (currentTheme === 'dark' ? theme.colors.dark.text : theme.colors.light.text) : (currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder),
+                                                width: 80,
+                                                height: 24,
+                                                textAlign: 'right',
+                                                paddingVertical: 0,
+                                                paddingHorizontal: 0,
+                                                includeFontPadding: false,
+                                                fontSize: 16,
+                                                lineHeight: 20,
+                                            }}
+                                        />
+                                        <Text
+                                            className={classes.textSize('text-lg', 'placeholder')}
+                                            style={{
+                                                height: 20,
+                                                lineHeight: 20,
+                                                textAlignVertical: 'center',
+                                            }}
+                                        >
+                                            BPM
+                                        </Text>
                                     </View>
                                 </View>
                             </View>

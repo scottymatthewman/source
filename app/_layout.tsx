@@ -29,7 +29,8 @@ export default function RootLayout() {
               content TEXT,
               date_modified TEXT,
               folder_id INTEGER,
-              key TEXT
+              key TEXT,
+              bpm INTEGER
             );
           `);
 

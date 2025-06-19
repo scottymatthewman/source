@@ -57,6 +57,7 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const insets = useSafeAreaInsets();
+  const { createSong } = useSongs();
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
@@ -72,9 +73,14 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
     };
   }, []);
 
-  const handleNewSong = () => {
+  const handleNewSong = async () => {
     onClose();
-    router.push('/newSong');
+    const song = await createSong();
+    if (song && song.id) {
+      router.push({ pathname: '/newSong', params: { songId: song.id } });
+    } else {
+      Alert.alert('Error', 'Failed to create new song');
+    }
   };
 
   const handleNewFolder = () => {
