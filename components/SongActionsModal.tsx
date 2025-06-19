@@ -1,126 +1,57 @@
 import React from 'react';
-import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MUSICAL_KEYS, MusicalKey } from '../constants/musicalKeys';
+import { LayoutRectangle, Modal, Pressable, Text, View } from 'react-native';
 import theme from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
+import { useThemeClasses } from '../utils/theme';
 
 interface SongActionsModalProps {
   visible: boolean;
   onClose: () => void;
-  selectedKey: MusicalKey | null;
-  onSelectKey: (key: MusicalKey | null) => void;
   mode?: 'full' | 'keyOnly';
   onMakeCopy?: () => void;
   onDelete?: () => void;
+  buttonRef?: React.RefObject<View>;
+  buttonLayout?: LayoutRectangle | null;
 }
 
 const SongActionsModal: React.FC<SongActionsModalProps> = ({
   visible,
   onClose,
-  selectedKey,
-  onSelectKey,
   mode = 'full',
   onMakeCopy,
   onDelete,
+  buttonRef,
+  buttonLayout,
 }) => {
   const { theme: currentTheme } = useTheme();
+  const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
-  const renderKeySelector = () => (
-    <View className="pt-6 pl-6 pr-6 pb-16">
-      <Text className={`text-lg font-medium pb-1 ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}>Set Key</Text>
-      <FlatList
-        data={MUSICAL_KEYS}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="py-1"
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => onSelectKey(selectedKey === item ? null : item)}
-            className={`mr-2 px-4 py-2 rounded-lg ${
-              selectedKey === item
-                ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
-                : currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'
-            }`}
-          >
-            <Text
-              className={`text-lg font-medium ${
-                selectedKey === item
-                  ? currentTheme === 'dark' ? 'text-dark-text-inverted' : 'text-light-text-inverted'
-                  : currentTheme === 'dark' ? 'text-light-text-inverted' : 'text-dark-text-inverted'
-              }`}
-            >
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item}
-      />
-    </View>
-  );
-
-  const renderFullActions = () => (
-    <View className="pt-6 pl-6 pr-6 pb-16">
-      <TouchableOpacity
-        onPress={() => {
-          onSelectKey(null);
-          onClose();
-        }}
-        className={`py-3 ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
-      >
-        <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium pb-1`}>Set Key</Text>
-        <FlatList
-          data={MUSICAL_KEYS}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="py-1"
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => onSelectKey(selectedKey === item ? null : item)}
-              className={`mr-2 px-4 py-2 rounded-lg ${
-                selectedKey === item
-                  ? currentTheme === 'dark' ? 'bg-dark-surface-inverted' : 'bg-light-surface-inverted'
-                  : currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'
-              }`}
-            >
-              <Text
-                className={`text-lg ${
-                  selectedKey === item
-                    ? currentTheme === 'dark' ? 'text-dark-text-inverted' : 'text-light-text-inverted'
-                    : currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'
-                }`}
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item}
-        />
-      </TouchableOpacity>
+  const renderActions = () => (
+    <>
       {onMakeCopy && (
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             onMakeCopy();
             onClose();
           }}
-          className={`py-4 ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
         >
-          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-lg font-medium`}>Make a Copy</Text>
-        </TouchableOpacity>
+          <Text className={classes.text.body}>Make a Copy</Text>
+        </Pressable>
       )}
       {onDelete && (
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             onDelete();
             onClose();
           }}
-          className="py-4"
+          className="px-2 py-4"
         >
-          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive'} text-lg font-medium`}>Delete Song</Text>
-        </TouchableOpacity>
+          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive'}`}>Delete Song</Text>
+        </Pressable>
       )}
-    </View>
+    </>
   );
 
   return (
@@ -130,19 +61,35 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable
-        className="flex-1 bg-black/50"
-        onPress={onClose}
-      >
+      <View style={{ flex: 1 }}>
         <Pressable
-          className={`absolute bottom-0 w-full ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'} rounded-t-3xl`}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <SafeAreaView edges={['bottom']}>
-            {mode === 'keyOnly' ? renderKeySelector() : renderFullActions()}
-          </SafeAreaView>
-        </Pressable>
-      </Pressable>
+          className="flex-1 bg-black/50"
+          onPress={onClose}
+          style={{ zIndex: 1 }}
+        />
+        {buttonLayout && (
+          <View
+            style={{
+              position: 'absolute',
+              top: buttonLayout.y + buttonLayout.height + 10,
+              left: 12,
+              right: 12,
+              zIndex: 2,
+              borderRadius: 16,
+              overflow: 'hidden',
+              backgroundColor: colorPalette.bg,
+              borderWidth: 1,
+              borderColor: colorPalette.border,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+            onStartShouldSetResponder={() => true}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
+            {renderActions()}
+          </View>
+        )}
+      </View>
     </Modal>
   );
 };
