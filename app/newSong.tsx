@@ -9,7 +9,7 @@ import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
 import { ClipListModal } from '../components/ClipListModal';
 import { FolderDropdown } from '../components/FolderDropdown';
-import { CloseIcon, KebabIcon, MicIcon } from '../components/icons';
+import { CloseIcon, MicIcon } from '../components/icons';
 import ClipIcon from '../components/icons/ClipIcon';
 import RichTextEditor from '../components/RichTextEditor';
 import SongActionsModal from '../components/SongActionsModal';
@@ -353,9 +353,6 @@ const NewSong = () => {
                                 selectedFolderId={selectedFolderId}
                                 onSelectFolder={setSelectedFolderId}
                             />
-                            <TouchableOpacity onPress={() => setShowActions(true)}>
-                                <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
-                            </TouchableOpacity>
                         </View>
                         <TouchableOpacity onPress={handleSave}>
                             <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>

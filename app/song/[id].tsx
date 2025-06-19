@@ -3,7 +3,7 @@ import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, findNodeHandle, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../../components/audio/RecordingControls';
 import SaveClipModal from '../../components/audio/SaveClipModal';
@@ -34,6 +34,8 @@ const Details = () => {
     const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showKeyPicker, setShowKeyPicker] = useState(false);
+    const [kebabButtonLayout, setKebabButtonLayout] = useState<LayoutRectangle | null>(null);
+    const kebabButtonRef = useRef<View>(null);
     const db = useSQLiteContext();
     const [clipCount, setClipCount] = useState(0);
     const [showRecorder, setShowRecorder] = useState(false);
@@ -362,14 +364,26 @@ const Details = () => {
 
     // Robust cleanup logic for closing the recording controls
     const handleCloseRecordingControls = async () => {
-        setShowRecorder(false);
         if (isRecording) {
             await stopRecording();
         }
         if (isPlaying) {
-            await stopPlayback();
+            stopPlayback();
         }
-        await cleanupRecording();
+        setShowRecorder(false);
+        hasStartedRecordingRef.current = false;
+    };
+
+    const openActionsModal = () => {
+        if (kebabButtonRef.current) {
+            const handle = findNodeHandle(kebabButtonRef.current);
+            if (handle) {
+                UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
+                    setKebabButtonLayout({ x: pageX, y: pageY, width, height });
+                    setShowActions(true);
+                });
+            }
+        }
     };
 
     if (!song) {
@@ -426,7 +440,7 @@ const Details = () => {
                                 selectedFolderId={selectedFolderId}
                                 onSelectFolder={setSelectedFolderId}
                             />
-                            <TouchableOpacity onPress={() => setShowActions(true)}>
+                            <TouchableOpacity ref={kebabButtonRef} onPress={openActionsModal}>
                                 <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
                             </TouchableOpacity>
                         </View>
@@ -550,10 +564,9 @@ const Details = () => {
             <SongActionsModal
                 visible={showActions}
                 onClose={() => setShowActions(false)}
-                selectedKey={selectedKey}
-                onSelectKey={setSelectedKey}
                 onMakeCopy={handleMakeCopy}
                 onDelete={handleDelete}
+                buttonLayout={kebabButtonLayout}
             />
 
             <SaveClipModal
