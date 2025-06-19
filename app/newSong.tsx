@@ -461,15 +461,15 @@ const NewSong = () => {
                         </View>
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
-                        <View style={{ flex: 1 }}>
-                            <RichTextEditor
-                                value={content}
-                                onChange={setContent}
-                                placeholder="I heard there was a secret chord..."
-                                className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
-                                isDarkMode={currentTheme === 'dark'}
-                            />
-                        </View>
+                        <TextInput 
+                            className={`text-xl font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            placeholder="I heard there was a secret chord..."
+                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
+                            multiline={true}
+                            textAlignVertical="top"
+                            value={content}
+                            onChangeText={setContent}
+                        />
                     </ScrollView>
                 </Animated.View>
             </SafeAreaView>
