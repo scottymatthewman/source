@@ -6,6 +6,7 @@ import { ColorProvider } from '../context/colorContext';
 import { FoldersProvider } from '../context/folderContext';
 import { SongsProvider } from '../context/songContext';
 import { ThemeProvider } from '../context/ThemeContext';
+import './globals.css';
 
 export default function RootLayout() {
   return (
