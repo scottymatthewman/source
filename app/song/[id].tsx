@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../../components/audio/RecordingControls';
 import SaveClipModal from '../../components/audio/SaveClipModal';
 import { ClipListModal } from '../../components/ClipListModal';
-import DomTest from '../../components/DomTest';
 import { FolderDropdown } from '../../components/FolderDropdown';
 import { ChevronLeftIcon, KebabIcon, MicIcon } from '../../components/icons';
 import SongActionsModal from '../../components/SongActionsModal';
@@ -536,7 +535,7 @@ const Details = () => {
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
                         <TextInput 
-                            className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            className={`text-xl font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             multiline={true}
@@ -544,9 +543,6 @@ const Details = () => {
                             value={content}
                             onChangeText={setContent}
                         />
-                        <View style={{ flex: 1, minHeight: 300, marginTop: 24 }}>
-                            <DomTest />
-                        </View>
                     </ScrollView>
                 </Animated.View>
             </SafeAreaView>

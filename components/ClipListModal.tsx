@@ -1,6 +1,6 @@
 import { useAudioPlayer } from 'expo-audio';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../constants/theme';
 import { Clip } from '../context/clipContext';
 import { useColorPalette } from '../context/colorContext';
@@ -121,14 +121,31 @@ export function ClipListModal({
     return (
         <Modal
             visible={visible}
-            animationType="slide"
-            transparent={true}
+            animationType="fade"
+            transparent
             onRequestClose={handleModalClose}
         >
-            <View className="flex-1 justify-end">
+            <Pressable
+                className="flex-1 bg-black/50"
+                onPress={onClose}
+                style={{ zIndex: 1 }}
+            >
+            <View 
+                className="flex-1 justify-end"
+                style={{ zIndex: 2 }}
+            >
                 <View 
                     className="rounded-t-3xl px-4 pt-4 mx-4 mb-8"
-                    style={{ backgroundColor: colorPalette.background, borderRadius: 24, borderWidth: 1 }}
+                    style={{ 
+                        backgroundColor: colorPalette.background, 
+                        borderRadius: 24, 
+                        borderWidth: 1, 
+                        borderColor: borderColor, 
+                        overflow: 'hidden',
+                        minHeight: 200,
+                    }}
+                    onStartShouldSetResponder={() => true}
+                    onTouchEnd={(e) => e.stopPropagation()}
                 >
                     <View className="flex-row justify-between items-center mb-4">
                         <Text 
@@ -146,14 +163,20 @@ export function ClipListModal({
                             </Text>
                         </TouchableOpacity>
                     </View>
-                    <View>
+                    <View style={{ flex: 1 }}>
                         <FlatList
                             data={clips}
                             keyExtractor={item => item.id.toString()}
-                            renderItem={({ item }) => (
+                            style={{ overflow: 'hidden' }}
+                            contentContainerStyle={{ overflow: 'hidden' }}
+                            showsVerticalScrollIndicator={true}
+                            renderItem={({ item, index }) => (
                                 <View 
                                     className="py-3 px-4 border-b flex-row items-center justify-between"
-                                    style={{ borderColor }}
+                                    style={{ 
+                                        borderColor,
+                                        borderBottomWidth: index === clips.length - 1 ? 0 : 1
+                                    }}
                                 >
                                     <View className="flex-1">
                                         <Text 
@@ -191,8 +214,9 @@ export function ClipListModal({
                             ListEmptyComponent={<Text>No clips found.</Text>}
                         />
                     </View>
-                </View>
+                    </View>
             </View>
+            </Pressable>
         </Modal>
     );
 } 

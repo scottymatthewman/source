@@ -127,7 +127,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
       <Pressable
