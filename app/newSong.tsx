@@ -39,8 +39,9 @@ const RichTextEditorWrapper = (props: RichTextEditorWrapperProps) => {
 };
 
 const NewSong = () => {
-    const { createSong, updateSong, songs, deleteSong } = useSongs();
+    const { updateSong, songs, deleteSong } = useSongs();
     const params = useLocalSearchParams();
+    const songId = params.songId ? String(params.songId) : null;
     const [title, setTitle] = useState(params.title ? String(params.title) : "");
     const [content, setContent] = useState(params.content ? String(params.content) : "");
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
@@ -49,6 +50,7 @@ const NewSong = () => {
     const router = useRouter();
     const [showActions, setShowActions] = useState(false);
     const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
+    const [bpm, setBpm] = useState<number | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showKeyPicker, setShowKeyPicker] = useState(false);
     const { theme: currentTheme } = useTheme();
@@ -80,45 +82,29 @@ const NewSong = () => {
     const shrunkHeight = windowHeight - (RECORDING_PANEL_HEIGHT + RECORDING_PANEL_MARGIN + 12);
     const heightAnim = useRef(new Animated.Value(-1)).current;
     const hasStartedRecordingRef = useRef(false);
-    const [newSongId, setNewSongId] = useState<string | null>(null);
     const [relatedClips, setRelatedClips] = useState<Clip[]>([]);
-
-    // Create the song as soon as the page mounts
-    useEffect(() => {
-        let isMounted = true;
-        const createInitialSong = async () => {
-            if (!newSongId) {
-                const song = await createSong();
-                if (song && isMounted) {
-                    setNewSongId(song.id);
-                }
-            }
-        };
-        createInitialSong();
-        return () => { isMounted = false; };
-    }, []);
 
     // Fetch and update the clip count for this song
     useEffect(() => {
         const fetchClipCount = async () => {
-            if (newSongId) {
+            if (songId) {
                 const result = await db.getFirstAsync(
                     'SELECT COUNT(*) as count FROM song_clip_rel WHERE song_id = ?',
-                    [newSongId]
+                    [songId]
                 ) as { count?: number } | undefined;
                 setClipCount((result && typeof result.count === 'number') ? result.count : 0);
             }
         };
         fetchClipCount();
-    }, [newSongId, showSaveClipModal]);
+    }, [songId, showSaveClipModal]);
 
     // Fetch related clips for this song
     useEffect(() => {
         const fetchRelatedClips = async () => {
-            if (newSongId) {
+            if (songId) {
                 const rows = await db.getAllAsync<{ clip_id: string }>(
                     'SELECT clip_id FROM song_clip_rel WHERE song_id = ?',
-                    [newSongId]
+                    [songId]
                 );
                 if (rows && rows.length > 0) {
                     const ids = rows.map(r => r.clip_id);
@@ -133,7 +119,7 @@ const NewSong = () => {
             }
         };
         fetchRelatedClips();
-    }, [newSongId, showSaveClipModal]);
+    }, [songId, showSaveClipModal]);
 
     // Start recording when modal opens (only once per open session)
     useEffect(() => {
@@ -180,19 +166,23 @@ const NewSong = () => {
             Alert.alert('Error', 'Please enter a title for the song');
             return;
         }
+        if (!songId) {
+            Alert.alert('Error', 'No song ID available');
+            return;
+        }
         try {
-            if (!newSongId) throw new Error('No song ID');
-            await updateSong(newSongId, {
-                title,
-                content,
+            await updateSong(songId, {
+                title: title.trim(),
+                content: content.trim(),
+                date_modified: new Date(),
                 folder_id: selectedFolderId,
                 key: selectedKey,
-                date_modified: new Date(),
+                bpm
             });
             router.back();
         } catch (error) {
-            console.error('Error creating song:', error);
-            Alert.alert('Error', 'Failed to create song');
+            console.error('Error saving song:', error);
+            Alert.alert('Error', 'Failed to save song');
         }
     };
 
@@ -206,8 +196,8 @@ const NewSong = () => {
                         text: "Don't Save",
                         style: "destructive",
                         onPress: async () => {
-                            if (newSongId) {
-                                await deleteSong(newSongId);
+                            if (songId) {
+                                await deleteSong(songId);
                             }
                             cleanupRecording();
                             router.back();
@@ -227,39 +217,41 @@ const NewSong = () => {
                 ]
             );
         } else {
-            if (newSongId) {
-                deleteSong(newSongId);
+            if (songId) {
+                deleteSong(songId);
             }
             cleanupRecording();
             router.back();
         }
     };
 
-    const handleSaveClip = async (title: string) => {
+    const handleSaveClip = async (title: string, selectedSongIds: string[]) => {
+        if (!audioUri || !songId) {
+            console.error('No audio URI or song ID available');
+            cleanupRecording();
+            return;
+        }
         try {
-            if (!audioUri || !newSongId) {
-                console.error('No audio URI or song ID available');
-                cleanupRecording();
-                return;
-            }
             const clip = await saveRecording(title, audioUri);
             if (!clip) {
                 console.error('Failed to save clip');
                 cleanupRecording();
                 return;
             }
-            // Immediately associate the clip with the song
-            await db.runAsync(
-                'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
-                [newSongId, clip.id]
-            );
+            // Create relationships for each selected song
+            for (const songId of selectedSongIds) {
+                await db.runAsync(
+                    'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
+                    [songId, clip.id]
+                );
+            }
             setShowSaveClipModal(false);
             setShowRecorder(false);
             cleanupRecording();
             // Update the clip counter
             const result = await db.getFirstAsync(
                 'SELECT COUNT(*) as count FROM song_clip_rel WHERE song_id = ?',
-                [newSongId]
+                [songId]
             ) as { count?: number } | undefined;
             setClipCount((result && typeof result.count === 'number') ? result.count : 0);
         } catch (error) {
@@ -273,12 +265,12 @@ const NewSong = () => {
             // Delete the clip relationship
             await db.runAsync(
                 'DELETE FROM song_clip_rel WHERE song_id = ? AND clip_id = ?',
-                [newSongId, clipId]
+                [songId, clipId]
             );
             // Update the clip count
             const result = await db.getFirstAsync(
                 'SELECT COUNT(*) as count FROM song_clip_rel WHERE song_id = ?',
-                [newSongId]
+                [songId]
             ) as { count?: number } | undefined;
             setClipCount((result && typeof result.count === 'number') ? result.count : 0);
             // Refresh the clips list
@@ -358,7 +350,7 @@ const NewSong = () => {
                             <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>
                         </TouchableOpacity>
                     </View>
-                    <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
+                    <View className="flex-row justify-between items-center w-full pt-6 pl-6 pr-4 pb-2">
                         <TextInput 
                             className={`text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                             placeholder="Untitled"
@@ -392,8 +384,8 @@ const NewSong = () => {
                                 </View>
                             </View>
                             <View className="px-6 flex-row justify-stretch items-center gap-4">
-                                <View className="flex-row py-3 grow items-center justify-between">
-                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>  
+                                <View className="flex-1 flex-row py-3 items-center justify-between">
+                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>
                                     <TouchableOpacity
                                         className="flex-row items-center justify-center gap-1 h-9 rounded-lg w-12"
                                         style={{ backgroundColor: colorPalette.surface1 }}
@@ -404,12 +396,43 @@ const NewSong = () => {
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
-                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
-                                <View className="flex-row py-4 grow items-center justify-between">
+                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }} />
+                                <View className="flex-1 flex-row py-4 items-center justify-between">
                                     <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Tempo</Text>
-                                    <View className="flex-row gap-1">
-                                        <Text className={classes.textSize('text-lg')}>120</Text>  
-                                        <Text className={classes.textSize('text-lg', 'placeholder')}>BPM</Text>  
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                    <TextInput
+                                            className={classes.textSize('text-lg')}
+                                            placeholder="-"
+                                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
+                                            value={bpm?.toString() || ''}
+                                            onChangeText={(text) => {
+                                                const sanitized = text.replace(/[^0-9]/g, '').slice(0, 3);
+                                                setBpm(sanitized ? parseInt(sanitized) : null);
+                                            }}
+                                            keyboardType="number-pad"
+                                            maxLength={3}
+                                            style={{
+                                                color: bpm ? (currentTheme === 'dark' ? theme.colors.dark.text : theme.colors.light.text) : (currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder),
+                                                width: 80,
+                                                height: 24,
+                                                textAlign: 'right',
+                                                paddingVertical: 0,
+                                                paddingHorizontal: 0,
+                                                includeFontPadding: false,
+                                                fontSize: 16,
+                                                lineHeight: 20,
+                                            }}
+                                        />
+                                        <Text
+                                            className={classes.textSize('text-lg', 'placeholder')}
+                                            style={{
+                                                height: 20,
+                                                lineHeight: 20,
+                                                textAlignVertical: 'center',
+                                            }}
+                                        >
+                                            BPM
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
@@ -474,9 +497,6 @@ const NewSong = () => {
             <SongActionsModal
                 visible={showActions}
                 onClose={() => setShowActions(false)}
-                selectedKey={selectedKey}
-                onSelectKey={setSelectedKey}
-                mode="keyOnly"
             />
 
             <SaveClipModal
@@ -485,7 +505,7 @@ const NewSong = () => {
                 onSave={handleSaveClip}
                 songs={songs}
                 mode="songDetail"
-                currentSongId={newSongId || undefined}
+                currentSongId={songId || undefined}
             />
 
             <ClipListModal

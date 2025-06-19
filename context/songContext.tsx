@@ -17,6 +17,7 @@ export interface Song {
   date_modified: Date | null;
   folder_id: string | null;
   key: MusicalKey | null;
+  bpm: number | null;
 }
 
 export const tursoOptions = {
@@ -98,16 +99,18 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       date_modified: new Date(),
       folder_id: null,
       key: null,
+      bpm: null,
     };
 
     try {
       const result = await db.runAsync(
-        'INSERT INTO songs (title, content, date_modified, folder_id, key) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO songs (title, content, date_modified, folder_id, key, bpm) VALUES (?, ?, ?, ?, ?, ?)',
         newSong.title,
         newSong.content,
         newSong.date_modified.toISOString(),
         newSong.folder_id,
-        newSong.key
+        newSong.key,
+        newSong.bpm
       );
       fetchSongs();
       return { ...newSong, id: result.lastInsertRowId.toString() };
@@ -130,17 +133,21 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       date_modified: updates.date_modified ?? new Date(),
       folder_id: updates.folder_id ?? existingSong.folder_id,
       key: updates.key ?? existingSong.key,
+      bpm: updates.bpm ?? existingSong.bpm,
     };
 
+    console.log('Updating song in DB:', updatedSong, id);
     await db.runAsync(
-      'UPDATE songs SET title = ?, content = ?, date_modified = ?, folder_id = ?, key = ? WHERE id = ?',
+      'UPDATE songs SET title = ?, content = ?, date_modified = ?, folder_id = ?, key = ?, bpm = ? WHERE id = ?',
       updatedSong.title,
       updatedSong.content,
       updatedSong.date_modified.toISOString(),
       updatedSong.folder_id,
       updatedSong.key,
+      updatedSong.bpm,
       id
     );
+    console.log('DB update complete');
     fetchSongs();
   };
 
