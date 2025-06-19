@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { findNodeHandle, LayoutRectangle, Modal, Pressable, Text, TouchableWithoutFeedback, UIManager, View } from 'react-native';
+import { findNodeHandle, LayoutRectangle, Modal, Pressable, Text, UIManager, View } from 'react-native';
 import theme from '../constants/theme';
 import { useFolders } from '../context/folderContext';
 import { useTheme } from '../context/ThemeContext';
@@ -57,50 +57,55 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setIsOpen(false)}>
-          <View style={{ flex: 1 }}>
-            {buttonLayout && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: buttonLayout.y + buttonLayout.height + 10,
-                  left: 12,
-                  right: 12,
-                  zIndex: 9999,
-                  borderRadius: 16,
-                  overflow: 'hidden',
-                  backgroundColor: colorPalette.bg,
-                  borderWidth: 1,
-                  borderColor: colorPalette.border,
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
+        <View style={{ flex: 1 }}>
+          <Pressable
+            className="flex-1 bg-black/50"
+            onPress={() => setIsOpen(false)}
+            style={{ zIndex: 1 }}
+          />
+          {buttonLayout && (
+            <View
+              style={{
+                position: 'absolute',
+                top: buttonLayout.y + buttonLayout.height + 10,
+                left: 12,
+                right: 12,
+                zIndex: 2,
+                borderRadius: 16,
+                overflow: 'hidden',
+                backgroundColor: colorPalette.bg,
+                borderWidth: 1,
+                borderColor: colorPalette.border,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+              }}
+              onStartShouldSetResponder={() => true}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
+              <Pressable
+                onPress={() => {
+                  onSelectFolder(null);
+                  setIsOpen(false);
                 }}
+                className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
               >
+                <Text className={classes.text.body}>No Folder</Text>
+              </Pressable>
+              {folders.map((folder) => (
                 <Pressable
+                  key={folder.id}
                   onPress={() => {
-                    onSelectFolder(null);
+                    onSelectFolder(folder.id);
                     setIsOpen(false);
                   }}
-                  className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+                  className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'} last:border-b-0`}
                 >
-                  <Text className={classes.text.body}>No Folder</Text>
+                  <Text className={classes.text.body}>{folder.title}</Text>
                 </Pressable>
-                {folders.map((folder) => (
-                  <Pressable
-                    key={folder.id}
-                    onPress={() => {
-                      onSelectFolder(folder.id);
-                      setIsOpen(false);
-                    }}
-                    className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'} last:border-b-0`}
-                  >
-                    <Text className={classes.text.body}>{folder.title}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+              ))}
+            </View>
+          )}
+        </View>
       </Modal>
     </>
   );
