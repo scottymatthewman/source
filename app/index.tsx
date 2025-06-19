@@ -6,7 +6,7 @@ import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Pressable, Safe
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
-import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
+import { AddIcon, FolderIcon, HomeIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
@@ -375,9 +375,7 @@ export default function Index() {
       >
         <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
           <View className="flex-row items-center">
-            <Text className={classes.text.header} style={{ fontSize: 32, fontWeight: 'bold' }}>
-              Home
-            </Text>
+            <HomeIcon width={28} height={28} fill={colorPalette.icon.primary} />
           </View>
           <View className="flex-row items-center">
             <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
