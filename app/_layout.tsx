@@ -101,6 +101,14 @@ export default function RootLayout() {
                       headerShown: false 
                     }} 
                   />
+                  <Stack.Screen 
+                    name="newSong" 
+                    options={{ 
+                      title: 'New Song',
+                      headerShown: false,
+                      gestureEnabled: false
+                    }} 
+                  />
                 </Stack>
               </ColorProvider>
             </ClipsProvider>
