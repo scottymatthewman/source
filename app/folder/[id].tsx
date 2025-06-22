@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { FlatList, LayoutRectangle, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import FolderActionsModal from '../../components/FolderActionsModal';
 import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 import { useFolders } from '../../context/folderContext';
@@ -10,7 +11,7 @@ import { useTheme } from '../../context/ThemeContext';
 export default function FolderDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { folders, updateFolder } = useFolders();
+  const { folders, updateFolder, deleteFolder, createFolder } = useFolders();
   const { songs } = useSongs();
   const { theme: currentTheme } = useTheme();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
@@ -18,6 +19,9 @@ export default function FolderDetails() {
   const folder = folders.find(f => f.id.toString() === id?.toString());
   const [title, setTitle] = useState(folder?.title || '');
   const [editing, setEditing] = useState(false);
+  const [showActionsModal, setShowActionsModal] = useState(false);
+  const [buttonLayout, setButtonLayout] = useState<LayoutRectangle | null>(null);
+  const buttonRef = useRef<View>(null);
 
   useEffect(() => {
     setTitle(folder?.title || '');
@@ -28,6 +32,29 @@ export default function FolderDetails() {
       updateFolder(folder.id, { title });
     }
     setEditing(false);
+  };
+
+  const handleMakeCopy = async () => {
+    if (folder) {
+      const newTitle = `${folder.title} (Copy)`;
+      await createFolder(newTitle);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (folder) {
+      await deleteFolder(folder.id);
+      router.back();
+    }
+  };
+
+  const handleKebabPress = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+        setButtonLayout({ x: pageX, y: pageY, width, height });
+        setShowActionsModal(true);
+      });
+    }
   };
 
   const songsInFolder = songs.filter(song => song.folder_id === folder?.id);
@@ -57,7 +84,7 @@ export default function FolderDetails() {
             selectTextOnFocus
           />
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity ref={buttonRef} onPress={handleKebabPress}>
           <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
         </TouchableOpacity>
       </View>
@@ -80,6 +107,13 @@ export default function FolderDetails() {
             No songs in this folder.
           </Text>
         }
+      />
+      <FolderActionsModal
+        visible={showActionsModal}
+        onClose={() => setShowActionsModal(false)}
+        onMakeCopy={handleMakeCopy}
+        onDelete={handleDelete}
+        buttonLayout={buttonLayout}
       />
     </SafeAreaView>
   );
