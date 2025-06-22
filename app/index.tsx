@@ -1,4 +1,3 @@
-import NoteIcon from '@/components/icons/NoteIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,7 +5,7 @@ import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Pressable, Safe
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
-import { AddIcon, FolderIcon, HomeIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
+import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
@@ -214,6 +213,7 @@ export default function Index() {
   const { folders } = useFolders();
   const router = useRouter();
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
+  const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('files');
   const { theme: currentTheme, toggleTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
@@ -379,9 +379,18 @@ export default function Index() {
           zIndex: 1, // Main content above controls
         }}
       >
-        <View className="flex-row items-center justify-between px-6 pt-4 pb-3">
-          <View className="flex-row items-center">
-            <HomeIcon width={28} height={28} fill={colorPalette.icon.primary} />
+        <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
+          <View className="flex-row items-center gap-1">
+            <TouchableOpacity onPress={() => setActiveToggle('files')}>
+              <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                Files
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveToggle('folders')}>
+              <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                Folders
+              </Text>
+            </TouchableOpacity>
           </View>
           <View className="flex-row items-center">
             <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
@@ -392,64 +401,48 @@ export default function Index() {
             </TouchableOpacity>
           </View>
         </View>
-        <View>
-          <View className="flex-row items-bottom justify-between pl-5 pr-6 pt-4 pb-2">
-            <View className="flex-row items-center justify start gap-1">
-              <NoteIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
-              <Text className={`${classes.text.placeholder} text-base font-semibold pb-1`}>
-                  Recent Songs
-                </Text>
-            </View>
-            <TouchableOpacity onPress={() => router.push('/allSongs')}>
-              <Text className={`${classes.text.header} text-base font-semibold`}>
-                View All
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={recentSongs}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingHorizontal: 18, }}
-            className="pb-2"
-            renderItem={({ item }) => (
-              <TouchableOpacity
+        
+        {activeToggle === 'files' ? (
+          <View className="pt-2 flex-1">
+            <FlatList
+              data={recentSongs}
+              className="pl-4"
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
                 onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-                className={`mr-4 ${classes.bg.surface1} rounded-xl px-4 py-3 w-40 h-28 flex-col justify-end`}
-              >
-                <Text className={`text-lg font-semibold ${classes.text.header} mt-auto`} numberOfLines={2}>
-                  {item.title || 'Untitled'}
-                </Text>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
-            }
-          />
-          <View className="flex-row items-center justify-start gap-1 pl-5 pr-6 pt-6 pb-1">
-            <FolderIcon width={22} height={22} fill={colorPalette.textPlaceholder} />
-            <Text className={`${classes.text.placeholder} text-base font-medium`}>
-              Folders
-            </Text>
+                  className={`pr-6 py-2 flex-row items-center`}
+                >
+                  <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
+                  <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
+              }
+            />
           </View>
-          <FlatList
-            data={folders}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-                className={`pr-6 py-2 flex-row items-center`}
-              >
-                <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
-                <Text className={`${classes.text.header} text-lg font-medium`}>{item.title || 'Untitled Folder'}</Text>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
-            }
-          />
-        </View>
+        ) : (
+          <View className="pt-2 flex-1">
+            <FlatList
+              data={folders}
+              className="pl-4"
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
+                  className={`pr-6 py-2 flex-row items-center`}
+                >
+                  <FolderIcon width={24} height={24} fill={colorPalette.icon.secondary} />
+                  <Text className={`${classes.text.header} text-xl font-medium pl-2`}>{item.title || 'Untitled Folder'}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
+              }
+            />
+          </View>
+        )}
       </Animated.View>
 
       {/* Create Overlay */}
