@@ -8,6 +8,7 @@ export { default as CloseIcon } from './CloseIcon';
 export { default as CopyIcon } from './CopyIcon';
 export { default as DeleteIcon } from './DeleteIcon';
 export { default as DragIcon } from './DragIcon';
+export { default as EmptyIcon } from './EmptyIcon';
 export { default as FolderIcon } from './FolderIcon';
 export { default as GoIcon } from './GoIcon';
 export { default as HomeIcon } from './HomeIcon';

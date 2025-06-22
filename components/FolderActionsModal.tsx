@@ -3,7 +3,7 @@ import { LayoutRectangle, Modal, Pressable, Text, View } from 'react-native';
 import theme from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../utils/theme';
-import { CopyIcon, DeleteIcon } from './icons';
+import { CopyIcon, DeleteIcon, EmptyIcon } from './icons';
 
 interface FolderActionsModalProps {
   visible: boolean;
@@ -11,6 +11,7 @@ interface FolderActionsModalProps {
   mode?: 'full' | 'keyOnly';
   onMakeCopy?: () => void;
   onDelete?: () => void;
+  onEmptyAndDelete?: () => void;
   buttonRef?: React.RefObject<View>;
   buttonLayout?: LayoutRectangle | null;
 }
@@ -21,6 +22,7 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
   mode = 'full',
   onMakeCopy,
   onDelete,
+  onEmptyAndDelete,
   buttonRef,
   buttonLayout,
 }) => {
@@ -41,6 +43,20 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
           <View className="flex-row items-center gap-2">
             <CopyIcon width={24} height={24} fill={colorPalette.icon.primary} />
             <Text className={classes.text.body}>Make a Copy</Text>
+          </View>
+        </Pressable>
+      )}
+      {onEmptyAndDelete && (
+        <Pressable
+          onPress={() => {
+            onEmptyAndDelete();
+            onClose();
+          }}
+          className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+        >
+          <View className="flex-row items-center gap-2">
+            <EmptyIcon width={24} height={24} fill={colorPalette.icon.secondary} />
+            <Text className={classes.text.body}>Empty and Delete</Text>
           </View>
         </Pressable>
       )}
