@@ -12,7 +12,7 @@ export default function FolderDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { folders, updateFolder, deleteFolder, createFolder } = useFolders();
-  const { songs } = useSongs();
+  const { songs, deleteSong, updateSong } = useSongs();
   const { theme: currentTheme } = useTheme();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
@@ -43,6 +43,19 @@ export default function FolderDetails() {
 
   const handleDelete = async () => {
     if (folder) {
+      await deleteFolder(folder.id);
+      router.back();
+    }
+  };
+
+  const handleEmptyAndDelete = async () => {
+    if (folder) {
+      // Remove folder_id from all songs in the folder (set to null)
+      const songsInFolder = songs.filter(song => song.folder_id === folder.id);
+      for (const song of songsInFolder) {
+        await updateSong(song.id, { folder_id: null });
+      }
+      // Then delete the folder
       await deleteFolder(folder.id);
       router.back();
     }
@@ -113,6 +126,7 @@ export default function FolderDetails() {
         onClose={() => setShowActionsModal(false)}
         onMakeCopy={handleMakeCopy}
         onDelete={handleDelete}
+        onEmptyAndDelete={handleEmptyAndDelete}
         buttonLayout={buttonLayout}
       />
     </SafeAreaView>
