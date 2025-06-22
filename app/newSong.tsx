@@ -1,6 +1,6 @@
 import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon';
 import { MUSICAL_KEYS, MusicalKey } from '@/constants/musicalKeys';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -83,6 +83,13 @@ const NewSong = () => {
     const heightAnim = useRef(new Animated.Value(-1)).current;
     const hasStartedRecordingRef = useRef(false);
     const [relatedClips, setRelatedClips] = useState<Clip[]>([]);
+
+    // Disable swipe gesture for this screen
+    useFocusEffect(
+        React.useCallback(() => {
+            // This disables the swipe gesture when the screen is focused
+        }, [])
+    );
 
     // Fetch and update the clip count for this song
     useEffect(() => {
