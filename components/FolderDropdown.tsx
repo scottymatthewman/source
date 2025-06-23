@@ -87,7 +87,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                   onSelectFolder(null);
                   setIsOpen(false);
                 }}
-                className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+                className={`px-2 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
               >
                 <Text className={classes.text.body}>No Folder</Text>
               </Pressable>
@@ -98,7 +98,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                     onSelectFolder(folder.id);
                     setIsOpen(false);
                   }}
-                  className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'} last:border-b-0`}
+                  className={`px-2 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'} last:border-b-0`}
                 >
                   <Text className={classes.text.body}>{folder.title}</Text>
                 </Pressable>

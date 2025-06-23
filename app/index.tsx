@@ -1,3 +1,4 @@
+import SettingsIcon from '@/components/icons/SettingsIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -213,7 +214,7 @@ export default function Index() {
   const { folders } = useFolders();
   const router = useRouter();
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
-  const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('files');
+  const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('folders');
   const { theme: currentTheme, toggleTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
@@ -380,24 +381,29 @@ export default function Index() {
         }}
       >
         <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
-          <View className="flex-row items-center gap-1">
-            <TouchableOpacity onPress={() => setActiveToggle('files')}>
-              <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
-                Files
-              </Text>
+          <View className="flex-row items-center gap-1">  
+            <TouchableOpacity onPress={toggleTheme}>
+              {currentTheme === 'dark' ? 
+                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              }
             </TouchableOpacity>
+          </View>
+          <View className="flex-row items-center gap-1">
             <TouchableOpacity onPress={() => setActiveToggle('folders')}>
               <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
                 Folders
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveToggle('files')}>
+              <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                All Songs
+              </Text>
+            </TouchableOpacity>
           </View>
           <View className="flex-row items-center">
-            <TouchableOpacity onPress={toggleTheme} style={{ marginLeft: 12 }}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
+            <TouchableOpacity>
+              <SettingsIcon width={24} height={24} fill={colorPalette.icon.primary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -418,7 +424,15 @@ export default function Index() {
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <Text className={`${classes.text.placeholder} px-1`}>No recent songs.</Text>
+                <View className="flex-1 items-center justify-center">
+                  <Text className={`${classes.text.placeholder} px-6`}>No recent songs.</Text>
+                  <TouchableOpacity 
+                    onPress={() => router.push({ pathname: '/newSong' })}
+                    className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
+                  > 
+                    <Text className={`${classes.text.body} text-center`}>Create a new song</Text>
+                  </TouchableOpacity>
+                </View>
               }
             />
           </View>
@@ -438,7 +452,15 @@ export default function Index() {
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
+                <View className="flex-1 items-center justify-center"> 
+                  <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
+                  <TouchableOpacity 
+                    onPress={() => router.push({ pathname: '/folder/[id]', params: { id: 'new' } })}
+                    className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
+                  > 
+                    <Text className={`${classes.text.body} text-center`}>Create your first folder</Text>
+                  </TouchableOpacity>
+                </View>
               }
             />
           </View>
