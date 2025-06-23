@@ -38,7 +38,7 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
             onMakeCopy();
             onClose();
           }}
-          className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
         >
           <View className="flex-row items-center gap-2">
             <CopyIcon width={24} height={24} fill={colorPalette.icon.primary} />
@@ -52,7 +52,7 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
             onEmptyAndDelete();
             onClose();
           }}
-          className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
         >
           <View className="flex-row items-center gap-2">
             <EmptyIcon width={24} height={24} fill={colorPalette.icon.secondary} />
@@ -66,7 +66,7 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
             onDelete();
             onClose();
           }}
-          className={`px-2 py-4 ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`py-3 ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
         >
           <View className="flex-row items-center gap-2">
             <DeleteIcon width={24} height={24} fill={colorPalette.icon.destructive} />
@@ -103,9 +103,9 @@ const FolderActionsModal: React.FC<FolderActionsModalProps> = ({
               backgroundColor: colorPalette.bg,
               borderWidth: 1,
               borderColor: colorPalette.border,
-              paddingHorizontal: 8,
+              paddingHorizontal: 12,
               paddingVertical: 8,
-              width: 180,
+              width: 200,
             }}
             onStartShouldSetResponder={() => true}
             onTouchEnd={(e) => e.stopPropagation()}
