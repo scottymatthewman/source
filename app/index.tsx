@@ -7,7 +7,6 @@ import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
 import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
-import SettingsIcon from '../components/icons/SettingsIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
@@ -47,10 +46,10 @@ const FolderItem = ({ folder }: { folder: Folder }) => {
   );
 };
 
-const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolean; onClose: () => void; onStartRecording: () => void }) => {
+const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu' }: { visible: boolean; onClose: () => void; onStartRecording: () => void; initialMode?: 'menu' | 'folder' }) => {
   const router = useRouter();
   const { createFolder } = useFolders();
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(initialMode === 'folder');
   const [folderName, setFolderName] = useState('');
   const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
@@ -58,6 +57,14 @@ const CreateOverlay = ({ visible, onClose, onStartRecording }: { visible: boolea
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const insets = useSafeAreaInsets();
   const { createSong } = useSongs();
+
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (visible) {
+      setIsCreatingFolder(initialMode === 'folder');
+      setFolderName('');
+    }
+  }, [visible, initialMode]);
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
@@ -210,10 +217,11 @@ const styles = StyleSheet.create({
 });
 
 export default function Index() {
-  const { songs } = useSongs();
+  const { songs, createSong } = useSongs();
   const { folders } = useFolders();
   const router = useRouter();
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
+  const [createOverlayMode, setCreateOverlayMode] = useState<'menu' | 'folder'>('menu');
   const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('folders');
   const { theme: currentTheme, toggleTheme } = useTheme();
   const classes = useThemeClasses();
@@ -381,14 +389,6 @@ export default function Index() {
         }}
       >
         <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
-          <View className="flex-row items-center gap-1">  
-            <TouchableOpacity onPress={toggleTheme}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
-            </TouchableOpacity>
-          </View>
           <View className="flex-row items-center gap-1">
             <TouchableOpacity onPress={() => setActiveToggle('folders')}>
               <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
@@ -401,11 +401,19 @@ export default function Index() {
               </Text>
             </TouchableOpacity>
           </View>
-          <View className="flex-row items-center">
-            <TouchableOpacity>
-              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
+          <View className="flex-row items-center gap-1">  
+            <TouchableOpacity onPress={toggleTheme}>
+              {currentTheme === 'dark' ? 
+                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              }
             </TouchableOpacity>
           </View>
+          {/* <View className="flex-row items-center">
+            <TouchableOpacity>
+              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
+            </TouchableOpacity> */}
+          {/* </View> */}
         </View>
         
         {activeToggle === 'files' ? (
@@ -413,6 +421,7 @@ export default function Index() {
             <FlatList
               data={recentSongs}
               className="pl-4"
+              key="songs-list"
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -425,40 +434,51 @@ export default function Index() {
               )}
               ListEmptyComponent={
                 <View className="flex-1 items-center justify-center">
-                  <Text className={`${classes.text.placeholder} px-6`}>No recent songs.</Text>
                   <TouchableOpacity 
-                    onPress={() => router.push({ pathname: '/newSong' })}
+                    onPress={async () => {
+                      const song = await createSong();
+                      if (song && song.id) {
+                        router.push({ pathname: '/newSong', params: { songId: song.id } });
+                      } else {
+                        Alert.alert('Error', 'Failed to create new song');
+                      }
+                    }}
                     className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
                   > 
-                    <Text className={`${classes.text.body} text-center`}>Create a new song</Text>
+                    <Text className={`${classes.text.body} text-center text-lg`}>Write your first song</Text>
                   </TouchableOpacity>
                 </View>
               }
             />
           </View>
         ) : (
-          <View className="pt-2 flex-1">
+          <View className="pt-2 flex-1 w-full">
             <FlatList
               data={folders}
-              className="pl-4"
+              className="px-4"
+              key="folders-list"
+              numColumns={2}
+              columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-                  className={`pr-6 py-2 flex-row items-center`}
+                  className={`p-4 rounded-3xl flex-row items-center`}
+                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface2, alignItems: 'flex-end' }}
                 >
-                  <FolderIcon width={24} height={24} fill={colorPalette.icon.secondary} />
-                  <Text className={`${classes.text.header} text-xl font-medium pl-2`}>{item.title || 'Untitled Folder'}</Text>
+                  <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
                 <View className="flex-1 items-center justify-center"> 
-                  <Text className={`${classes.text.placeholder} px-6`}>No folders yet.</Text>
                   <TouchableOpacity 
-                    onPress={() => router.push({ pathname: '/folder/[id]', params: { id: 'new' } })}
+                    onPress={() => {
+                      setCreateOverlayMode('folder');
+                      setShowCreateOverlay(true);
+                    }}
                     className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
                   > 
-                    <Text className={`${classes.text.body} text-center`}>Create your first folder</Text>
+                    <Text className={`${classes.text.body} text-center text-lg`}>Create your first folder</Text>
                   </TouchableOpacity>
                 </View>
               }
@@ -472,12 +492,16 @@ export default function Index() {
         visible={showCreateOverlay}
         onClose={() => setShowCreateOverlay(false)}
         onStartRecording={handleStartRecording}
+        initialMode={createOverlayMode}
       />
 
       {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
       {!showRecordingControls && (
         <TouchableOpacity 
-          onPress={() => setShowCreateOverlay((v) => !v)}
+          onPress={() => {
+            setCreateOverlayMode('menu');
+            setShowCreateOverlay((v) => !v);
+          }}
           style={{
             position: 'absolute',
             left: CREATE_BUTTON_LEFT,
