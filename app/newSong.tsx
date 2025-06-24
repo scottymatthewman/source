@@ -357,15 +357,15 @@ const NewSong = () => {
                             <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>
                         </TouchableOpacity>
                     </View>
-                    <View className="flex-row justify-between items-center w-full pt-6 pl-6 pr-4 pb-2">
+                    <View className="flex-row items-center w-full pt-6 pl-6 pr-4 pb-2">
                         <TextInput 
-                            className={`text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                            className={`flex-1 text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
                             placeholder="Untitled"
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             value={title} 
                             onChangeText={setTitle}
                         />
-                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
+                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)} className="ml-2">
                             <View style={{ transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] }}>
                                 <DropdownOutlineDownIcon width={28} height={28} fill={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder} />
                             </View>
@@ -489,7 +489,7 @@ const NewSong = () => {
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
                         <TextInput 
-                            className={`text-xl font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            className={`text-xl/6 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             multiline={true}

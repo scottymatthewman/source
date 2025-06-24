@@ -590,7 +590,7 @@ const Details = () => {
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
                         <TextInput 
-                            className={`text-xl font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            className={`text-xl/6 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             multiline={true}
