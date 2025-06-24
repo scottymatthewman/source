@@ -1,4 +1,3 @@
-import SettingsIcon from '@/components/icons/SettingsIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -8,6 +7,7 @@ import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
 import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
+import SettingsIcon from '../components/icons/SettingsIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
@@ -403,7 +403,7 @@ export default function Index() {
           </View>
           <View className="flex-row items-center">
             <TouchableOpacity>
-              <SettingsIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
             </TouchableOpacity>
           </View>
         </View>
