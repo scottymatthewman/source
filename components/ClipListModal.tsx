@@ -1,10 +1,10 @@
 import { useAudioPlayer } from 'expo-audio';
-import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Modal, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../constants/theme';
 import { Clip } from '../context/clipContext';
-import { useColorPalette } from '../context/colorContext';
 import { useTheme } from '../context/ThemeContext';
+import { useThemeClasses } from '../utils/theme';
 import { KebabIcon } from './icons';
 
 interface ClipListModalProps {
@@ -24,12 +24,27 @@ export function ClipListModal({
     clips = [],
     onDeleteClip
 }: ClipListModalProps) {
-    const { colorPalette } = useColorPalette();
     const { theme: currentTheme } = useTheme();
-    const borderColor = currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border;
+    const classes = useThemeClasses();
+    const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
     const [playingClipId, setPlayingClipId] = useState<string | null>(null);
     const [currentClipUri, setCurrentClipUri] = useState<string | null>(null);
     const player = useAudioPlayer(currentClipUri);
+
+    // Animation values
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(300)).current;
+
+    // Debug logging
+    console.log('ClipListModal theme debug:', {
+        currentTheme,
+        textHeaderClass: classes.text.header,
+        textBodyClass: classes.text.body,
+        bgMainClass: classes.bg.main,
+        bgSurface1Class: classes.bg.surface1,
+        colorPaletteBg: colorPalette.bg,
+        colorPaletteText: colorPalette.text
+    });
 
     // Cleanup effect: stop playback when modal closes or unmounts
     useEffect(() => {
@@ -55,6 +70,37 @@ export function ClipListModal({
             }
         };
     }, [visible, player]);
+
+    // Animate when modal visibility changes
+    useEffect(() => {
+        if (visible) {
+            Animated.parallel([
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(slideAnim, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        } else {
+            Animated.parallel([
+                Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(slideAnim, {
+                    toValue: 300,
+                    duration: 200,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        }
+    }, [visible, fadeAnim, slideAnim]);
 
     const handlePlayClip = async (clip: Clip) => {
         try {
@@ -121,78 +167,117 @@ export function ClipListModal({
     return (
         <Modal
             visible={visible}
-            animationType="slide"
-            transparent={true}
+            transparent
             onRequestClose={handleModalClose}
         >
-            <View className="flex-1 justify-end">
-                <View 
-                    className="rounded-t-3xl px-4 pt-4 mx-4 mb-8"
-                    style={{ backgroundColor: colorPalette.background, borderRadius: 24, borderWidth: 1 }}
+            <Animated.View
+                className="flex-1 bg-black/40"
+                style={{ 
+                    zIndex: 1,
+                    opacity: fadeAnim,
+                }}
+            >
+                <Pressable
+                    className="flex-1"
+                    onPress={onClose}
+                />
+                <Animated.View 
+                    className="flex-1 justify-end"
+                    style={{ 
+                        zIndex: 2,
+                        transform: [{ translateY: slideAnim }],
+                    }}
                 >
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text 
-                            className="text-2xl font-bold"
-                            style={{ color: colorPalette.text.primary }}
-                        >
-                            {title}
-                        </Text>
-                        <TouchableOpacity onPress={onClose}>
+                    <View 
+                        className={`rounded-t-3xl px-6 pt-6 pb-8`}
+                        style={{ 
+                            borderRadius: 24, 
+                            overflow: 'hidden',
+                            minHeight: '88%',
+                            backgroundColor: colorPalette.surface1,
+                        }}
+                        onStartShouldSetResponder={() => true}
+                        onTouchEnd={(e) => e.stopPropagation()}
+                    >
+                        <View className="flex-row justify-between items-center mb-4">
                             <Text 
-                                className="text-lg"
-                                style={{ color: colorPalette.text.primary }}
+                                className={`text-2xl font-bold ${classes.text.header}`}
+                                style={{ color: colorPalette.textHeader }}
                             >
-                                Close
+                                {title}
                             </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View>
-                        <FlatList
-                            data={clips}
-                            keyExtractor={item => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <View 
-                                    className="py-3 px-4 border-b flex-row items-center justify-between"
-                                    style={{ borderColor }}
+                            <TouchableOpacity onPress={onClose}>
+                                <Text 
+                                    className={`text-lg ${classes.text.body}`}
+                                    style={{ color: colorPalette.text }}
                                 >
-                                    <View className="flex-1">
-                                        <Text 
-                                            className="text-lg"
-                                            style={{ color: colorPalette.text.primary }}
-                                        >
-                                            {item.title || 'Untitled'}
-                                        </Text>
-                                        <Text 
-                                            className="text-sm"
-                                            style={{ color: colorPalette.text.secondary }}
-                                        >
-                                            {item.duration ? `${Math.floor(item.duration / 60)}:${(item.duration % 60).toString().padStart(2, '0')}` : '0:00'}
-                                        </Text>
-                                    </View>
-                                    <View className="flex-row items-center gap-4">
-                                        <TouchableOpacity 
-                                            onPress={() => playingClipId === item.id ? handleStopClip() : handlePlayClip(item)}
-                                            className="px-3 py-2 rounded-lg"
-                                            style={{ backgroundColor: colorPalette.surface1 }}
-                                        >
-                                            <Text style={{ color: colorPalette.text.primary }}>
-                                                {playingClipId === item.id ? 'Stop' : 'Play'}
+                                    Close
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <FlatList
+                                data={clips}
+                                keyExtractor={item => item.id.toString()}
+                                style={{ overflow: 'hidden' }}
+                                contentContainerStyle={{ overflow: 'hidden' }}
+                                showsVerticalScrollIndicator={true}
+                                renderItem={({ item, index }) => (
+                                    <View 
+                                        className={`py-3 px-4 border-b flex-row items-center justify-between ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
+                                        style={{ 
+                                            borderBottomWidth: index === clips.length - 1 ? 0 : 1
+                                        }}
+                                    >
+                                        <View className="flex-1">
+                                            <Text 
+                                                className={`text-lg ${classes.text.body}`}
+                                                style={{ color: colorPalette.text }}
+                                            >
+                                                {item.title || 'Untitled'}
                                             </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity 
-                                            onPress={() => handleDeleteClip(item.id)}
-                                            className="p-2"
-                                        >
-                                            <KebabIcon width={20} height={20} fill={colorPalette.icon.primary} />
-                                        </TouchableOpacity>
+                                            <Text 
+                                                className={`text-sm ${classes.text.placeholder}`}
+                                                style={{ color: colorPalette.textPlaceholder }}
+                                            >
+                                                {item.duration ? `${Math.floor(item.duration / 60)}:${(item.duration % 60).toString().padStart(2, '0')}` : '0:00'}
+                                            </Text>
+                                        </View>
+                                        <View className="flex-row items-center gap-4">
+                                            <TouchableOpacity 
+                                                onPress={() => playingClipId === item.id ? handleStopClip() : handlePlayClip(item)}
+                                                className={`px-3 py-2 rounded-lg ${classes.bg.surface1}`}
+                                                style={{ backgroundColor: colorPalette.surface1 }}
+                                            >
+                                                <Text 
+                                                    className={classes.text.body}
+                                                    style={{ color: colorPalette.text }}
+                                                >
+                                                    {playingClipId === item.id ? 'Stop' : 'Play'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity 
+                                                onPress={() => handleDeleteClip(item.id)}
+                                                className="p-2"
+                                            >
+                                                <KebabIcon width={20} height={20} fill={colorPalette.icon.primary} />
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
-                                </View>
-                            )}
-                            ListEmptyComponent={<Text>No clips found.</Text>}
-                        />
+                                )}
+                                ListEmptyComponent={
+                                    <Text 
+                                        className={classes.text.placeholder}
+                                        style={{ color: colorPalette.textPlaceholder }}
+                                    >
+                                        No clips found.
+                                    </Text>
+                                }
+                            />
+                        </View>
                     </View>
-                </View>
-            </View>
+                </Animated.View>
+            </Animated.View>
         </Modal>
     );
 } 
