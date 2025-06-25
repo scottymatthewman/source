@@ -68,8 +68,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
               style={{
                 position: 'absolute',
                 top: buttonLayout.y + buttonLayout.height + 10,
-                left: 12,
-                right: 12,
+                left: 48,
                 zIndex: 2,
                 borderRadius: 16,
                 overflow: 'hidden',
@@ -78,6 +77,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                 borderColor: colorPalette.border,
                 paddingHorizontal: 16,
                 paddingVertical: 8,
+                width: 260,
               }}
               onStartShouldSetResponder={() => true}
               onTouchEnd={(e) => e.stopPropagation()}
