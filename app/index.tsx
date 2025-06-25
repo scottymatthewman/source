@@ -129,6 +129,7 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
           className={`${classes.bg.main} rounded-3xl overflow-hidden`}
           style={[
             { 
+              backgroundColor: colorPalette.surface1,
               elevation: 5, 
               shadowColor: '#000', 
               shadowOffset: { width: 0, height: 2 }, 
@@ -175,7 +176,7 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
               </TouchableOpacity>
             </>
           ) : (
-            <View className={`px-4 pt-5 pb-3 ${currentTheme === 'dark' ? theme.colors.dark.surface2 : theme.colors.light.surface1} rounded-lg`}>
+            <View className={`px-4 pt-5 pb-3 ${currentTheme === 'dark' ? theme.colors.dark.surface2 : theme.colors.light.surface2} rounded-lg`}>
               <View className="flex-row gap-0 items-left">
                 <FolderIcon width={28} height={28} fill={colorPalette.textPlaceholder} />
                 <TextInput 
@@ -425,11 +426,47 @@ export default function Index() {
           {/* </View> */}
         </View>
         
-        {activeToggle === 'files' ? (
+        {activeToggle === 'folders' ? (
+          <View className="pt-2 flex-1 w-full">
+          <FlatList
+            data={folders}
+            className="px-4"
+            key="folders-list"
+            numColumns={2}
+            columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
+                className={`p-4 rounded-3xl flex-row items-center`}
+                style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
+              >
+                <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View className="flex-1 items-center justify-center"> 
+                <TouchableOpacity 
+                  onPress={() => {
+                    setCreateOverlayMode('folder');
+                    setShowCreateOverlay(true);
+                  }}
+                  className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
+                  style={{
+                    backgroundColor: colorPalette.surface2,
+                  }}
+                > 
+                  <Text className={`${classes.text.body} text-center text-lg font-medium`}>Create your first folder</Text>
+                </TouchableOpacity>
+              </View>
+            }
+          />
+        </View>
+        ) : (
           <View className="pt-2 flex-1">
             <FlatList
               data={recentSongs}
-              className="pl-4"
+              className="px-4"
               key="songs-list"
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
@@ -452,42 +489,12 @@ export default function Index() {
                         Alert.alert('Error', 'Failed to create new song');
                       }
                     }}
-                    className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
-                  > 
-                    <Text className={`${classes.text.body} text-center text-lg`}>Write your first song</Text>
-                  </TouchableOpacity>
-                </View>
-              }
-            />
-          </View>
-        ) : (
-          <View className="pt-2 flex-1 w-full">
-            <FlatList
-              data={folders}
-              className="px-4"
-              key="folders-list"
-              numColumns={2}
-              columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-                  className={`p-4 rounded-3xl flex-row items-center`}
-                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
-                >
-                  <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={
-                <View className="flex-1 items-center justify-center"> 
-                  <TouchableOpacity 
-                    onPress={() => {
-                      setCreateOverlayMode('folder');
-                      setShowCreateOverlay(true);
+                    className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
+                    style={{
+                      backgroundColor: colorPalette.surface2,
                     }}
-                    className={`${classes.bg.surface2} rounded-lg px-4 py-2 mt-4 w-200 items-center justify-center`}
                   > 
-                    <Text className={`${classes.text.body} text-center text-lg`}>Create your first folder</Text>
+                    <Text className={`${classes.text.body} text-center text-lg font-medium`}>Write your first song</Text>
                   </TouchableOpacity>
                 </View>
               }
