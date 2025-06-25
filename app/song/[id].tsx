@@ -10,6 +10,7 @@ import SaveClipModal from '../../components/audio/SaveClipModal';
 import { ClipListModal } from '../../components/ClipListModal';
 import { FolderDropdown } from '../../components/FolderDropdown';
 import { ChevronLeftIcon, KebabIcon, MicIcon } from '../../components/icons';
+import HideKeyboardIcon from '../../components/icons/HideKeyboardIcon';
 import SongActionsModal from '../../components/SongActionsModal';
 import { MUSICAL_KEYS, MusicalKey } from '../../constants/musicalKeys';
 import theme from '../../constants/theme';
@@ -465,6 +466,7 @@ const Details = () => {
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             value={title}
                             onChangeText={setTitle}
+                            inputAccessoryViewID="titleInput"
                         />
                         <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)} className="ml-2">
                             <View style={{ transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] }}>
@@ -636,11 +638,9 @@ const Details = () => {
 
             <InputAccessoryView nativeID="contentInput">
                 <View style={{
-                    backgroundColor: colorPalette.bg,
-                    borderTopWidth: 1,
-                    borderTopColor: colorPalette.border,
                     paddingHorizontal: 16,
-                    paddingVertical: 8,
+                    paddingBottom: 8,
+                    paddingTop: 4,
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
                     alignItems: 'center',
@@ -648,19 +648,40 @@ const Details = () => {
                     <TouchableOpacity
                         onPress={() => Keyboard.dismiss()}
                         style={{
-                            paddingHorizontal: 16,
-                            paddingVertical: 8,
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
                             borderRadius: 8,
-                            backgroundColor: colorPalette.surface2,
+                            backgroundColor: colorPalette.surface1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     >
-                        <Text style={{
-                            color: colorPalette.text,
-                            fontSize: 16,
-                            fontWeight: '600',
-                        }}>
-                            Hide
-                        </Text>
+                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
+
+            <InputAccessoryView nativeID="titleInput">
+                <View style={{
+                    paddingHorizontal: 16,
+                    paddingBottom: 8,
+                    paddingTop: 4,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
                     </TouchableOpacity>
                 </View>
             </InputAccessoryView>
