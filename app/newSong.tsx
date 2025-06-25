@@ -3,7 +3,7 @@ import { MUSICAL_KEYS, MusicalKey } from '@/constants/musicalKeys';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Keyboard, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, InputAccessoryView, Keyboard, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
@@ -499,6 +499,7 @@ const NewSong = () => {
                             textAlignVertical="top"
                             value={content}
                             onChangeText={setContent}
+                            inputAccessoryViewID="contentInput"
                         />
                     </ScrollView>
                 </Animated.View>
@@ -525,6 +526,37 @@ const NewSong = () => {
                 clips={relatedClips}
                 onDeleteClip={handleDeleteClip}
             />
+
+            <InputAccessoryView nativeID="contentInput">
+                <View style={{
+                    backgroundColor: colorPalette.bg,
+                    borderTopWidth: 1,
+                    borderTopColor: colorPalette.border,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface2,
+                        }}
+                    >
+                        <Text style={{
+                            color: colorPalette.text,
+                            fontSize: 16,
+                            fontWeight: '600',
+                        }}>
+                            Hide
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
         </>
     );
 };
