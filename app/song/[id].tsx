@@ -473,7 +473,7 @@ const Details = () => {
                         </TouchableOpacity>
                     </View>
                     {isDropdownOpen && (
-                        <View className={`mt-2 pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
+                        <View className={`mt-2 pt-3 border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
                             <View className="px-6 pb-3 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
                                 <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
                                 <View className="flex-row gap-4">
@@ -483,7 +483,7 @@ const Details = () => {
                                     </TouchableOpacity>
                                     <TouchableOpacity 
                                         className="flex-row items-center gap-1 h-9 pl-1 pr-2.5 rounded-lg" 
-                                        style={{ backgroundColor: colorPalette.surface1 }}
+                                        style={{ backgroundColor: colorPalette.surface2 }}
                                         onPress={() => setIsClipsModalVisible(true)}
                                     >
                                         <ClipIcon width={28} height={28} fill={colorPalette.icon.primary} />
@@ -496,7 +496,7 @@ const Details = () => {
                                     <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>
                                     <TouchableOpacity
                                         className="flex-row items-center justify-center gap-1 h-9 rounded-lg w-12"
-                                        style={{ backgroundColor: colorPalette.surface1 }}
+                                        style={{ backgroundColor: colorPalette.surface2 }}
                                         onPress={() => setShowKeyPicker((v) => !v)}
                                     >
                                         <Text className={classes.textSize('text-lg font-medium')}>
@@ -547,7 +547,7 @@ const Details = () => {
                         </View>
                     )}
                     {showKeyPicker && (
-                        <View className={`px-6 py-2 ${currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'}`}>
+                        <View className={`px-6 py-2 ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
                             <RNScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -566,8 +566,8 @@ const Details = () => {
                                                     ? 'bg-dark-surface-inverted'
                                                     : 'bg-light-surface-inverted'
                                                 : currentTheme === 'dark'
-                                                ? 'bg-dark-surface1'
-                                                : 'bg-light-surface1'
+                                                ? 'bg-dark-surface2'
+                                                : 'bg-light-surface2'
                                         }`}
                                     >
                                         <Text
