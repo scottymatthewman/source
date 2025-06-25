@@ -135,11 +135,18 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
               shadowOpacity: 0.25, 
               shadowRadius: 3.84,
               position: 'absolute',
-              left: 20,
-              right: 20,
-              width: 240,
               bottom: isCreatingFolder ? keyboardHeight + 20 : 108,
-              alignSelf: 'flex-start'
+              // Expand to full width when creating folder, otherwise use fixed width
+              ...(isCreatingFolder ? {
+                left: 20,
+                right: 20,
+                width: undefined,
+              } : {
+                left: 20,
+                right: 20,
+                width: 240,
+                alignSelf: 'flex-start'
+              })
             }
           ]}
         >
