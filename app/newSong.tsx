@@ -3,7 +3,7 @@ import { MUSICAL_KEYS, MusicalKey } from '@/constants/musicalKeys';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, Keyboard, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
@@ -376,7 +376,10 @@ const NewSong = () => {
                             <View className="px-6 pb-3 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
                                 <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
                                 <View className="flex-row gap-4">
-                                    <TouchableOpacity className="flex-row items-center gap-1 h-9 pl-1 pr-2 rounded-lg" onPress={() => setShowRecorder(true)}>
+                                    <TouchableOpacity className="flex-row items-center gap-1 h-9 pl-1 pr-2 rounded-lg" onPress={() => {
+                                        Keyboard.dismiss();
+                                        setShowRecorder(true);
+                                    }}>
                                         <MicIcon width={24} height={24} fill={colorPalette.icon.primary} />
                                         <Text className={classes.textSize('text-lg font-medium')}>Record</Text>
                                     </TouchableOpacity>
