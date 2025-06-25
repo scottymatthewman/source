@@ -3,7 +3,7 @@ import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, findNodeHandle, Keyboard, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import { Alert, Animated, Dimensions, findNodeHandle, InputAccessoryView, Keyboard, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../../components/audio/RecordingControls';
 import SaveClipModal from '../../components/audio/SaveClipModal';
@@ -593,6 +593,9 @@ const Details = () => {
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
                         <TextInput 
+                            style={{
+                                height: '100%',
+                            }}
                             className={`text-xl/6 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
@@ -600,6 +603,7 @@ const Details = () => {
                             textAlignVertical="top"
                             value={content}
                             onChangeText={setContent}
+                            inputAccessoryViewID="contentInput"
                         />
                     </ScrollView>
                 </Animated.View>
@@ -629,6 +633,37 @@ const Details = () => {
                 clips={relatedClips}
                 onDeleteClip={handleDeleteClip}
             />
+
+            <InputAccessoryView nativeID="contentInput">
+                <View style={{
+                    backgroundColor: colorPalette.bg,
+                    borderTopWidth: 1,
+                    borderTopColor: colorPalette.border,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface2,
+                        }}
+                    >
+                        <Text style={{
+                            color: colorPalette.text,
+                            fontSize: 16,
+                            fontWeight: '600',
+                        }}>
+                            Hide
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
         </>
     );
 };
