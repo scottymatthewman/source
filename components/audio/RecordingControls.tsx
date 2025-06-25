@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import tinycolor from 'tinycolor2';
 import theme from '../../constants/theme';
-import { useTheme } from '../../context/ThemeContext';
 import AddIcon from '../icons/AddIcon';
 import GoArrowRightIcon from '../icons/goArrowRightIcon';
 import PauseIcon from '../icons/PauseIcon';
@@ -36,8 +35,8 @@ export function RecordingControls({
   onCancelRecording,
   showControls,
 }: RecordingControlsProps) {
-  const { theme: currentTheme } = useTheme();
-  const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+  // Always use dark theme colors for recording controls
+  const colorPalette = theme.colors.dark;
 
   // Don't render if not recording or playing
   if (!showControls) {
@@ -53,7 +52,7 @@ export function RecordingControls({
         right: 0,
         bottom: 0,
         height: 138, // RECORDING_PANEL_HEIGHT + 18
-        backgroundColor: colorPalette.button.bgInverted,
+        backgroundColor: colorPalette.surface2,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -70,10 +69,10 @@ export function RecordingControls({
       <TouchableOpacity
         onPress={onCancelRecording}
         style={{
-          backgroundColor: tinycolor(colorPalette.bg).setAlpha(0.2).toRgbString(),
+          backgroundColor: tinycolor(theme.colors.light.bg).setAlpha(0.2).toRgbString(),
           borderRadius: 9999,
           borderWidth: 1,
-          borderColor: tinycolor(colorPalette.border).setAlpha(0.6).toRgbString(),
+          borderColor: tinycolor(theme.colors.light.border).setAlpha(0.6).toRgbString(),
           width: 44,
           height: 44,
           alignItems: 'center',
@@ -81,7 +80,7 @@ export function RecordingControls({
           transform: [{ rotate: '45deg' }],
         }}
       >
-        <AddIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+        <AddIcon width={24} height={24} fill={colorPalette.icon.primary} />
       </TouchableOpacity>
 
         {/* Play/Pause button - only show when not recording */}
@@ -89,10 +88,10 @@ export function RecordingControls({
           <TouchableOpacity
             onPress={isPlaying ? onPauseRecording : onPlayRecording}
             style={{
-              backgroundColor: tinycolor(colorPalette.bg).setAlpha(0.2).toRgbString(),
+              backgroundColor: tinycolor(theme.colors.light.bg).setAlpha(0.2).toRgbString(),
               borderRadius: 9999,
               borderWidth: 1,
-              borderColor: tinycolor(colorPalette.border).setAlpha(0.6).toRgbString(),
+              borderColor: tinycolor(theme.colors.light.border).setAlpha(0.6).toRgbString(),
               width: 44,
               height: 44,
               alignItems: 'center',
@@ -100,9 +99,9 @@ export function RecordingControls({
             }}
           >
             {isPlaying ? (
-              <PauseIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+              <PauseIcon width={24} height={24} fill={colorPalette.icon.primary} />
             ) : (
-              <PlayIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+              <PlayIcon width={24} height={24} fill={colorPalette.icon.primary} />
             )}
           </TouchableOpacity>
         )}
@@ -114,27 +113,27 @@ export function RecordingControls({
             height: 56,
             width: '100%',
             marginHorizontal: 16,
-            backgroundColor: colorPalette.button.bgInverted,
+            backgroundColor: colorPalette.surface2,
             borderRadius: 40,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           {/* TODO: Add waveform visualization here */}
-          <Text style={{ color: colorPalette.textInverted }}>
+          <Text style={{ color: colorPalette.text }}>
             {isRecording ? 'Recording...' : isPlaying ? 'Playing...' : 'Paused'}
           </Text>
-          <Text style={{ color: colorPalette.textInverted, fontSize: 12 }}>{duration}s</Text>
+          <Text style={{ color: colorPalette.text, fontSize: 12 }}>{duration}s</Text>
       </View>
       
       {/* Stop/Next button */}
       <TouchableOpacity
         onPress={isRecording ? onStopRecording : onSaveRecording}
         style={{
-          backgroundColor: tinycolor(colorPalette.bg).setAlpha(0.2).toRgbString(),
+          backgroundColor: tinycolor(theme.colors.light.bg).setAlpha(0.2).toRgbString(),
           borderRadius: 9999,
           borderWidth: 1,
-          borderColor: tinycolor(colorPalette.border).setAlpha(0.6).toRgbString(),
+          borderColor: tinycolor(theme.colors.light.border).setAlpha(0.6).toRgbString(),
           width: 44,
           height: 44,
           alignItems: 'center',
@@ -142,9 +141,9 @@ export function RecordingControls({
         }}
       >
         {isRecording ? (
-          <StopIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+          <StopIcon width={24} height={24} fill={colorPalette.icon.primary} />
         ) : (
-          <GoArrowRightIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+          <GoArrowRightIcon width={24} height={24} fill={colorPalette.icon.primary} />
         )}
       </TouchableOpacity>
     </View>
