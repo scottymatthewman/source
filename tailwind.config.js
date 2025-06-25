@@ -7,17 +7,17 @@ module.exports = {
     extend: {
       colors: {
         'dark': {
-          'bg': '#1A1A1A',
-          'border': '#333333',
-          'surface-1': '#0B0B0B',
-          'surface-2': '#232323',
+          'bg': '#131211',
+          'border': '#1D1C1C',
+          'surface1': '#1D1C1C',
+          'surface2': '#262524',
           'surface-inverted': '#FAFAFA',
           'highlight-caption': '#3B3B3B',
           'highlight-annotation': '#2A2A2A',
-          'text-header': '#FFFFFF',
-          'text-body': '#FAFAFA',
+          'text-header': '#FAFAFA',
+          'text-body': '#F2F1EF',
           'text-inverted': '#1A1A1A',
-          'text-placeholder': '#999999',
+          'text-placeholder': '#5B5B5B',
           'text-destructive': '#FF8080',
           'custom-yellow': '#FFE78F',
           'button': {
@@ -27,7 +27,7 @@ module.exports = {
             'border-destructive': '#FF8080',
           },
           'icon': {
-            'primary': '#FFFFFF',
+            'primary': '#FAFAFA',
             'secondary': '#8C8C8C',
             'tertiary': '#484848',
             'inactive': '#EEEEEE',
@@ -35,10 +35,10 @@ module.exports = {
           },
         },
         'light': {
-          'bg': '#FCFBFA',
-          'border': '#EEEEEE',
-          'surface-1': '#F3F0EE',
-          'surface-2': '#D7D0CB',
+          'bg': '#FAFAFA',
+          'border': '#E8E6E4',
+          'surface1': '#EFEFEE',
+          'surface2': '#E8E6E4',
           'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
           'highlight-annotation': '#E3E3E3',

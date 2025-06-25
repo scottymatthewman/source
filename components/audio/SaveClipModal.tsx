@@ -86,7 +86,7 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'index', curren
       onRequestClose={handleClose}
     >
       <Pressable
-        className="flex-1 bg-black/70 justify-end items-start"
+        className="flex-1 bg-black/40 justify-end items-start"
         style={{
           paddingLeft: 22,
           paddingRight: 22,
@@ -99,8 +99,9 @@ const SaveClipModal = ({ visible, onClose, onSave, songs, mode = 'index', curren
           style={{ width: '100%' }}
         >
           <View
-            className={`${classes.bg.main} rounded-2xl overflow-hidden w-full`}
+            className={`rounded-2xl overflow-hidden w-full`}
             style={{
+              backgroundColor: colorPalette.surface1,
               elevation: 5,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },

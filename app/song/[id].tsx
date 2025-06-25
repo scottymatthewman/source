@@ -3,14 +3,14 @@ import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, findNodeHandle, InputAccessoryView, Keyboard, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../../components/audio/RecordingControls';
 import SaveClipModal from '../../components/audio/SaveClipModal';
 import { ClipListModal } from '../../components/ClipListModal';
-import DomTest from '../../components/DomTest';
 import { FolderDropdown } from '../../components/FolderDropdown';
 import { ChevronLeftIcon, KebabIcon, MicIcon } from '../../components/icons';
+import HideKeyboardIcon from '../../components/icons/HideKeyboardIcon';
 import SongActionsModal from '../../components/SongActionsModal';
 import { MUSICAL_KEYS, MusicalKey } from '../../constants/musicalKeys';
 import theme from '../../constants/theme';
@@ -33,8 +33,11 @@ const Details = () => {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [selectedKey, setSelectedKey] = useState<MusicalKey | null>(null);
+    const [bpm, setBpm] = useState<number | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showKeyPicker, setShowKeyPicker] = useState(false);
+    const [kebabButtonLayout, setKebabButtonLayout] = useState<LayoutRectangle | null>(null);
+    const kebabButtonRef = useRef<View>(null);
     const db = useSQLiteContext();
     const [clipCount, setClipCount] = useState(0);
     const [showRecorder, setShowRecorder] = useState(false);
@@ -79,6 +82,7 @@ const Details = () => {
             setContent(song.content || '');
             setSelectedFolderId(song.folder_id);
             setSelectedKey(song.key);
+            setBpm(song.bpm);
             setHasUnsavedChanges(false);
         }
     }, [song]);
@@ -89,10 +93,11 @@ const Details = () => {
                 title !== (song.title || '') || 
                 content !== (song.content || '') ||
                 selectedFolderId !== song.folder_id ||
-                selectedKey !== song.key;
+                selectedKey !== song.key ||
+                bpm !== song.bpm;
             setHasUnsavedChanges(hasChanges);
         }
-    }, [title, content, selectedFolderId, selectedKey, song]);
+    }, [title, content, selectedFolderId, selectedKey, bpm, song]);
 
     useEffect(() => {
         if (!song) return;
@@ -174,15 +179,20 @@ const Details = () => {
 
     const handleSave = async () => {
         if (song) {
+            console.log('Save pressed', { title, content, selectedFolderId, selectedKey, bpm });
             await updateSong(song.id, {
                 title,
                 content,
                 date_modified: new Date(),
                 folder_id: selectedFolderId,
-                key: selectedKey
+                key: selectedKey,
+                bpm: bpm !== null && !isNaN(bpm) ? bpm : null,
             });
             setHasUnsavedChanges(false);
-            router.back();
+            // Wait for the songs to be refreshed, then navigate back
+            setTimeout(() => {
+                router.back();
+            }, 200);
         }
     };
 
@@ -363,14 +373,26 @@ const Details = () => {
 
     // Robust cleanup logic for closing the recording controls
     const handleCloseRecordingControls = async () => {
-        setShowRecorder(false);
         if (isRecording) {
             await stopRecording();
         }
         if (isPlaying) {
-            await stopPlayback();
+            stopPlayback();
         }
-        await cleanupRecording();
+        setShowRecorder(false);
+        hasStartedRecordingRef.current = false;
+    };
+
+    const openActionsModal = () => {
+        if (kebabButtonRef.current) {
+            const handle = findNodeHandle(kebabButtonRef.current);
+            if (handle) {
+                UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
+                    setKebabButtonLayout({ x: pageX, y: pageY, width, height });
+                    setShowActions(true);
+                });
+            }
+        }
     };
 
     if (!song) {
@@ -427,7 +449,7 @@ const Details = () => {
                                 selectedFolderId={selectedFolderId}
                                 onSelectFolder={setSelectedFolderId}
                             />
-                            <TouchableOpacity onPress={() => setShowActions(true)}>
+                            <TouchableOpacity ref={kebabButtonRef} onPress={openActionsModal}>
                                 <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />
                             </TouchableOpacity>
                         </View>
@@ -435,32 +457,38 @@ const Details = () => {
                             <Text className={`${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'} text-[17px] font-semibold`}>Save</Text>
                         </TouchableOpacity>
                     </View>
-                    <View className="flex-row justify-between items-center pt-4 pl-6 pr-4 pb-1">
-                        <TextInput 
-                            className={`text-3xl font-semibold ${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'}`}
+                    <View className="flex-row items-center w-full pt-6 pl-6 pr-4 pb-2">
+                        <TextInput
+                            className={`flex-1 text-3xl font-semibold ${
+                                currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'
+                            }`}
                             placeholder="Untitled"
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
-                            value={title} 
+                            value={title}
                             onChangeText={setTitle}
+                            inputAccessoryViewID="titleInput"
                         />
-                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
+                        <TouchableOpacity onPress={() => setIsDropdownOpen(!isDropdownOpen)} className="ml-2">
                             <View style={{ transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] }}>
                                 <DropdownOutlineDownIcon width={28} height={28} fill={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder} />
                             </View>
                         </TouchableOpacity>
                     </View>
                     {isDropdownOpen && (
-                        <View className={`mt-2 pt-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface1'} border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
+                        <View className={`mt-2 pt-3 border-y ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}>
                             <View className="px-6 pb-3 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
                                 <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
                                 <View className="flex-row gap-4">
-                                    <TouchableOpacity className="flex-row items-center gap-1 h-9 pl-1 pr-2 rounded-lg" onPress={() => setShowRecorder(true)}>
+                                    <TouchableOpacity className="flex-row items-center gap-1 h-9 pl-1 pr-2 rounded-lg" onPress={() => {
+                                        Keyboard.dismiss();
+                                        setShowRecorder(true);
+                                    }}>
                                         <MicIcon width={24} height={24} fill={colorPalette.icon.primary} />
                                         <Text className={classes.textSize('text-lg font-medium')}>Record</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity 
                                         className="flex-row items-center gap-1 h-9 pl-1 pr-2.5 rounded-lg" 
-                                        style={{ backgroundColor: colorPalette.surface1 }}
+                                        style={{ backgroundColor: colorPalette.surface2 }}
                                         onPress={() => setIsClipsModalVisible(true)}
                                     >
                                         <ClipIcon width={28} height={28} fill={colorPalette.icon.primary} />
@@ -469,11 +497,11 @@ const Details = () => {
                                 </View>
                             </View>
                             <View className="px-6 flex-row justify-stretch items-center gap-4">
-                                <View className="flex-row py-3 grow items-center justify-between">
-                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>  
+                                <View className="flex-1 flex-row py-3 items-center justify-between">
+                                    <Text className={classes.textSize('text-lg', 'placeholder')}>Key</Text>
                                     <TouchableOpacity
                                         className="flex-row items-center justify-center gap-1 h-9 rounded-lg w-12"
-                                        style={{ backgroundColor: colorPalette.surface1 }}
+                                        style={{ backgroundColor: colorPalette.surface2 }}
                                         onPress={() => setShowKeyPicker((v) => !v)}
                                     >
                                         <Text className={classes.textSize('text-lg font-medium')}>
@@ -481,19 +509,50 @@ const Details = () => {
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
-                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}></View>
-                                <View className="flex-row py-4 grow items-center justify-between">
+                                <View className="w-[1px] h-full" style={{ backgroundColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }} />
+                                <View className="flex-1 flex-row py-4 items-center justify-between">
                                     <Text className={currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder'}>Tempo</Text>
-                                    <View className="flex-row gap-1">
-                                        <Text className={classes.textSize('text-lg')}>120</Text>  
-                                        <Text className={classes.textSize('text-lg', 'placeholder')}>BPM</Text>  
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                        <TextInput
+                                            className={classes.textSize('text-lg')}
+                                            placeholder="-"
+                                            placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
+                                            value={bpm?.toString() || ''}
+                                            onChangeText={(text) => {
+                                                const sanitized = text.replace(/[^0-9]/g, '').slice(0, 3);
+                                                setBpm(sanitized ? parseInt(sanitized) : null);
+                                            }}
+                                            keyboardType="number-pad"
+                                            maxLength={3}
+                                            style={{
+                                                color: bpm ? (currentTheme === 'dark' ? theme.colors.dark.text : theme.colors.light.text) : (currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder),
+                                                width: 80,
+                                                height: 24,
+                                                textAlign: 'right',
+                                                paddingVertical: 0,
+                                                paddingHorizontal: 0,
+                                                includeFontPadding: false,
+                                                fontSize: 16,
+                                                lineHeight: 20,
+                                            }}
+                                        />
+                                        <Text
+                                            className={classes.textSize('text-lg', 'placeholder')}
+                                            style={{
+                                                height: 20,
+                                                lineHeight: 20,
+                                                textAlignVertical: 'center',
+                                            }}
+                                        >
+                                            BPM
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
                         </View>
                     )}
                     {showKeyPicker && (
-                        <View className={`px-6 py-2 ${currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'}`}>
+                        <View className={`px-6 py-2 ${currentTheme === 'dark' ? 'bg-dark-bg' : 'bg-light-bg'}`}>
                             <RNScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -512,8 +571,8 @@ const Details = () => {
                                                     ? 'bg-dark-surface-inverted'
                                                     : 'bg-light-surface-inverted'
                                                 : currentTheme === 'dark'
-                                                ? 'bg-dark-surface1'
-                                                : 'bg-light-surface1'
+                                                ? 'bg-dark-surface2'
+                                                : 'bg-light-surface2'
                                         }`}
                                     >
                                         <Text
@@ -536,17 +595,18 @@ const Details = () => {
                     )}
                     <ScrollView className="px-6 pt-1" contentContainerStyle={{ flexGrow: 1 }}>
                         <TextInput 
-                            className={`text-xl/9 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
+                            style={{
+                                height: '100%',
+                            }}
+                            className={`text-xl/6 font-normal ${currentTheme === 'dark' ? 'text-dark-text-body' : 'text-light-text-body'}`}
                             placeholder="I heard there was a secret chord..."
                             placeholderTextColor={currentTheme === 'dark' ? theme.colors.dark.textPlaceholder : theme.colors.light.textPlaceholder}
                             multiline={true}
                             textAlignVertical="top"
                             value={content}
                             onChangeText={setContent}
+                            inputAccessoryViewID="contentInput"
                         />
-                        <View style={{ flex: 1, minHeight: 300, marginTop: 24 }}>
-                            <DomTest />
-                        </View>
                     </ScrollView>
                 </Animated.View>
             </SafeAreaView>
@@ -554,10 +614,9 @@ const Details = () => {
             <SongActionsModal
                 visible={showActions}
                 onClose={() => setShowActions(false)}
-                selectedKey={selectedKey}
-                onSelectKey={setSelectedKey}
                 onMakeCopy={handleMakeCopy}
                 onDelete={handleDelete}
+                buttonLayout={kebabButtonLayout}
             />
 
             <SaveClipModal
@@ -576,6 +635,56 @@ const Details = () => {
                 clips={relatedClips}
                 onDeleteClip={handleDeleteClip}
             />
+
+            <InputAccessoryView nativeID="titleInput">
+                <View style={{
+                    paddingHorizontal: 16,
+                    paddingBottom: 8,
+                    paddingTop: 4,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface2,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
+
+            <InputAccessoryView nativeID="contentInput">
+                <View style={{
+                    paddingHorizontal: 16,
+                    paddingBottom: 8,
+                    paddingTop: 4,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface2,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
         </>
     );
 };

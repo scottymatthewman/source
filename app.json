@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Wright",
-    "slug": "Wright",
+    "name": "Terrace",
+    "slug": "Terrace",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wright",
+    "scheme": "terrace",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "font": {
@@ -16,7 +16,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.smatthewman.Wright",
+      "bundleIdentifier": "app.smatthewman.terrace",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -26,7 +26,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -53,7 +57,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow Wright to access your microphone."
+          "microphonePermission": "Allow Terrace to access your microphone."
         }
       ]
     ],
@@ -63,8 +67,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "fefcfe7b-2cb1-4233-a531-a14157cfe841"
+        "projectId": "6fa26c16-8445-4d64-bfcd-810d2dec0c19"
       }
-    }
+    },
+    "owner": "smatthewman"
   }
 }
