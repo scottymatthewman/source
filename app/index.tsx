@@ -409,6 +409,7 @@ export default function Index() {
               }
             </TouchableOpacity>
           </View>
+          {/* Settings Icon for when we want it */}
           {/* <View className="flex-row items-center">
             <TouchableOpacity>
               <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />

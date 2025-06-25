@@ -7,17 +7,17 @@ module.exports = {
     extend: {
       colors: {
         'dark': {
-          'bg': '#1A1A1A',
-          'border': '#222222',
-          'surface1': '#222222',
-          'surface2': '#292929',
+          'bg': '#131211',
+          'border': '#1D1C1C',
+          'surface1': '#1D1C1C',
+          'surface2': '#262524',
           'surface-inverted': '#FAFAFA',
           'highlight-caption': '#3B3B3B',
           'highlight-annotation': '#2A2A2A',
-          'text-header': '#FFFFFF',
-          'text-body': '#FAFAFA',
+          'text-header': '#FAFAFA',
+          'text-body': '#F2F1EF',
           'text-inverted': '#1A1A1A',
-          'text-placeholder': '#999999',
+          'text-placeholder': '#5B5B5B',
           'text-destructive': '#FF8080',
           'custom-yellow': '#FFE78F',
           'button': {
@@ -27,7 +27,7 @@ module.exports = {
             'border-destructive': '#FF8080',
           },
           'icon': {
-            'primary': '#FFFFFF',
+            'primary': '#FAFAFA',
             'secondary': '#8C8C8C',
             'tertiary': '#484848',
             'inactive': '#EEEEEE',
@@ -36,8 +36,8 @@ module.exports = {
         },
         'light': {
           'bg': '#FAFAFA',
-          'border': '#F2EFEE',
-          'surface1': '#F2EFEE',
+          'border': '#F2F1EF',
+          'surface1': '#F2F1EF',
           'surface2': '#EEEBE8',
           'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
