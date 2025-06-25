@@ -79,8 +79,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             style={{
               position: 'absolute',
               top: buttonLayout.y + buttonLayout.height + 10,
-              alignSelf: 'flex-end',
-              right: 16,
+              alignSelf: 'center',
               zIndex: 2,
               borderRadius: 16,
               overflow: 'hidden',

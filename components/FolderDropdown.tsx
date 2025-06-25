@@ -68,7 +68,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
               style={{
                 position: 'absolute',
                 top: buttonLayout.y + buttonLayout.height + 10,
-                left: 56,
+                alignSelf: 'center',
                 zIndex: 2,
                 borderRadius: 16,
                 overflow: 'hidden',
