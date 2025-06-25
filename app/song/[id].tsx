@@ -636,31 +636,6 @@ const Details = () => {
                 onDeleteClip={handleDeleteClip}
             />
 
-            <InputAccessoryView nativeID="contentInput">
-                <View style={{
-                    paddingHorizontal: 16,
-                    paddingBottom: 8,
-                    paddingTop: 4,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center',
-                }}>
-                    <TouchableOpacity
-                        onPress={() => Keyboard.dismiss()}
-                        style={{
-                            paddingHorizontal: 8,
-                            paddingVertical: 4,
-                            borderRadius: 8,
-                            backgroundColor: colorPalette.surface1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
-                    </TouchableOpacity>
-                </View>
-            </InputAccessoryView>
-
             <InputAccessoryView nativeID="titleInput">
                 <View style={{
                     paddingHorizontal: 16,
@@ -676,7 +651,32 @@ const Details = () => {
                             paddingHorizontal: 8,
                             paddingVertical: 4,
                             borderRadius: 8,
-                            backgroundColor: colorPalette.surface1,
+                            backgroundColor: colorPalette.surface2,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <HideKeyboardIcon width={24} height={24} color={colorPalette.text} />
+                    </TouchableOpacity>
+                </View>
+            </InputAccessoryView>
+
+            <InputAccessoryView nativeID="contentInput">
+                <View style={{
+                    paddingHorizontal: 16,
+                    paddingBottom: 8,
+                    paddingTop: 4,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                }}>
+                    <TouchableOpacity
+                        onPress={() => Keyboard.dismiss()}
+                        style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 8,
+                            backgroundColor: colorPalette.surface2,
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
