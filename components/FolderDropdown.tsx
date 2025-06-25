@@ -59,7 +59,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
       >
         <View style={{ flex: 1 }}>
           <Pressable
-            className="flex-1 bg-black/50"
+            className="flex-1 bg-black/40"
             onPress={() => setIsOpen(false)}
             style={{ zIndex: 1 }}
           />
@@ -68,7 +68,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
               style={{
                 position: 'absolute',
                 top: buttonLayout.y + buttonLayout.height + 10,
-                left: 48,
+                left: 56,
                 zIndex: 2,
                 borderRadius: 16,
                 overflow: 'hidden',
@@ -77,7 +77,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                 borderColor: colorPalette.border,
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                width: 260,
+                width: 240,
               }}
               onStartShouldSetResponder={() => true}
               onTouchEnd={(e) => e.stopPropagation()}
@@ -87,7 +87,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                   onSelectFolder(null);
                   setIsOpen(false);
                 }}
-                className={`px-2 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
+                className={`px-1 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
               >
                 <Text className={classes.text.body}>No Folder</Text>
               </Pressable>
@@ -98,7 +98,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
                     onSelectFolder(folder.id);
                     setIsOpen(false);
                   }}
-                  className={`px-2 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'} last:border-b-0`}
+                  className={`px-1 py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'} last:border-b-0`}
                 >
                   <Text className={classes.text.body}>{folder.title}</Text>
                 </Pressable>
