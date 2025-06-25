@@ -44,9 +44,9 @@ interface Theme {
 const colors: ThemeColors = {
   light: {
     bg: '#FAFAFA',
-    border: '#F2F1EF',
-    surface1: '#F2F1EF',
-    surface2: '#EEEBE8',
+    border: '#E8E6E4',
+    surface1: '#EFEFEE',
+    surface2: '#E8E6E4',
     highlightCaption: '#E3E3E3',
     highlightAnnotation: '#E3E3E3',
     textHeader: '#1A1A1A',

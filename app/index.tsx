@@ -122,11 +122,11 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
       onRequestClose={handleCancel}
     >
       <Pressable 
-        className="flex-1 bg-black/70"
+        className="flex-1 bg-black/30"
         onPress={handleCancel}
       >
         <View 
-          className={`${classes.bg.main} rounded-2xl overflow-hidden`}
+          className={`${classes.bg.main} rounded-3xl overflow-hidden`}
           style={[
             { 
               elevation: 5, 
@@ -137,6 +137,7 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
               position: 'absolute',
               left: 20,
               right: 20,
+              width: 240,
               bottom: isCreatingFolder ? keyboardHeight + 20 : 108,
               alignSelf: 'flex-start'
             }

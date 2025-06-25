@@ -36,7 +36,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onMakeCopy();
             onClose();
           }}
-          className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
+          className={`py-3 border-b ${currentTheme === 'dark' ? 'border-dark-border' : 'border-light-border'}`}
         >
           <View className="flex-row items-center gap-2">
             <CopyIcon width={24} height={24} fill={colorPalette.icon.primary} />
@@ -50,7 +50,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             onDelete();
             onClose();
           }}
-          className="px-2 py-4"
+          className="py-3"
         >
           <View className="flex-row items-center gap-2">
             <DeleteIcon width={24} height={24} fill={colorPalette.icon.destructive} />
@@ -70,7 +70,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
     >
       <View style={{ flex: 1 }}>
         <Pressable
-          className="flex-1 bg-black/50"
+          className="flex-1 bg-black/40"
           onPress={onClose}
           style={{ zIndex: 1 }}
         />
