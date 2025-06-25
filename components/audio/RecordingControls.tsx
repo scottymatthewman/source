@@ -84,48 +84,49 @@ export function RecordingControls({
         <AddIcon width={24} height={24} fill={colorPalette.icon.inverted} />
       </TouchableOpacity>
 
-      {/* Play/Pause button - only show when not recording */}
-      {!isRecording && (
-        <TouchableOpacity
-          onPress={isPlaying ? onPauseRecording : onPlayRecording}
+        {/* Play/Pause button - only show when not recording */}
+        {!isRecording && (
+          <TouchableOpacity
+            onPress={isPlaying ? onPauseRecording : onPlayRecording}
+            style={{
+              backgroundColor: tinycolor(colorPalette.bg).setAlpha(0.2).toRgbString(),
+              borderRadius: 9999,
+              borderWidth: 1,
+              borderColor: tinycolor(colorPalette.border).setAlpha(0.6).toRgbString(),
+              width: 44,
+              height: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {isPlaying ? (
+              <PauseIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+            ) : (
+              <PlayIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Waveform and timer placeholder */}
+        <View
           style={{
-            backgroundColor: tinycolor(colorPalette.bg).setAlpha(0.2).toRgbString(),
-            borderRadius: 9999,
-            borderWidth: 1,
-            borderColor: tinycolor(colorPalette.border).setAlpha(0.6).toRgbString(),
-            width: 44,
-            height: 44,
+            flex: 1,
+            height: 56,
+            width: '100%',
+            marginHorizontal: 16,
+            backgroundColor: colorPalette.button.bgInverted,
+            borderRadius: 40,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          {isPlaying ? (
-            <PauseIcon width={24} height={24} fill={colorPalette.icon.inverted} />
-          ) : (
-            <PlayIcon width={24} height={24} fill={colorPalette.icon.inverted} />
-          )}
-        </TouchableOpacity>
-      )}
-
-      {/* Waveform and timer placeholder */}
-      <View
-        style={{
-          flex: 1,
-          height: 56,
-          marginHorizontal: 16,
-          backgroundColor: colorPalette.button.bgInverted,
-          borderRadius: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {/* TODO: Add waveform visualization here */}
-        <Text style={{ color: colorPalette.textInverted }}>
-          {isRecording ? 'Recording...' : isPlaying ? 'Playing...' : 'Paused'}
-        </Text>
-        <Text style={{ color: colorPalette.textInverted, fontSize: 12 }}>{duration}s</Text>
+          {/* TODO: Add waveform visualization here */}
+          <Text style={{ color: colorPalette.textInverted }}>
+            {isRecording ? 'Recording...' : isPlaying ? 'Playing...' : 'Paused'}
+          </Text>
+          <Text style={{ color: colorPalette.textInverted, fontSize: 12 }}>{duration}s</Text>
       </View>
-
+      
       {/* Stop/Next button */}
       <TouchableOpacity
         onPress={isRecording ? onStopRecording : onSaveRecording}
