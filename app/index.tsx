@@ -464,7 +464,7 @@ export default function Index() {
                 <TouchableOpacity
                   onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
                   className={`p-4 rounded-3xl flex-row items-center`}
-                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface2, alignItems: 'flex-end' }}
+                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
                 >
                   <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
                 </TouchableOpacity>
