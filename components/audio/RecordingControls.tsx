@@ -62,6 +62,7 @@ export function RecordingControls({
         paddingBottom: 24,
         zIndex: 0, // Lower z-index so main content is above
         elevation: 1,
+        gap: 12,
         opacity: showControls ? 1 : 0,
       }}
     >

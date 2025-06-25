@@ -43,7 +43,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
       >
         <Pressable
           onPress={openDropdown}
-          className={`flex-row items-center gap-1 pt-1 pb-1 pl-3 pr-3 ${currentTheme === 'dark' ? 'bg-dark-surface-1' : 'bg-light-surface-1'} rounded-full`}
+          className={`flex-row items-center gap-1 pt-1 pb-1 pl-3 pr-3 ${currentTheme === 'dark' ? 'bg-dark-surface2' : 'bg-light-surface2'} rounded-full`}
         >
           <FolderIcon width={20} height={20} fill={colorPalette.icon.primary} />
           <Text className={classes.text.body}>

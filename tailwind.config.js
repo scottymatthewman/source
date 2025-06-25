@@ -8,9 +8,9 @@ module.exports = {
       colors: {
         'dark': {
           'bg': '#1A1A1A',
-          'border': '#333333',
-          'surface-1': '#0B0B0B',
-          'surface-2': '#232323',
+          'border': '#222222',
+          'surface1': '#222222',
+          'surface2': '#292929',
           'surface-inverted': '#FAFAFA',
           'highlight-caption': '#3B3B3B',
           'highlight-annotation': '#2A2A2A',
@@ -35,10 +35,10 @@ module.exports = {
           },
         },
         'light': {
-          'bg': '#FCFBFA',
-          'border': '#EEEEEE',
-          'surface-1': '#F3F0EE',
-          'surface-2': '#D7D0CB',
+          'bg': '#FAFAFA',
+          'border': '#F2EFEE',
+          'surface1': '#F2EFEE',
+          'surface2': '#EEEBE8',
           'surface-inverted': '#242424',
           'highlight-caption': '#E3E3E3',
           'highlight-annotation': '#E3E3E3',
