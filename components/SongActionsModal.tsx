@@ -3,6 +3,7 @@ import { LayoutRectangle, Modal, Pressable, Text, View } from 'react-native';
 import theme from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../utils/theme';
+import { CopyIcon, DeleteIcon } from './icons';
 
 interface SongActionsModalProps {
   visible: boolean;
@@ -37,7 +38,10 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
           }}
           className={`px-2 py-4 border-b ${currentTheme === 'dark' ? 'border-dark-surface-2' : 'border-light-surface-2'}`}
         >
-          <Text className={classes.text.body}>Make a Copy</Text>
+          <View className="flex-row items-center gap-2">
+            <CopyIcon width={24} height={24} fill={colorPalette.icon.primary} />
+            <Text className={classes.text.body}>Make a Copy</Text>
+          </View>
         </Pressable>
       )}
       {onDelete && (
@@ -48,7 +52,10 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
           }}
           className="px-2 py-4"
         >
-          <Text className={`${currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive'}`}>Delete Song</Text>
+          <View className="flex-row items-center gap-2">
+            <DeleteIcon width={24} height={24} fill={colorPalette.icon.destructive} />
+            <Text className={`${currentTheme === 'dark' ? 'text-dark-text-destructive' : 'text-light-text-destructive'}`}>Delete Song</Text>
+          </View>
         </Pressable>
       )}
     </>
@@ -72,8 +79,8 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
             style={{
               position: 'absolute',
               top: buttonLayout.y + buttonLayout.height + 10,
-              left: 12,
-              right: 12,
+              alignSelf: 'flex-end',
+              right: 16,
               zIndex: 2,
               borderRadius: 16,
               overflow: 'hidden',
@@ -82,6 +89,7 @@ const SongActionsModal: React.FC<SongActionsModalProps> = ({
               borderColor: colorPalette.border,
               paddingHorizontal: 16,
               paddingVertical: 8,
+              width: 200,
             }}
             onStartShouldSetResponder={() => true}
             onTouchEnd={(e) => e.stopPropagation()}
