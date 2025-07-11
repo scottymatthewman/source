@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Terrace",
-    "slug": "Terrace",
+    "name": "Slant",
+    "slug": "Slant",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "terrace",
+    "scheme": "slant",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "font": {
@@ -16,7 +16,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.smatthewman.terrace",
+      "bundleIdentifier": "app.smatthewman.slant",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -57,7 +57,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow Terrace to access your microphone."
+          "microphonePermission": "Allow Slant to access your microphone."
         }
       ]
     ],
@@ -67,7 +67,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "6fa26c16-8445-4d64-bfcd-810d2dec0c19"
+        "projectId": "0adbf4f7-1b3b-41df-a470-c0088424e94c"
       }
     },
     "owner": "smatthewman"
