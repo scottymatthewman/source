@@ -1,6 +1,6 @@
-# Wright - Audio Recording App
+# Slant - Audio Recording App
 
-A modern React Native application built with Expo for audio recording and management. Wright provides a seamless experience for recording, playing, and managing audio clips with a beautiful and intuitive user interface.
+A modern React Native application built with Expo for audio recording and management. Slant provides a seamless experience for recording, playing, and managing audio clips with a beautiful and intuitive user interface.
 
 ## Features
 
@@ -36,7 +36,7 @@ A modern React Native application built with Expo for audio recording and manage
 1. Clone the repository
    ```bash
    git clone [your-repo-url]
-   cd Wright
+   cd Slant
    ```
 
 2. Install dependencies
