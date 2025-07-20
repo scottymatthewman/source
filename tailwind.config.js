@@ -20,6 +20,7 @@ module.exports = {
           'text-placeholder': '#5B5B5B',
           'text-destructive': '#FF8080',
           'custom-yellow': '#FFE78F',
+          'recording-red': '#FA3227',
           'button': {
             'bg': '#222222',
             'bg-destructive': '#4B000D',
@@ -48,6 +49,7 @@ module.exports = {
           'text-placeholder': '#A0A0A0',
           'text-destructive': '#FD364A',
           'custom-yellow': '#CCA537',
+          'recording-red': '#FA3227',
           'button': {
             'bg': '#FDFDFD',
             'bg-destructive': '#FD364A',

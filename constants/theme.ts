@@ -14,6 +14,7 @@ interface ColorScheme {
   textPlaceholder: string;
   textDestructive: string;
   customYellow: string;
+  recordingRed: string;
   button: {
     bg: string;
     bgDestructive: string;
@@ -55,6 +56,7 @@ const colors: ThemeColors = {
     textPlaceholder: '#A0A0A0',
     textDestructive: '#FF4747',
     customYellow: '#CCA537',
+    recordingRed: '#FA3227',
     button: {
       bg: '#FDFDFD',
       bgDestructive: '#FFEDED',
@@ -84,6 +86,7 @@ const colors: ThemeColors = {
     textPlaceholder: '#5B5B5B',
     textDestructive: '#FF8080',
     customYellow: '#FFE78F',
+    recordingRed: '#FA3227',
     button: {
       bg: '#222222',
       bgDestructive: '#4B000D',
