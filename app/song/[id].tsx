@@ -9,7 +9,7 @@ import { RecordingControls } from '../../components/audio/RecordingControls';
 import SaveClipModal from '../../components/audio/SaveClipModal';
 import { ClipListModal } from '../../components/ClipListModal';
 import { FolderDropdown } from '../../components/FolderDropdown';
-import { ChevronLeftIcon, KebabIcon, MicIcon } from '../../components/icons';
+import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
 import HideKeyboardIcon from '../../components/icons/HideKeyboardIcon';
 import SongActionsModal from '../../components/SongActionsModal';
 import { MUSICAL_KEYS, MusicalKey } from '../../constants/musicalKeys';
@@ -479,13 +479,6 @@ const Details = () => {
                             <View className="px-6 pb-3 flex-row items-center justify-between border-b" style={{ borderColor: currentTheme === 'dark' ? theme.colors.dark.border : theme.colors.light.border }}>
                                 <Text className={classes.textSize('text-lg', 'placeholder')}>Attachments</Text>
                                 <View className="flex-row gap-4">
-                                    <TouchableOpacity className="flex-row items-center gap-1 h-9 pl-1 pr-2 rounded-lg" onPress={() => {
-                                        Keyboard.dismiss();
-                                        setShowRecorder(true);
-                                    }}>
-                                        <MicIcon width={24} height={24} fill={colorPalette.icon.primary} />
-                                        <Text className={classes.textSize('text-lg font-medium')}>Record</Text>
-                                    </TouchableOpacity>
                                     <TouchableOpacity 
                                         className="flex-row items-center gap-1 h-9 pl-1 pr-2.5 rounded-lg" 
                                         style={{ backgroundColor: colorPalette.surface2 }}
@@ -493,6 +486,25 @@ const Details = () => {
                                     >
                                         <ClipIcon width={28} height={28} fill={colorPalette.icon.primary} />
                                         <Text className={classes.textSize('text-lg font-medium')}>{clipCount}</Text>  
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        className="flex-row items-center justify-center w-9 h-9 rounded-full" 
+                                        style={{ backgroundColor: colorPalette.surface2 }} 
+                                        onPress={() => {
+                                        Keyboard.dismiss();
+                                        setShowRecorder(true);
+                                    }}>
+                                        <View 
+                                            style={
+                                                { 
+                                                    borderWidth: 1,
+                                                    borderColor: currentTheme === 'dark' ? theme.colors.dark.bg : theme.colors.light.bg,
+                                                    backgroundColor: currentTheme === 'dark' ? theme.colors.dark.recordingRed : theme.colors.light.recordingRed,
+                                                    width: 14,
+                                                    height: 14,
+                                                    borderRadius: 8,
+                                                }
+                                            } />
                                     </TouchableOpacity>
                                 </View>
                             </View>
