@@ -33,15 +33,14 @@ export function FoldersProvider({ children }: { children: React.ReactNode }) {
   }, [db]);
 
   const syncFolders = useCallback(async () => {
-    console.log('Syncing folders with Turso DB...');
+    console.log('Syncing folders...');
     try {
-      await db.syncLibSQL();
       await fetchFolders();
-      console.log('Synced folders with Turso DB');
+      console.log('Synced folders');
     } catch (e) {
       console.error('Error syncing folders:', e);
     }
-  }, [db, fetchFolders]);
+  }, [fetchFolders]);
 
   const createFolder = async (title: string) => {
     const newFolder = {

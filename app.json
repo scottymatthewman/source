@@ -51,7 +51,7 @@
       [
         "expo-sqlite",
         {
-          "useLibSQL": true
+          "useLibSQL": false
         }
       ],
       [
