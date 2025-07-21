@@ -59,7 +59,8 @@
         {
           "microphonePermission": "Allow Slant to access your microphone."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
