@@ -1,3 +1,4 @@
+import SettingsIcon from '@/components/icons/SettingsIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,8 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
 import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
-import MoonIcon from '../components/icons/MoonIcon';
-import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
@@ -411,19 +410,10 @@ export default function Index() {
             </TouchableOpacity>
           </View>
           <View className="flex-row items-center gap-1">  
-            <TouchableOpacity onPress={toggleTheme}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
+            <TouchableOpacity onPress={() => router.push({ pathname: '/settings' })}>
+              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
             </TouchableOpacity>
           </View>
-          {/* Settings Icon for when we want it */}
-          {/* <View className="flex-row items-center">
-            <TouchableOpacity>
-              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
-            </TouchableOpacity> */}
-          {/* </View> */}
         </View>
         
         {activeToggle === 'folders' ? (
