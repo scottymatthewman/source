@@ -1,3 +1,4 @@
+import SettingsIcon from '@/components/icons/SettingsIcon';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,8 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
 import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
-import MoonIcon from '../components/icons/MoonIcon';
-import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
@@ -136,17 +135,19 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
               shadowOpacity: 0.25, 
               shadowRadius: 3.84,
               position: 'absolute',
-              bottom: isCreatingFolder ? keyboardHeight + 20 : 108,
-              // Expand to full width when creating folder, otherwise use fixed width
+              bottom: isCreatingFolder ? keyboardHeight + 24 : 108,
+              // Center overlay when not creating folder, full width when creating folder
               ...(isCreatingFolder ? {
                 left: 20,
                 right: 20,
                 width: undefined,
+                alignSelf: undefined,
               } : {
-                left: 20,
-                right: 20,
+                left: '50%',
+                transform: [{ translateX: -120 }], // Half of fixed width (240)
                 width: 240,
-                alignSelf: 'flex-start'
+                alignSelf: 'center',
+                bottom: 100,
               })
             }
           ]}
@@ -232,7 +233,7 @@ export default function Index() {
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
   const [createOverlayMode, setCreateOverlayMode] = useState<'menu' | 'folder'>('menu');
   const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('folders');
-  const { theme: currentTheme, toggleTheme } = useTheme();
+  const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
   const { 
@@ -411,19 +412,10 @@ export default function Index() {
             </TouchableOpacity>
           </View>
           <View className="flex-row items-center gap-1">  
-            <TouchableOpacity onPress={toggleTheme}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
+            <TouchableOpacity onPress={() => router.push({ pathname: '/settings' })}>
+              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
             </TouchableOpacity>
           </View>
-          {/* Settings Icon for when we want it */}
-          {/* <View className="flex-row items-center">
-            <TouchableOpacity>
-              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
-            </TouchableOpacity> */}
-          {/* </View> */}
         </View>
         
         {activeToggle === 'folders' ? (
@@ -514,16 +506,18 @@ export default function Index() {
       {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
       {!showRecordingControls && (
         <TouchableOpacity 
+          className="flex-row items-center justify-center"
           onPress={() => {
             setCreateOverlayMode('menu');
             setShowCreateOverlay((v) => !v);
           }}
           style={{
             position: 'absolute',
-            left: CREATE_BUTTON_LEFT,
+            left: '50%',
+            transform: [{ translateX: -CREATE_BUTTON_SIZE * 1.75 / 2 }],
             bottom: bottomSafeArea,
-            width: CREATE_BUTTON_SIZE,
-            height: CREATE_BUTTON_SIZE,
+            width: CREATE_BUTTON_SIZE * 1.75,
+            height: CREATE_BUTTON_SIZE * .9,
             borderRadius: CREATE_BUTTON_SIZE / 2,
             backgroundColor: colorPalette.button.bgInverted,
             alignItems: 'center',

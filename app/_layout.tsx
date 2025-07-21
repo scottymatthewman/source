@@ -109,6 +109,13 @@ export default function RootLayout() {
                       gestureEnabled: false
                     }} 
                   />
+                  <Stack.Screen 
+                    name="settings" 
+                    options={{ 
+                      title: 'Settings',
+                      headerShown: false 
+                    }} 
+                  />
                 </Stack>
               </ColorProvider>
             </ClipsProvider>
