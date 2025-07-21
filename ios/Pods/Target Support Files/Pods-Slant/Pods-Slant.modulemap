@@ -1,0 +1,6 @@
+module Pods_Slant {
+  umbrella header "Pods-Slant-umbrella.h"
+
+  export *
+  module * { export * }
+}
