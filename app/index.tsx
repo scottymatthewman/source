@@ -233,7 +233,7 @@ export default function Index() {
   const [showCreateOverlay, setShowCreateOverlay] = useState(false);
   const [createOverlayMode, setCreateOverlayMode] = useState<'menu' | 'folder'>('menu');
   const [activeToggle, setActiveToggle] = useState<'files' | 'folders'>('folders');
-  const { theme: currentTheme, toggleTheme } = useTheme();
+  const { theme: currentTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
   const { 
