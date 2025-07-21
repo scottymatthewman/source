@@ -135,17 +135,19 @@ const CreateOverlay = ({ visible, onClose, onStartRecording, initialMode = 'menu
               shadowOpacity: 0.25, 
               shadowRadius: 3.84,
               position: 'absolute',
-              bottom: isCreatingFolder ? keyboardHeight + 20 : 108,
-              // Expand to full width when creating folder, otherwise use fixed width
+              bottom: isCreatingFolder ? keyboardHeight + 24 : 108,
+              // Center overlay when not creating folder, full width when creating folder
               ...(isCreatingFolder ? {
                 left: 20,
                 right: 20,
                 width: undefined,
+                alignSelf: undefined,
               } : {
-                left: 20,
-                right: 20,
+                left: '50%',
+                transform: [{ translateX: -120 }], // Half of fixed width (240)
                 width: 240,
-                alignSelf: 'flex-start'
+                alignSelf: 'center',
+                bottom: 100,
               })
             }
           ]}
@@ -504,16 +506,18 @@ export default function Index() {
       {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
       {!showRecordingControls && (
         <TouchableOpacity 
+          className="flex-row items-center justify-center"
           onPress={() => {
             setCreateOverlayMode('menu');
             setShowCreateOverlay((v) => !v);
           }}
           style={{
             position: 'absolute',
-            left: CREATE_BUTTON_LEFT,
+            left: '50%',
+            transform: [{ translateX: -CREATE_BUTTON_SIZE * 1.75 / 2 }],
             bottom: bottomSafeArea,
-            width: CREATE_BUTTON_SIZE,
-            height: CREATE_BUTTON_SIZE,
+            width: CREATE_BUTTON_SIZE * 1.75,
+            height: CREATE_BUTTON_SIZE * .9,
             borderRadius: CREATE_BUTTON_SIZE / 2,
             backgroundColor: colorPalette.button.bgInverted,
             alignItems: 'center',

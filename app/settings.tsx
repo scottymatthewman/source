@@ -4,8 +4,6 @@ import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import ChevronLeftIcon from '../components/icons/ChevronLeftIcon';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
-import LeftHandIcon from '../components/icons/leftHand';
-import RightHandIcon from '../components/icons/rightHand';
 import theme from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 
@@ -51,7 +49,7 @@ const Settings = () => {
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colorPalette.bg }}>
       <View className="flex-1 items-start justify-start px-6 pt-4 gap-y-4" style={{ backgroundColor: colorPalette.bg }}>
-        <View className="flex-row items-center w-full gap-x-1">
+        <View className="flex-row items-center w-full gap-x-1 mb-2">
           <TouchableOpacity onPress={() => router.back()}>
             <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
           </TouchableOpacity>
@@ -85,36 +83,6 @@ const Settings = () => {
               <MoonIcon width={22} height={22} fill={getToggleIconColor(currentTheme === 'dark')} />
               <Text className="text-[16px] font-medium ml-2" style={{ color: getToggleTextColor(currentTheme === 'dark') }}>
                 Dark
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View className="flex-row items-center justify-between w-full gap-x-1">
-          <Text className="text-[17px] font-medium w-[170px]" style={{ color: colorPalette.text }}>
-            Dominant Hand
-          </Text>
-          <View className="flex-row rounded-2xl p-1.5 min-w-[180px] items-center justify-center"
-            style={{ backgroundColor: colorPalette.surface2 }}>
-            <TouchableOpacity
-              className={`flex-row items-center justify-center rounded-xl px-4 py-2 ${isLeftHanded ? 'bg-white' : ''}`}
-              style={getToggleStyle(isLeftHanded)}
-              activeOpacity={1}
-              onPress={() => setIsLeftHanded(true)}
-            >
-              <LeftHandIcon width={24} height={24} fill={getToggleIconColor(isLeftHanded)} />
-              <Text className="text-[16px] font-medium ml-2" style={{ color: getToggleTextColor(isLeftHanded) }}>
-                Left
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-row items-center justify-center rounded-xl px-4 py-2 ${!isLeftHanded ? 'bg-white' : ''}`}
-              style={getToggleStyle(!isLeftHanded)}
-              activeOpacity={1}
-              onPress={() => setIsLeftHanded(false)}
-            >
-              <RightHandIcon width={24} height={24} fill={getToggleIconColor(!isLeftHanded)} />
-              <Text className="text-[16px] font-medium ml-2" style={{ color: getToggleTextColor(!isLeftHanded) }}>
-                Right
               </Text>
             </TouchableOpacity>
           </View>
