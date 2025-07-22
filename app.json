@@ -57,7 +57,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow access to your microphone to record audio."
+          "microphonePermission": "Allow access to your microphone to create and attach audio clips to your songs."
         }
       ],
       "expo-web-browser"
