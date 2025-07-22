@@ -57,7 +57,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow Slant to access your microphone."
+          "microphonePermission": "Allow access to your microphone to record audio."
         }
       ],
       "expo-web-browser"
