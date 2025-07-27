@@ -36,7 +36,7 @@ A modern React Native application built with Expo for audio recording and manage
 1. Clone the repository
    ```bash
    git clone [your-repo-url]
-   cd Slant
+   cd Source
    ```
 
 2. Install dependencies
