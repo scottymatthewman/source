@@ -1,6 +1,6 @@
-# Slant - Audio Recording App
+# Source - Songwriting App
 
-A modern React Native application built with Expo for audio recording and management. Slant provides a seamless experience for recording, playing, and managing audio clips with a beautiful and intuitive user interface.
+A modern React Native application built with Expo for audio recording and management. Source provides a seamless experience for recording, playing, and managing audio clips with a beautiful and intuitive user interface.
 
 ## Features
 
