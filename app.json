@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Slant",
-    "slug": "Slant",
+    "name": "Source",
+    "slug": "Source",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "slant",
+    "scheme": "source",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "font": {
@@ -16,7 +16,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.smatthewman.slant",
+      "bundleIdentifier": "app.smatthewman.source",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
