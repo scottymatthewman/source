@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecordingControls } from '../components/audio/RecordingControls';
 import SaveClipModal from '../components/audio/SaveClipModal';
@@ -225,6 +225,12 @@ const styles = StyleSheet.create({
   },
 });
 
+// Helper function to detect iPad
+const isIPad = () => {
+  const { width, height } = Dimensions.get('window');
+  return Platform.OS === 'ios' && Math.min(width, height) >= 768;
+};
+
 export default function Index() {
   const { songs, createSong } = useSongs();
   const { folders } = useFolders();
@@ -254,7 +260,8 @@ export default function Index() {
   const [showRecordingControls, setShowRecordingControls] = useState(false);
   const insets = useSafeAreaInsets();
   const windowHeight = Dimensions.get('window').height;
-  const RECORDING_PANEL_HEIGHT = 120;
+  const isTablet = isIPad();
+  const RECORDING_PANEL_HEIGHT = isTablet ? 140 : 120;
   const RECORDING_PANEL_MARGIN = 24;
   const bottomSafeArea = insets.bottom;
   const shrunkHeight = windowHeight - (RECORDING_PANEL_HEIGHT + RECORDING_PANEL_MARGIN + 12);
@@ -359,9 +366,9 @@ export default function Index() {
     }
   };
 
-  // Button and menu positions
-  const CREATE_BUTTON_SIZE = 56;
-  const CREATE_BUTTON_LEFT = 24;
+  // Button and menu positions (responsive for iPad)
+  const CREATE_BUTTON_SIZE = isTablet ? 64 : 56;
+  const CREATE_BUTTON_LEFT = isTablet ? 32 : 24;
   const MENU_GAP = 12;
 
   return (

@@ -17,8 +17,20 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.smatthewman.source",
+      "requireFullScreen": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIRequiresFullScreen": false,
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown"
+        ],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
       }
     },
     "android": {
