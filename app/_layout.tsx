@@ -13,12 +13,6 @@ export default function RootLayout() {
     <ThemeProvider>
     <SQLiteProvider 
      databaseName="songs"
-     options={{
-      libSQLOptions: {
-        url: process.env.EXPO_PUBLIC_TURSO_DB_URL!,
-        authToken: process.env.EXPO_PUBLIC_TURSO_DB_AUTH_TOKEN!,
-      }
-     }}
      onInit={async (db:SQLiteDatabase) => {
         try {
           // Create tables with latest schema
@@ -69,13 +63,6 @@ export default function RootLayout() {
 
           // Set version to latest
           await db.execAsync(`PRAGMA user_version = 4`);
-
-          // Temporarily disabled sync
-          // try {
-          //   await db.syncLibSQL();
-          // } catch (syncError) {
-          //   console.warn('Sync disabled:', syncError);
-          // }
         } catch (error) {
           console.error('Database initialization error:', error);
         }

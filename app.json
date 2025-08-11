@@ -54,12 +54,7 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      [
-        "expo-sqlite",
-        {
-          "useLibSQL": true
-        }
-      ],
+      "expo-sqlite",
       [
         "expo-audio",
         {
