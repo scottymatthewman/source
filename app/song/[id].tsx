@@ -180,6 +180,7 @@ const Details = () => {
     const handleSave = async () => {
         if (song) {
             console.log('Save pressed', { title, content, selectedFolderId, selectedKey, bpm });
+            console.log('selectedFolderId type:', typeof selectedFolderId, 'value:', selectedFolderId);
             await updateSong(song.id, {
                 title,
                 content,
@@ -447,7 +448,10 @@ const Details = () => {
                         <View className="flex-row items-center gap-2">
                             <FolderDropdown 
                                 selectedFolderId={selectedFolderId}
-                                onSelectFolder={setSelectedFolderId}
+                                onSelectFolder={(folderId) => {
+                                    console.log('Song detail: folder selected, value:', folderId, 'type:', typeof folderId);
+                                    setSelectedFolderId(folderId);
+                                }}
                             />
                             <TouchableOpacity ref={kebabButtonRef} onPress={openActionsModal}>
                                 <KebabIcon width={28} height={28} fill={colorPalette.icon.secondary} />

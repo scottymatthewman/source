@@ -131,7 +131,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       title: updates.title ?? existingSong.title,
       content: updates.content ?? existingSong.content,
       date_modified: updates.date_modified ?? new Date(),
-      folder_id: updates.folder_id ?? existingSong.folder_id,
+      folder_id: updates.hasOwnProperty('folder_id') ? updates.folder_id : existingSong.folder_id,
       key: updates.key ?? existingSong.key,
       bpm: updates.bpm ?? existingSong.bpm,
     };

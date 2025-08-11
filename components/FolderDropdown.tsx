@@ -84,6 +84,7 @@ export const FolderDropdown = ({ selectedFolderId, onSelectFolder }: FolderDropd
             >
               <Pressable
                 onPress={() => {
+                  console.log('FolderDropdown: No Folder selected, setting to null');
                   onSelectFolder(null);
                   setIsOpen(false);
                 }}
