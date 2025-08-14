@@ -522,6 +522,7 @@ const Details = () => {
                     currentSongId={song?.id}
                     onClose={() => setShowRecorder(false)}
                     onTemporaryClipAdded={handleTemporaryClipAdded}
+                    autoStart={true}
                 />
             )}
 

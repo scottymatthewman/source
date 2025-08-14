@@ -1,5 +1,5 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,8 +8,7 @@ import { useSongs } from '../../context/songContext';
 import { useAudioPlayback } from '../../hooks/useAudioPlayback';
 import { useAudioRecording } from '../../hooks/useAudioRecording';
 import { CloseIcon } from '../icons';
-import { PlaybackControls } from './PlaybackControls';
-import { RecordButton } from './RecordButton';
+import { AudioControls } from './AudioControls';
 import SaveClipModal from './SaveClipModal';
 
 interface AudioRecorderProps {
@@ -17,13 +16,15 @@ interface AudioRecorderProps {
   currentSongId?: string;
   onClose?: () => void;
   onTemporaryClipAdded?: (clip: Clip) => void; // New callback for temporary clips
+  autoStart?: boolean; // Auto-start recording when component mounts
 }
 
 export function AudioRecorder({ 
   mode = 'index', 
   currentSongId, 
   onClose,
-  onTemporaryClipAdded 
+  onTemporaryClipAdded,
+  autoStart = false
 }: AudioRecorderProps) {
   const { state, startRecording, stopRecording, duration, resetRecording } = useAudioRecording();
   const { isPlaying, play, pause, stop } = useAudioPlayback(state.audioUri);
@@ -33,13 +34,23 @@ export function AudioRecorder({
   const db = useSQLiteContext();
   const { theme: currentTheme } = useTheme();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
+  const hasAutoStarted = useRef(false);
+
+  // Auto-start recording if requested (only once)
+  useEffect(() => {
+    if (autoStart && state.state === 'idle' && !hasAutoStarted.current) {
+      hasAutoStarted.current = true;
+      startRecording();
+    }
+  }, [autoStart, state.state, startRecording]);
 
   const handleRecordPress = () => {
     if (state.state === 'recording') {
       stopRecording();
-    } else {
+    } else if (state.state === 'idle') {
       startRecording();
     }
+    // Ignore presses during other states (like error)
   };
 
   const handlePlayPress = () => {
@@ -112,11 +123,11 @@ export function AudioRecorder({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colorPalette.surface2 }]}>
+    <View style={[styles.container, { backgroundColor: colorPalette.surface1 }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colorPalette.text }]}>
           {state.state === 'recording' ? 'Recording...' : 
-           state.audioUri ? 'Recording Complete' : 'Ready to Record'}
+           state.audioUri ? 'Record' : 'Ready to Record'}
         </Text>
         <TouchableOpacity onPress={handleDiscard} style={styles.closeButton}>
           <CloseIcon width={20} height={20} fill={colorPalette.icon.primary} />
@@ -124,24 +135,20 @@ export function AudioRecorder({
       </View>
       
       <View style={styles.content}>
-        <RecordButton 
+        <AudioControls
           isRecording={state.state === 'recording'}
-          onPress={handleRecordPress}
-          duration={duration}
+          onRecord={handleRecordPress}
+          recordingDuration={duration}
+          hasAudio={!!state.audioUri}
+          isPlaying={isPlaying}
+          onPlay={handlePlayPress}
+          onStop={stop}
+          onSave={() => setShowSaveModal(true)}
         />
-        
-        {state.audioUri && (
-          <PlaybackControls
-            isPlaying={isPlaying}
-            onPlay={handlePlayPress}
-            onStop={stop}
-            onSave={() => setShowSaveModal(true)}
-          />
-        )}
       </View>
 
       {state.error && (
-        <Text style={[styles.error, { color: colorPalette.error }]}>
+        <Text style={[styles.error, { color: colorPalette.text }]}>
           {state.error}
         </Text>
       )}
@@ -160,9 +167,13 @@ export function AudioRecorder({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    borderRadius: 16,
-    margin: 16,
+    paddingHorizontal: 32,
+    paddingTop: 16,
+    paddingBottom: 36,
+    borderTopWidth: 1,
+    borderColor: theme.colors.light.border,
+    borderStyle: 'solid',
+    height: 144,
   },
   header: {
     flexDirection: 'row',

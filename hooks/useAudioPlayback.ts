@@ -1,4 +1,4 @@
-import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useCallback, useEffect, useState } from 'react';
 
 // Audio configuration for playback (main speakers)
@@ -12,6 +12,7 @@ const PLAYBACK_AUDIO_CONFIG = {
 
 export function useAudioPlayback(audioUri: string | null) {
   const player = useAudioPlayer(audioUri);
+  const status = useAudioPlayerStatus(player);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const play = useCallback(async () => {
@@ -23,12 +24,17 @@ export function useAudioPlayback(audioUri: string | null) {
       // Set volume to maximum before playing
       player.volume = 1.0;
       
+      // If the audio is at the end (currentTime >= duration), seek to beginning
+      if (status && status.currentTime >= status.duration) {
+        await player.seekTo(0);
+      }
+      
       await player.play();
       setIsPlaying(true);
     } catch (error) {
       console.error('Playback error:', error);
     }
-  }, [audioUri, player]);
+  }, [audioUri, player, status]);
 
   const pause = useCallback(async () => {
     try {
@@ -48,6 +54,13 @@ export function useAudioPlayback(audioUri: string | null) {
       console.error('Stop error:', error);
     }
   }, [player]);
+
+  // Update playing state based on audio player status
+  useEffect(() => {
+    if (status) {
+      setIsPlaying(status.playing);
+    }
+  }, [status]);
 
   // Reset playing state when audio URI changes
   useEffect(() => {

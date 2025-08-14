@@ -46,8 +46,14 @@ export function useAudioRecording() {
   }, []);
 
   const startRecording = useCallback(async () => {
+    setState(prev => {
+      if (prev.state === 'recording') {
+        return prev; // Already recording, don't change state
+      }
+      return { ...prev, state: 'recording', error: null };
+    });
+    
     try {
-      setState(prev => ({ ...prev, state: 'recording', error: null }));
       await recorder.prepareToRecordAsync();
       recorder.record();
     } catch (error) {
@@ -60,13 +66,22 @@ export function useAudioRecording() {
   }, [recorder]);
 
   const stopRecording = useCallback(async () => {
+    setState(prev => {
+      if (prev.state !== 'recording') {
+        return prev; // Not recording, don't change state
+      }
+      return { ...prev, state: 'idle' }; // Immediately update state to stop recording UI
+    });
+    
     try {
-      await recorder.stop();
+      const finalDuration = recorder.currentTime;
+      await recorder.stop(); // Must await this!
       const uri = recorder.uri;
+      
       setState(prev => ({ 
         ...prev, 
-        state: 'idle', 
-        audioUri: uri 
+        audioUri: uri,
+        duration: finalDuration 
       }));
     } catch (error) {
       setState(prev => ({ 
@@ -91,6 +106,6 @@ export function useAudioRecording() {
     startRecording,
     stopRecording,
     resetRecording,
-    duration: recorder.currentTime
+    duration: state.state === 'recording' ? recorder.currentTime : state.duration
   };
 }

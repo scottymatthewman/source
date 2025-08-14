@@ -381,6 +381,7 @@ export default function Index() {
         <AudioRecorder
           mode="index"
           onClose={() => setShowRecorder(false)}
+          autoStart={true}
         />
       )}
 
