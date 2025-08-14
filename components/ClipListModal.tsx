@@ -1,4 +1,4 @@
-import { useAudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../constants/theme';
@@ -6,6 +6,15 @@ import { Clip } from '../context/clipContext';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../utils/theme';
 import { KebabIcon } from './icons';
+
+// Audio configuration for main speaker routing
+const PLAYBACK_AUDIO_CONFIG = {
+    allowsRecording: false,
+    playsInSilentMode: true,
+    shouldPlayInBackground: true,
+    interruptionMode: 'mixWithOthers' as const,
+    shouldRouteThroughEarpiece: false, // CRITICAL: Use main speakers
+};
 
 interface ClipListModalProps {
     visible: boolean;
@@ -107,6 +116,10 @@ export function ClipListModal({
             if (player) {
                 await player.pause();
             }
+            
+            // Set audio mode to use main speakers
+            await setAudioModeAsync(PLAYBACK_AUDIO_CONFIG);
+            
             setCurrentClipUri(clip.file_path);
             setPlayingClipId(clip.id);
         } catch (error) {
