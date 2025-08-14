@@ -259,124 +259,159 @@ export default function Index() {
   const MENU_GAP = 12;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
-      {/* Main content */}
-      <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
-        <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
-          <View className="flex-row items-center gap-1">
-            <TouchableOpacity onPress={() => setActiveToggle('folders')}>
-              <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
-                Folders
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveToggle('files')}>
-              <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
-                All Songs
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="flex-row items-center gap-1">  
-            <TouchableOpacity onPress={toggleTheme}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
-            </TouchableOpacity>
-          </View>
-          {/* Settings Icon for when we want it */}
-          {/* <View className="flex-row items-center">
-            <TouchableOpacity>
-              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
-            </TouchableOpacity> */}
-          {/* </View> */}
-        </View>
-        
-        {activeToggle === 'folders' ? (
-          <View className="pt-2 flex-1 w-full">
-          <FlatList
-            data={folders}
-            className="px-4"
-            key="folders-list"
-            numColumns={2}
-            columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-                className={`p-4 rounded-3xl flex-row items-center`}
-                style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
-              >
-                <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
+    <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+        {/* Main content */}
+        <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+          <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
+            <View className="flex-row items-center gap-1">
+              <TouchableOpacity onPress={() => setActiveToggle('folders')}>
+                <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                  Folders
+                </Text>
               </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <View className="flex-1 items-center justify-center"> 
-                <TouchableOpacity 
-                  onPress={() => {
-                    setCreateOverlayMode('folder');
-                    setShowCreateOverlay(true);
-                  }}
-                  className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
-                  style={{
-                    backgroundColor: colorPalette.surface2,
-                  }}
-                > 
-                  <Text className={`${classes.text.body} text-center text-lg font-medium`}>Create your first folder</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          />
-        </View>
-        ) : (
-          <View className="pt-2 flex-1">
+              <TouchableOpacity onPress={() => setActiveToggle('files')}>
+                <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                  All Songs
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View className="flex-row items-center gap-1">  
+              <TouchableOpacity onPress={toggleTheme}>
+                {currentTheme === 'dark' ? 
+                  <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+                  <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+                }
+              </TouchableOpacity>
+            </View>
+            {/* Settings Icon for when we want it */}
+            {/* <View className="flex-row items-center">
+              <TouchableOpacity>
+                <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
+              </TouchableOpacity> */}
+            {/* </View> */}
+          </View>
+          
+          {activeToggle === 'folders' ? (
+            <View className="pt-2 flex-1 w-full">
             <FlatList
-              data={recentSongs}
+              data={folders}
               className="px-4"
-              key="songs-list"
+              key="folders-list"
+              numColumns={2}
+              columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-                  className={`pr-6 py-2 flex-row items-center`}
+                  onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
+                  className={`p-4 rounded-3xl flex-row items-center`}
+                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
                 >
-                  <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
-                  <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
+                  <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <View className="flex-1 items-center justify-center">
+                <View className="flex-1 items-center justify-center"> 
                   <TouchableOpacity 
-                    onPress={async () => {
-                      const song = await createSong();
-                      if (song && song.id) {
-                        router.push({ pathname: '/newSong', params: { songId: song.id } });
-                      } else {
-                        Alert.alert('Error', 'Failed to create new song');
-                      }
+                    onPress={() => {
+                      setCreateOverlayMode('folder');
+                      setShowCreateOverlay(true);
                     }}
                     className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
                     style={{
                       backgroundColor: colorPalette.surface2,
                     }}
                   > 
-                    <Text className={`${classes.text.body} text-center text-lg font-medium`}>Write your first song</Text>
+                    <Text className={`${classes.text.body} text-center text-lg font-medium`}>Create your first folder</Text>
                   </TouchableOpacity>
                 </View>
               }
             />
           </View>
-        )}
-      </View>
+          ) : (
+            <View className="pt-2 flex-1">
+              <FlatList
+                data={recentSongs}
+                className="px-4"
+                key="songs-list"
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                  onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
+                    className={`pr-6 py-2 flex-row items-center`}
+                  >
+                    <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
+                    <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <View className="flex-1 items-center justify-center">
+                    <TouchableOpacity 
+                      onPress={async () => {
+                        const song = await createSong();
+                        if (song && song.id) {
+                          router.push({ pathname: '/newSong', params: { songId: song.id } });
+                        } else {
+                          Alert.alert('Error', 'Failed to create new song');
+                        }
+                      }}
+                      className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
+                      style={{
+                        backgroundColor: colorPalette.surface2,
+                      }}
+                    > 
+                      <Text className={`${classes.text.body} text-center text-lg font-medium`}>Write your first song</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
+              />
+            </View>
+          )}
+        </View>
 
-      {/* Create Overlay */}
-      <CreateOverlay
-        visible={showCreateOverlay}
-        onClose={() => setShowCreateOverlay(false)}
-        onStartRecording={handleStartRecording}
-        initialMode={createOverlayMode}
-      />
+        {/* Create Overlay */}
+        <CreateOverlay
+          visible={showCreateOverlay}
+          onClose={() => setShowCreateOverlay(false)}
+          onStartRecording={handleStartRecording}
+          initialMode={createOverlayMode}
+        />
 
-      {/* Audio Recorder */}
+        {/* Create Button */}
+        <TouchableOpacity 
+          onPress={() => {
+            setCreateOverlayMode('menu');
+            setShowCreateOverlay((v) => !v);
+          }}
+          style={{
+            position: 'absolute',
+            left: CREATE_BUTTON_LEFT,
+            bottom: insets.bottom,
+            width: CREATE_BUTTON_SIZE,
+            height: CREATE_BUTTON_SIZE,
+            borderRadius: CREATE_BUTTON_SIZE / 2,
+            backgroundColor: colorPalette.button.bgInverted,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 2,
+          }}
+        >
+          <View style={showCreateOverlay ? { transform: [{ rotate: '45deg' }] } : undefined}>
+            <AddIcon 
+              width={28} 
+              height={28} 
+              fill={colorPalette.icon.inverted} 
+            />
+          </View>
+        </TouchableOpacity>
+      </SafeAreaView>
+
+      {/* Audio Recorder - positioned outside SafeAreaView to extend to bottom */}
       {showRecorder && (
         <AudioRecorder
           mode="index"
@@ -384,39 +419,6 @@ export default function Index() {
           autoStart={true}
         />
       )}
-
-      {/* Create Button */}
-      <TouchableOpacity 
-        onPress={() => {
-          setCreateOverlayMode('menu');
-          setShowCreateOverlay((v) => !v);
-        }}
-        style={{
-          position: 'absolute',
-          left: CREATE_BUTTON_LEFT,
-          bottom: insets.bottom,
-          width: CREATE_BUTTON_SIZE,
-          height: CREATE_BUTTON_SIZE,
-          borderRadius: CREATE_BUTTON_SIZE / 2,
-          backgroundColor: colorPalette.button.bgInverted,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
-          zIndex: 2,
-        }}
-      >
-        <View style={showCreateOverlay ? { transform: [{ rotate: '45deg' }] } : undefined}>
-          <AddIcon 
-            width={28} 
-            height={28} 
-            fill={colorPalette.icon.inverted} 
-          />
-        </View>
-      </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

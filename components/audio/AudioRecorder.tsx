@@ -167,6 +167,10 @@ export function AudioRecorder({
 
 const styles = StyleSheet.create({
   container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 32,
     paddingTop: 16,
     paddingBottom: 36,
@@ -174,6 +178,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.light.border,
     borderStyle: 'solid',
     height: 144,
+    zIndex: 1000,
   },
   header: {
     flexDirection: 'row',
