@@ -3,10 +3,9 @@ import DropdownOutlineDownIcon from '@/components/icons/DropdownOutlineDownIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, findNodeHandle, InputAccessoryView, Keyboard, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import { Alert, findNodeHandle, InputAccessoryView, Keyboard, LayoutRectangle, ScrollView as RNScrollView, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RecordingControls } from '../../components/audio/RecordingControls';
-import SaveClipModal from '../../components/audio/SaveClipModal';
+import { AudioRecorder } from '../../components/audio/AudioRecorder';
 import { ClipListModal } from '../../components/ClipListModal';
 import { FolderDropdown } from '../../components/FolderDropdown';
 import { ChevronLeftIcon, KebabIcon } from '../../components/icons';
@@ -17,7 +16,6 @@ import theme from '../../constants/theme';
 import { Clip } from '../../context/clipContext';
 import { useSongs } from '../../context/songContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useAudioRecording } from '../../hooks/useAudioRecording';
 import { useThemeClasses } from '../../utils/theme';
 
 const Details = () => {
@@ -40,31 +38,11 @@ const Details = () => {
     const kebabButtonRef = useRef<View>(null);
     const db = useSQLiteContext();
     const [clipCount, setClipCount] = useState(0);
-    const [showRecorder, setShowRecorder] = useState(false);
-    const [showSaveClipModal, setShowSaveClipModal] = useState(false);
-    const {
-        isRecording,
-        isPlaying,
-        duration,
-        startRecording,
-        stopRecording,
-        saveRecording,
-        stopPlayback,
-        playRecording,
-        pauseRecording,
-        audioUri,
-    } = useAudioRecording();
     const [isClipsModalVisible, setIsClipsModalVisible] = useState(false);
+    const [showRecorder, setShowRecorder] = useState(false);
     const [relatedClips, setRelatedClips] = useState<Clip[]>([]);
-    const [selectedSongIds, setSelectedSongIds] = useState<string[]>([]);
+    const [temporaryClips, setTemporaryClips] = useState<Clip[]>([]); // New state for temporary clips
     const insets = useSafeAreaInsets();
-    const windowHeight = Dimensions.get('window').height;
-    const RECORDING_PANEL_HEIGHT = 120;
-    const RECORDING_PANEL_MARGIN = 24;
-    const bottomSafeArea = insets.bottom;
-    const shrunkHeight = windowHeight - (RECORDING_PANEL_HEIGHT + RECORDING_PANEL_MARGIN + 12);
-    const heightAnim = useRef(new Animated.Value(-1)).current;
-    const hasStartedRecordingRef = useRef(false);
     
     // Convert id to string for comparison and add logging
     console.log('URL ID:', id, 'Type:', typeof id);
@@ -75,6 +53,21 @@ const Details = () => {
     console.log('Current song:', song);
     console.log('Related clips:', relatedClips);
     console.log('Clips modal visible:', isClipsModalVisible);
+
+    // Function to handle temporary clip addition
+    const handleTemporaryClipAdded = (clip: Clip) => {
+        setTemporaryClips(prev => [...prev, clip]);
+    };
+
+    // Function to get all clips (permanent + temporary)
+    const getAllClips = () => {
+        return [...relatedClips, ...temporaryClips];
+    };
+
+    // Function to get total clip count (permanent + temporary)
+    const getTotalClipCount = () => {
+        return relatedClips.length + temporaryClips.length;
+    };
 
     useEffect(() => {
         if (song) {
@@ -135,52 +128,31 @@ const Details = () => {
             }
         })();
         return () => { isMounted = false; };
-    }, [song, db, showSaveClipModal]);
+    }, [song, db]);
 
-    // Start recording when modal opens (only once per open session)
-    useEffect(() => {
-        if (showRecorder && !isRecording && !isPlaying && !hasStartedRecordingRef.current) {
-            startRecording();
-            hasStartedRecordingRef.current = true;
-        }
-        // Only reset if we're explicitly closing the recorder and not in the middle of saving
-        if (!showRecorder && (isRecording || isPlaying) && !showSaveClipModal) {
-            if (isRecording) {
-                stopRecording();
-            }
-            if (isPlaying) {
-                stopPlayback();
-            }
-            hasStartedRecordingRef.current = false;
-        }
-    }, [showRecorder, isRecording, isPlaying, showSaveClipModal]);
 
-    // Animate content height when recording starts/stops
-    useEffect(() => {
-        if (showRecorder) {
-            Animated.timing(heightAnim, {
-                toValue: shrunkHeight,
-                duration: 350,
-                useNativeDriver: false,
-            }).start();
-        } else {
-            Animated.timing(heightAnim, {
-                toValue: -1,
-                duration: 350,
-                useNativeDriver: false,
-            }).start();
-        }
-    }, [showRecorder, shrunkHeight]);
-
-    // Animated style for main content
-    const mainContentStyle = showRecorder
-        ? { height: heightAnim }
-        : { flex: 1 };
 
     const handleSave = async () => {
         if (song) {
             console.log('Save pressed', { title, content, selectedFolderId, selectedKey, bpm });
             console.log('selectedFolderId type:', typeof selectedFolderId, 'value:', selectedFolderId);
+            
+            // Save temporary clips to the database
+            if (temporaryClips.length > 0) {
+                for (const clip of temporaryClips) {
+                    try {
+                        await db.runAsync(
+                            'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
+                            [song.id, clip.id]
+                        );
+                    } catch (e) {
+                        console.error('Failed to save temporary clip:', e);
+                    }
+                }
+                // Clear temporary clips after saving
+                setTemporaryClips([]);
+            }
+            
             await updateSong(song.id, {
                 title,
                 content,
@@ -197,84 +169,8 @@ const Details = () => {
         }
     };
 
-    const handleStopRecording = () => {
-        stopRecording();
-        // Don't hide the recorder UI immediately
-        // setShowRecorder(false);
-    };
-
-    const handleSaveClip = async (title: string, selectedSongIds: string[]) => {
-        console.log('[handleSaveClip] called with selectedSongIds:', selectedSongIds);
-        if (!title.trim()) {
-            Alert.alert('Error', 'Please enter a title for the clip');
-            return;
-        }
-
-        if (selectedSongIds.length === 0) {
-            Alert.alert('Error', 'Please select at least one song to attach the clip to');
-            return;
-        }
-
-        if (!audioUri) {
-            Alert.alert('Error', 'No recording available to save');
-            cleanupRecording();
-            return;
-        }
-
-        try {
-            // Save the recording with the correct audioUri
-            const clip = await saveRecording(title, audioUri);
-            if (!clip) {
-                console.error('Failed to save clip');
-                cleanupRecording();
-                return;
-            }
-            console.log('[handleSaveClip] new clip id:', clip.id);
-
-            // Create relationships for each selected song
-            for (const songId of selectedSongIds) {
-                console.log('[handleSaveClip] Inserting into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
-                try {
-                    await db.runAsync(
-                        'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
-                        [songId, clip.id]
-                    );
-                    console.log('[handleSaveClip] Successfully inserted into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
-                } catch (e) {
-                    console.error('[handleSaveClip] Failed to insert into song_clip_rel:', e);
-                }
-            }
-
-            // Update clip count for the current song if it was selected
-            if (song && selectedSongIds.includes(song.id)) {
-                const result = await db.getFirstAsync<{ count: number }>(
-                    'SELECT COUNT(*) as count FROM song_clip_rel WHERE song_id = ?',
-                    [song.id]
-                );
-                if (result) setClipCount(result.count);
-            }
-
-            // Clean up recording state
-            cleanupRecording();
-            setShowSaveClipModal(false);
-        } catch (error) {
-            console.error('Error saving clip:', error);
-            Alert.alert('Error', 'Failed to save clip');
-        }
-    };
-
-    const cleanupRecording = () => {
-        if (isRecording) {
-            stopRecording();
-        }
-        if (isPlaying) {
-            stopPlayback();
-        }
-        setShowRecorder(false);
-    };
-
     const handleBack = () => {
-        if (hasUnsavedChanges) {
+        if (hasUnsavedChanges || temporaryClips.length > 0) {
             Alert.alert(
                 "Unsaved Changes",
                 "Do you want to save your changes before leaving?",
@@ -282,8 +178,19 @@ const Details = () => {
                     {
                         text: "Don't Save",
                         style: "destructive",
-                        onPress: () => {
-                            cleanupRecording();
+                        onPress: async () => {
+                            // Delete temporary clips if any exist
+                            if (temporaryClips.length > 0) {
+                                for (const clip of temporaryClips) {
+                                    try {
+                                        // Delete the clip file and database record
+                                        await db.runAsync('DELETE FROM clips WHERE id = ?', [clip.id]);
+                                    } catch (e) {
+                                        console.error('Failed to delete temporary clip:', e);
+                                    }
+                                }
+                                setTemporaryClips([]);
+                            }
                             router.back();
                         }
                     },
@@ -295,13 +202,11 @@ const Details = () => {
                         text: "Save",
                         onPress: async () => {
                             await handleSave();
-                            cleanupRecording();
                         }
                     }
                 ]
             );
         } else {
-            cleanupRecording();
             router.back();
         }
     };
@@ -351,38 +256,42 @@ const Details = () => {
         }
 
         try {
-            // Delete the relationship
-            await db.runAsync(
-                'DELETE FROM song_clip_rel WHERE song_id = ? AND clip_id = ?',
-                [song.id, clipId]
-            );
+            // Check if it's a temporary clip
+            const isTemporaryClip = temporaryClips.some(clip => clip.id === clipId);
+            
+            if (isTemporaryClip) {
+                // Remove from temporary clips
+                setTemporaryClips(prev => prev.filter(clip => clip.id !== clipId));
+                
+                // Delete the clip from database
+                await db.runAsync(
+                    'DELETE FROM clips WHERE id = ?',
+                    [clipId]
+                );
+            } else {
+                // Delete the relationship for permanent clips
+                await db.runAsync(
+                    'DELETE FROM song_clip_rel WHERE song_id = ? AND clip_id = ?',
+                    [song.id, clipId]
+                );
 
-            // Delete the clip
-            await db.runAsync(
-                'DELETE FROM clips WHERE id = ?',
-                [clipId]
-            );
+                // Delete the clip
+                await db.runAsync(
+                    'DELETE FROM clips WHERE id = ?',
+                    [clipId]
+                );
 
-            // Update the clips list
-            setRelatedClips(prev => prev.filter(clip => clip.id !== clipId));
-            setClipCount(prev => prev - 1);
+                // Update the clips list
+                setRelatedClips(prev => prev.filter(clip => clip.id !== clipId));
+                setClipCount(prev => prev - 1);
+            }
         } catch (error) {
             console.error('Error deleting clip:', error);
             Alert.alert('Error', 'Failed to delete clip');
         }
     };
 
-    // Robust cleanup logic for closing the recording controls
-    const handleCloseRecordingControls = async () => {
-        if (isRecording) {
-            await stopRecording();
-        }
-        if (isPlaying) {
-            stopPlayback();
-        }
-        setShowRecorder(false);
-        hasStartedRecordingRef.current = false;
-    };
+
 
     const openActionsModal = () => {
         if (kebabButtonRef.current) {
@@ -405,42 +314,13 @@ const Details = () => {
         );
     }
 
-    console.log('[Details] showSaveClipModal:', showSaveClipModal);
+
 
     return (
         <>
             <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
-                {/* Recording Controls Panel */}
-                <RecordingControls
-                    isRecording={isRecording}
-                    isPlaying={isPlaying}
-                    duration={duration}
-                    onStartRecording={startRecording}
-                    onStopRecording={stopRecording}
-                    onPlayRecording={playRecording}
-                    onPauseRecording={pauseRecording}
-                    onStopPlayback={stopPlayback}
-                    onSaveRecording={() => setShowSaveClipModal(true)}
-                    onCancelRecording={handleCloseRecordingControls}
-                    showControls={showRecorder}
-                />
-
-                {/* Main content: flex: 1 by default, animates to height when controls are shown */}
-                <Animated.View
-                    style={{
-                        ...mainContentStyle,
-                        borderBottomLeftRadius: showRecorder ? 32 : 0,
-                        borderBottomRightRadius: showRecorder ? 32 : 0,
-                        overflow: 'hidden',
-                        backgroundColor: colorPalette.bg,
-                        shadowColor: showRecorder ? '#000' : 'transparent',
-                        shadowOffset: { width: 0, height: -4 },
-                        shadowOpacity: showRecorder ? 0.12 : 0,
-                        shadowRadius: showRecorder ? 12 : 0,
-                        position: 'relative',
-                        zIndex: 1, // Main content above controls
-                    }}
-                >
+                {/* Main content */}
+                <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
                     <View className="flex-row pl-6 pr-6 pt-4 pb-1 items-center justify-between">
                         <TouchableOpacity onPress={handleBack}>
                             <ChevronLeftIcon width={28} height={28} fill={colorPalette.icon.primary} />
@@ -489,7 +369,7 @@ const Details = () => {
                                         onPress={() => setIsClipsModalVisible(true)}
                                     >
                                         <ClipIcon width={28} height={28} fill={colorPalette.icon.primary} />
-                                        <Text className={classes.textSize('text-lg font-medium')}>{clipCount}</Text>  
+                                        <Text className={classes.textSize('text-lg font-medium')}>{getTotalClipCount()}</Text>  
                                     </TouchableOpacity>
                                     <TouchableOpacity 
                                         className="flex-row items-center justify-center w-9 h-9 rounded-full" 
@@ -624,7 +504,7 @@ const Details = () => {
                             inputAccessoryViewID="contentInput"
                         />
                     </ScrollView>
-                </Animated.View>
+                </View>
             </SafeAreaView>
 
             <SongActionsModal
@@ -635,20 +515,22 @@ const Details = () => {
                 buttonLayout={kebabButtonLayout}
             />
 
-            <SaveClipModal
-                visible={showSaveClipModal}
-                onClose={() => setShowSaveClipModal(false)}
-                onSave={handleSaveClip}
-                songs={songs}
-                mode="songDetail"
-                currentSongId={song.id}
-            />
+            {/* Audio Recorder */}
+            {showRecorder && (
+                <AudioRecorder
+                    mode="songDetail"
+                    currentSongId={song?.id}
+                    onClose={() => setShowRecorder(false)}
+                    onTemporaryClipAdded={handleTemporaryClipAdded}
+                    autoStart={true}
+                />
+            )}
 
             <ClipListModal
                 visible={isClipsModalVisible}
                 onClose={() => setIsClipsModalVisible(false)}
-                title={`Clips (${clipCount})`}
-                clips={relatedClips}
+                title={`Clips (${getTotalClipCount()})`}
+                                  clips={getAllClips()}
                 onDeleteClip={handleDeleteClip}
             />
 

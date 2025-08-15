@@ -1,76 +1,87 @@
-import { AudioStatus, useAudioPlayer } from 'expo-audio';
-import { useEffect, useState } from 'react';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { useCallback, useEffect, useState } from 'react';
 
-export interface AudioPlayerStatus {
-  isLoaded: boolean;
-  isPlaying: boolean;
-  positionMillis: number;
-  durationMillis: number;
-  metering?: number;
-}
+// Audio configuration for playback (main speakers)
+const PLAYBACK_AUDIO_CONFIG = {
+  allowsRecording: false,
+  playsInSilentMode: true,
+  shouldPlayInBackground: true,
+  interruptionMode: 'mixWithOthers' as const,
+  shouldRouteThroughEarpiece: false, // CRITICAL: Use main speakers
+};
 
-export function useAudioPlayback() {
+export function useAudioPlayback(audioUri: string | null) {
+  const player = useAudioPlayer(audioUri);
+  const status = useAudioPlayerStatus(player);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackPosition, setPlaybackPosition] = useState(0);
-  const player = useAudioPlayer();
+  const [playbackProgress, setPlaybackProgress] = useState(0);
 
-  // Handle playback status updates
-  useEffect(() => {
-    const handlePlaybackStatusUpdate = (status: AudioStatus) => {
-      if (status.isLoaded) {
-        setIsPlaying(status.playing);
-        setPlaybackPosition(status.currentTime * 1000); // Convert seconds to milliseconds
+  const play = useCallback(async () => {
+    if (!audioUri) return;
+    try {
+      // Set audio mode for playback (main speakers)
+      await setAudioModeAsync(PLAYBACK_AUDIO_CONFIG);
+      
+      // Set volume to maximum before playing
+      player.volume = 1.0;
+      
+      // If the audio is at the end (currentTime >= duration), seek to beginning
+      if (status && status.currentTime >= status.duration) {
+        await player.seekTo(0);
       }
-    };
+      
+      await player.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Playback error:', error);
+    }
+  }, [audioUri, player, status]);
 
-    // Set up event listener
-    player.addListener('playbackStatusUpdate', handlePlaybackStatusUpdate);
-
-    return () => {
-      // Clean up event listener
-      player.removeListener('playbackStatusUpdate', handlePlaybackStatusUpdate);
-      player.remove();
+  const pause = useCallback(async () => {
+    try {
+      await player.pause();
       setIsPlaying(false);
-      setPlaybackPosition(0);
-    };
+    } catch (error) {
+      console.error('Pause error:', error);
+    }
   }, [player]);
 
-  const play = async (uri: string) => {
+  const stop = useCallback(async () => {
     try {
-      console.log('Loading audio from URI:', uri);
-      await player.replace(uri);
-      console.log('Audio loaded, starting playback');
-      await player.play();
+      await player.pause();
+      await player.seekTo(0);
+      setIsPlaying(false);
     } catch (error) {
-      console.error('Failed to play audio:', error);
-      if (error instanceof Error) {
-        console.error('Error details:', error.message);
+      console.error('Stop error:', error);
+    }
+  }, [player]);
+
+  // Update playing state and progress based on audio player status
+  useEffect(() => {
+    if (status) {
+      setIsPlaying(status.playing);
+      
+      // Calculate playback progress (0-1)
+      if (status.duration > 0) {
+        const progress = status.currentTime / status.duration;
+        setPlaybackProgress(Math.max(0, Math.min(1, progress)));
       }
     }
-  };
+  }, [status]);
 
-  const pause = async () => {
-    try {
-      player.pause();
-    } catch (error) {
-      console.error('Failed to pause audio:', error);
-    }
-  };
+  // Reset playing state when audio URI changes
+  useEffect(() => {
+    setIsPlaying(false);
+    setPlaybackProgress(0);
+  }, [audioUri]);
 
-  const stop = async () => {
-    try {
-      player.remove();
-      setPlaybackPosition(0);
-    } catch (error) {
-      console.error('Failed to stop audio:', error);
-    }
+  return { 
+    isPlaying, 
+    play, 
+    pause, 
+    stop, 
+    playbackProgress,
+    playbackDuration: status?.duration || 0,
+    currentTime: status?.currentTime || 0
   };
-
-  return {
-    isPlaying,
-    playbackPosition,
-    play,
-    pause,
-    stop,
-  };
-} 
+}

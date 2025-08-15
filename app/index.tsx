@@ -1,11 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RecordingControls } from '../components/audio/RecordingControls';
-import SaveClipModal from '../components/audio/SaveClipModal';
-import { AddIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
+import { AudioRecorder } from '../components/audio/AudioRecorder';
+import { AddIcon, ChevronRightIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
@@ -13,7 +12,6 @@ import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
 import { Song, useSongs } from '../context/songContext';
 import { useTheme } from '../context/ThemeContext';
-import { useAudioRecording } from '../hooks/useAudioRecording';
 import { useThemeClasses } from '../utils/theme';
 
 const SongItem = ({ song }: { song: Song }) => {
@@ -235,78 +233,16 @@ export default function Index() {
   const { theme: currentTheme, toggleTheme } = useTheme();
   const classes = useThemeClasses();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
-  const { 
-    startRecording, 
-    stopRecording, 
-    isRecording,
-    isPlaying,
-    duration,
-    saveRecording,
-    stopPlayback,
-    playRecording,
-    pauseRecording,
-    audioUri, 
-    cleanupRecording,
-    setIsRecording
-  } = useAudioRecording();
-  const [showSaveClipModal, setShowSaveClipModal] = useState(false);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [showRecordingControls, setShowRecordingControls] = useState(false);
+  const [showRecorder, setShowRecorder] = useState(false);
   const insets = useSafeAreaInsets();
-  const windowHeight = Dimensions.get('window').height;
-  const RECORDING_PANEL_HEIGHT = 120;
-  const RECORDING_PANEL_MARGIN = 24;
-  const bottomSafeArea = insets.bottom;
-  const shrunkHeight = windowHeight - (RECORDING_PANEL_HEIGHT + RECORDING_PANEL_MARGIN + 12);
-  const heightAnim = useRef(new Animated.Value(-1)).current;
-  const [clipTitle, setClipTitle] = useState('');
-  const [selectedSongs, setSelectedSongs] = useState<string[]>([]);
   const db = useSQLiteContext();
-
-  useEffect(() => {
-    if (showRecordingControls) {
-      Animated.timing(heightAnim, {
-        toValue: shrunkHeight,
-        duration: 350,
-        useNativeDriver: false,
-      }).start();
-      if (!isRecording && !isPlaying) {
-        startRecording();
-      }
-    } else {
-      Animated.timing(heightAnim, {
-        toValue: -1,
-        duration: 350,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [showRecordingControls, shrunkHeight]);
 
   // When user taps Record in the create menu
   const handleStartRecording = () => {
     setShowCreateOverlay(false);
-    setShowRecordingControls(true);
+    setShowRecorder(true);
   };
-
-  // When user closes the recording controls
-  const handleCloseRecordingControls = () => {
-    setShowRecordingControls(false);
-    if (isRecording) {
-      stopRecording();
-    }
-    if (isPlaying) {
-      stopPlayback();
-    }
-    cleanupRecording();
-  };
-
-  // Animated style for main content
-  const mainContentStyle = showRecordingControls
-    ? { height: heightAnim }
-    : { flex: 1 };
-
-  // Show recorder UI if not idle
-  const showRecorder = isRecording || isPlaying;
 
   // Sort and slice for recent songs
   const recentSongs = [...songs]
@@ -315,49 +251,7 @@ export default function Index() {
 
   // console.log('Available songs:', songs);
 
-  const handleSaveClip = async (title: string, selectedSongIds: string[]) => {
-    try {
-      if (!audioUri) {
-        console.error('No audio URI available to save');
-        Alert.alert('Error', 'No recording available to save');
-        return;
-      }
 
-      // Save the recording with the correct audioUri
-      const clip = await saveRecording(title, audioUri);
-      if (!clip) {
-        console.error('Failed to save clip');
-        cleanupRecording();
-        return;
-      }
-      console.log('[handleSaveClip] new clip id:', clip.id);
-
-      // Create relationships for each selected song
-      for (const songId of selectedSongIds) {
-        console.log('[handleSaveClip] Inserting into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
-        try {
-          await db.runAsync(
-            'INSERT INTO song_clip_rel (song_id, clip_id) VALUES (?, ?)',
-            [songId, clip.id]
-          );
-          console.log('[handleSaveClip] Successfully inserted into song_clip_rel: song_id=' + songId + ', clip_id=' + clip.id);
-        } catch (e) {
-          console.error('[handleSaveClip] Failed to insert into song_clip_rel:', e);
-        }
-      }
-
-      // Clean up recording state and hide controls
-      await cleanupRecording();
-      setIsRecording(false);
-      setShowSaveClipModal(false);
-    } catch (error) {
-      console.error('Error saving clip:', error);
-      Alert.alert('Error', 'Failed to save clip');
-      // Also clean up on error
-      await cleanupRecording();
-      setIsRecording(false);
-    }
-  };
 
   // Button and menu positions
   const CREATE_BUTTON_SIZE = 56;
@@ -365,154 +259,128 @@ export default function Index() {
   const MENU_GAP = 12;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
-      {/* Recording Controls Panel */}
-      <RecordingControls
-        isRecording={isRecording}
-        isPlaying={isPlaying}
-        duration={duration}
-        onStartRecording={startRecording}
-        onStopRecording={stopRecording}
-        onPlayRecording={playRecording}
-        onPauseRecording={pauseRecording}
-        onStopPlayback={stopPlayback}
-        onSaveRecording={() => setShowSaveClipModal(true)}
-        onCancelRecording={handleCloseRecordingControls}
-        showControls={showRecordingControls}
-      />
-
-      {/* Main content: flex: 1 by default, animates to height when controls are shown */}
-      <Animated.View
-        style={{
-          ...mainContentStyle,
-          borderBottomLeftRadius: showRecordingControls ? 32 : 0,
-          borderBottomRightRadius: showRecordingControls ? 32 : 0,
-          overflow: 'hidden',
-          backgroundColor: colorPalette.bg,
-          shadowColor: showRecordingControls ? '#000' : 'transparent',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: showRecordingControls ? 0.12 : 0,
-          shadowRadius: showRecordingControls ? 12 : 0,
-          position: 'relative',
-          zIndex: 1, // Main content above controls
-        }}
-      >
-        <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
-          <View className="flex-row items-center gap-1">
-            <TouchableOpacity onPress={() => setActiveToggle('folders')}>
-              <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
-                Folders
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveToggle('files')}>
-              <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
-                All Songs
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="flex-row items-center gap-1">  
-            <TouchableOpacity onPress={toggleTheme}>
-              {currentTheme === 'dark' ? 
-                <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-              }
-            </TouchableOpacity>
-          </View>
-          {/* Settings Icon for when we want it */}
-          {/* <View className="flex-row items-center">
-            <TouchableOpacity>
-              <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
-            </TouchableOpacity> */}
-          {/* </View> */}
-        </View>
-        
-        {activeToggle === 'folders' ? (
-          <View className="pt-2 flex-1 w-full">
-          <FlatList
-            data={folders}
-            className="px-4"
-            key="folders-list"
-            numColumns={2}
-            columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
-                className={`p-4 rounded-3xl flex-row items-center`}
-                style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
-              >
-                <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
+    <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+        {/* Main content */}
+        <View style={{ flex: 1, backgroundColor: colorPalette.bg }}>
+          <View className={`flex-row items-center justify-between px-6 pt-4 pb-3`}>
+            <View className="flex-row items-center gap-1">
+              <TouchableOpacity onPress={() => setActiveToggle('folders')}>
+                <Text className={`text-3xl font-semibold ${activeToggle === 'folders' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                  Folders
+                </Text>
               </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <View className="flex-1 items-center justify-center"> 
-                <TouchableOpacity 
-                  onPress={() => {
-                    setCreateOverlayMode('folder');
-                    setShowCreateOverlay(true);
-                  }}
-                  className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
-                  style={{
-                    backgroundColor: colorPalette.surface2,
-                  }}
-                > 
-                  <Text className={`${classes.text.body} text-center text-lg font-medium`}>Create your first folder</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          />
-        </View>
-        ) : (
-          <View className="pt-2 flex-1">
+              <TouchableOpacity onPress={() => setActiveToggle('files')}>
+                <Text className={`text-3xl font-semibold ${activeToggle === 'files' ? (currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header') : (currentTheme === 'dark' ? 'text-dark-text-placeholder' : 'text-light-text-placeholder')}`}>
+                  All Songs
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View className="flex-row items-center gap-1">  
+              <TouchableOpacity onPress={toggleTheme}>
+                {currentTheme === 'dark' ? 
+                  <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
+                  <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
+                }
+              </TouchableOpacity>
+            </View>
+            {/* Settings Icon for when we want it */}
+            {/* <View className="flex-row items-center">
+              <TouchableOpacity>
+                <SettingsIcon width={28} height={28} color={colorPalette.icon.primary} />
+              </TouchableOpacity> */}
+            {/* </View> */}
+          </View>
+          
+          {activeToggle === 'folders' ? (
+            <View className="pt-2 flex-1 w-full">
             <FlatList
-              data={recentSongs}
+              data={folders}
               className="px-4"
-              key="songs-list"
+              key="folders-list"
+              numColumns={2}
+              columnWrapperStyle={{ gap: 16, marginBottom: 16 }}
               keyExtractor={item => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-                  className={`pr-6 py-2 flex-row items-center`}
+                  onPress={() => router.push({ pathname: '/folder/[id]', params: { id: item.id } })}
+                  className={`p-4 rounded-3xl flex-row items-center`}
+                  style={{ height: 140, width: '48%', backgroundColor: colorPalette.surface1, alignItems: 'flex-end' }}
                 >
-                  <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
-                  <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
+                  <Text className={`${classes.text.header} text-xl font-medium pl-1`}>{item.title || 'Untitled Folder'}</Text>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <View className="flex-1 items-center justify-center">
+                <View className="flex-1 items-center justify-center"> 
                   <TouchableOpacity 
-                    onPress={async () => {
-                      const song = await createSong();
-                      if (song && song.id) {
-                        router.push({ pathname: '/newSong', params: { songId: song.id } });
-                      } else {
-                        Alert.alert('Error', 'Failed to create new song');
-                      }
+                    onPress={() => {
+                      setCreateOverlayMode('folder');
+                      setShowCreateOverlay(true);
                     }}
                     className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
                     style={{
                       backgroundColor: colorPalette.surface2,
                     }}
                   > 
-                    <Text className={`${classes.text.body} text-center text-lg font-medium`}>Write your first song</Text>
+                    <Text className={`${classes.text.body} text-center text-lg font-medium`}>Create your first folder</Text>
                   </TouchableOpacity>
                 </View>
               }
             />
           </View>
-        )}
-      </Animated.View>
+          ) : (
+            <View className="pt-2 flex-1">
+              <FlatList
+                data={recentSongs}
+                className="px-4"
+                key="songs-list"
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                  onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
+                    className={`pr-2 py-2 flex-row items-center justify-between`}
+                  >
+                    <View className="flex-row items-center">
+                      <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
+                      <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
+                    </View>
+                    <ChevronRightIcon width={24} height={24} fill={colorPalette.icon.secondary} />
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <View className="flex-1 items-center justify-center">
+                    <TouchableOpacity 
+                      onPress={async () => {
+                        const song = await createSong();
+                        if (song && song.id) {
+                          router.push({ pathname: '/newSong', params: { songId: song.id } });
+                        } else {
+                          Alert.alert('Error', 'Failed to create new song');
+                        }
+                      }}
+                      className={`rounded-2xl px-4 py-2 mt-4 w-200 items-center justify-center`}
+                      style={{
+                        backgroundColor: colorPalette.surface2,
+                      }}
+                    > 
+                      <Text className={`${classes.text.body} text-center text-lg font-medium`}>Write your first song</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
+              />
+            </View>
+          )}
+        </View>
 
-      {/* Create Overlay */}
-      <CreateOverlay
-        visible={showCreateOverlay}
-        onClose={() => setShowCreateOverlay(false)}
-        onStartRecording={handleStartRecording}
-        initialMode={createOverlayMode}
-      />
+        {/* Create Overlay */}
+        <CreateOverlay
+          visible={showCreateOverlay}
+          onClose={() => setShowCreateOverlay(false)}
+          onStartRecording={handleStartRecording}
+          initialMode={createOverlayMode}
+        />
 
-      {/* Create Button (always fixed at bottom left, hidden when controls are open) */}
-      {!showRecordingControls && (
+        {/* Create Button */}
         <TouchableOpacity 
           onPress={() => {
             setCreateOverlayMode('menu');
@@ -521,7 +389,7 @@ export default function Index() {
           style={{
             position: 'absolute',
             left: CREATE_BUTTON_LEFT,
-            bottom: bottomSafeArea,
+            bottom: insets.bottom,
             width: CREATE_BUTTON_SIZE,
             height: CREATE_BUTTON_SIZE,
             borderRadius: CREATE_BUTTON_SIZE / 2,
@@ -544,15 +412,16 @@ export default function Index() {
             />
           </View>
         </TouchableOpacity>
-      )}
+      </SafeAreaView>
 
-      <SaveClipModal
-        visible={showSaveClipModal}
-        onClose={() => setShowSaveClipModal(false)}
-        onSave={handleSaveClip}
-        songs={songs}
-        mode="index"
-      />
-    </SafeAreaView>
+      {/* Audio Recorder - positioned outside SafeAreaView to extend to bottom */}
+      {showRecorder && (
+        <AudioRecorder
+          mode="index"
+          onClose={() => setShowRecorder(false)}
+          autoStart={true}
+        />
+      )}
+    </View>
   );
 }
