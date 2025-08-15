@@ -5,8 +5,7 @@ import { Alert, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AudioRecorder } from '../components/audio/AudioRecorder';
 import { AddIcon, FolderIcon, GoIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
-import MoonIcon from '../components/icons/MoonIcon';
-import SunIcon from '../components/icons/SunIcon';
+import SettingsIcon from '../components/icons/SettingsIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
 import theme from '../constants/theme';
 import { Folder, useFolders } from '../context/folderContext';
@@ -277,11 +276,8 @@ export default function Index() {
               </TouchableOpacity>
             </View>
             <View className="flex-row items-center gap-1">  
-              <TouchableOpacity onPress={toggleTheme}>
-                {currentTheme === 'dark' ? 
-                  <MoonIcon width={24} height={24} fill={colorPalette.icon.primary} /> : 
-                  <SunIcon width={24} height={24} fill={colorPalette.icon.primary} />
-                }
+              <TouchableOpacity onPress={() => router.push('/settings')}>
+                <SettingsIcon width={24} height={24} color={colorPalette.icon.primary} />
               </TouchableOpacity>
             </View>
             {/* Settings Icon for when we want it */}
