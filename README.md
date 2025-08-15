@@ -18,7 +18,7 @@ A modern React Native application built with Expo for audio recording and manage
 - **Language**: TypeScript
 - **Styling**: NativeWind (Tailwind CSS)
 - **Navigation**: Expo Router
-- **Database**: libSQL (via expo-sqlite)
+- **Database**: SQLite (via expo-sqlite)
 - **Audio**: expo-audio
 - **State Management**: React Context
 - **Icons**: @expo/vector-icons

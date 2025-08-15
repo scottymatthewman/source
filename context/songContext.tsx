@@ -3,13 +3,6 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { MusicalKey } from '../constants/musicalKeys';
 
-if (
-  !process.env.EXPO_PUBLIC_TURSO_DB_URL ||
-  !process.env.EXPO_PUBLIC_TURSO_DB_AUTH_TOKEN
-) {
-  throw new Error('Turso DB URL and Auth Token must be set in .env.local');
-}
-
 export interface Song {
   id: string;
   title: string | null;
@@ -20,20 +13,13 @@ export interface Song {
   bpm: number | null;
 }
 
-export const tursoOptions = {
-  url: process.env.EXPO_PUBLIC_TURSO_DB_URL,
-  authToken: process.env.EXPO_PUBLIC_TURSO_DB_AUTH_TOKEN,
-};
+
 
 interface SongsContextType {
   songs: Song[];
   createSong: () => Promise<Song | undefined>;
   updateSong: (id: string, updates: Partial<Song>) => void;
   deleteSong: (id: string) => void;
-  // Temporarily disabled sync
-  // syncSongs: () => void;
-  // toggleSync: (enabled: boolean) => void;
-  // isSyncing: boolean;
 }
 
 const SongsContext = createContext<SongsContextType | null>(null);
@@ -41,22 +27,10 @@ const SongsContext = createContext<SongsContextType | null>(null);
 export function SongsProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
   const [songs, setSongs] = useState<Song[]>([]);
-  // Temporarily disabled sync
-  // const [isSyncing, setIsSyncing] = useState(false);
-  // const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchSongs();
   }, [db]);
-
-  // Temporarily disabled sync cleanup
-  // useEffect(() => {
-  //   return () => {
-  //     if (syncIntervalRef.current) {
-  //       clearInterval(syncIntervalRef.current);
-  //     }
-  //   };
-  // }, []);
 
   const fetchSongs = useCallback(async () => {
     const songs = await db.getAllAsync<Song>(
@@ -65,32 +39,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
     setSongs(songs);
   }, [db]);
 
-  // Temporarily disabled sync
-  // const syncSongs = useCallback(async () => {
-  //   console.log('Syncing songs with Turso DB...');
-  //   try {
-  //     await db.syncLibSQL();
-  //     await fetchSongs();
-  //     console.log('Synced songs with Turso DB');
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }, [db, fetchSongs]);
 
-  // const toggleSync = useCallback(
-  //   async (enabled: boolean) => {
-  //     setIsSyncing(enabled);
-  //     if (enabled) {
-  //       console.log('Starting sync interval...');
-  //       await syncSongs();
-  //       syncIntervalRef.current = setInterval(syncSongs, 2000);
-  //     } else if (syncIntervalRef.current) {
-  //       console.log('Stopping sync interval...');
-  //       clearInterval(syncIntervalRef.current);
-  //     }
-  //   },
-  //   [syncSongs]
-  // );
 
   const createSong = async () => {
     const newSong = {
@@ -142,7 +91,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       updatedSong.title,
       updatedSong.content,
       updatedSong.date_modified.toISOString(),
-      updatedSong.folder_id,
+      updatedSong.folder_id ?? null,
       updatedSong.key,
       updatedSong.bpm,
       id
@@ -194,10 +143,6 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
         createSong,
         updateSong,
         deleteSong,
-        // Temporarily disabled sync
-        // syncSongs,
-        // toggleSync,
-        // isSyncing,
       }}
     >
       {children}
