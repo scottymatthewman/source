@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Keyboard, Modal, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AudioRecorder } from '../components/audio/AudioRecorder';
-import { AddIcon, ChevronRightIcon, FolderIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
+import { AddIcon, FolderIcon, GoIcon, MicIcon, NewFolderIcon, WriteIcon } from '../components/icons';
 import MoonIcon from '../components/icons/MoonIcon';
 import SunIcon from '../components/icons/SunIcon';
 import ThumbIcon from '../components/icons/ThumbIcon';
@@ -344,7 +344,7 @@ export default function Index() {
                       <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
                       <Text className={`${classes.text.header} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
                     </View>
-                    <ChevronRightIcon width={24} height={24} fill={colorPalette.icon.secondary} />
+                    <GoIcon width={24} height={24} fill={colorPalette.icon.secondary} />
                   </TouchableOpacity>
                 )}
                 ListEmptyComponent={

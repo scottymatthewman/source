@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, LayoutRectangle, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FolderActionsModal from '../../components/FolderActionsModal';
-import { ChevronLeftIcon, ChevronRightIcon, KebabIcon } from '../../components/icons';
+import { ChevronLeftIcon, GoIcon, KebabIcon } from '../../components/icons';
 import theme from '../../constants/theme';
 import { useFolders } from '../../context/folderContext';
 import { useSongs } from '../../context/songContext';
@@ -115,7 +115,7 @@ export default function FolderDetails() {
                 <ThumbIcon width={24} height={24} fill={colorPalette.icon.tertiary} />
                 <Text className={`${currentTheme === 'dark' ? 'text-dark-text-header' : 'text-light-text-header'} text-xl font-medium`}>{item.title || 'Untitled'}</Text>
               </View>
-              <ChevronRightIcon width={24} height={24} fill={colorPalette.icon.secondary} />
+              <GoIcon width={24} height={24} fill={colorPalette.icon.secondary} />
             </TouchableOpacity>
         )}
         ListEmptyComponent={
