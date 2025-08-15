@@ -17,7 +17,6 @@ interface AudioWaveformProps {
   audioLevel?: number; // 0-1 value representing current audio level
   
   // Dimensions
-  width?: number;
   height?: number;
 }
 
@@ -28,7 +27,6 @@ export function AudioWaveform({
   playbackProgress = 0,
   playbackDuration = 0,
   audioLevel = 0,
-  width = 300,
   height = 60
 }: AudioWaveformProps) {
   const { theme: currentTheme } = useTheme();
@@ -59,8 +57,8 @@ export function AudioWaveform({
   // Generate waveform data for playback when we have duration but no recorded bars
   useEffect(() => {
     if (!isRecording && playbackDuration > 0 && waveformBars.length === 0) {
-      // Generate waveform bars based on playback duration
-      const barCount = Math.floor(width / 4);
+      // Generate a fixed number of bars for consistent display
+      const barCount = 50; // Fixed number of bars
       const bars: number[] = [];
       for (let i = 0; i < barCount; i++) {
         // Create a more realistic waveform pattern
@@ -71,7 +69,7 @@ export function AudioWaveform({
       }
       setWaveformBars(bars);
     }
-  }, [isRecording, playbackDuration, waveformBars.length, width]);
+  }, [isRecording, playbackDuration, waveformBars.length]);
   
   // Animate recording state
   useEffect(() => {
@@ -115,8 +113,7 @@ export function AudioWaveform({
     }).start();
   }, [audioLevel, levelAnimation]);
   
-  // Calculate number of bars based on width
-  const barCount = Math.floor(width / 4); // 4px per bar including gap
+  // Fixed bar dimensions for consistent display
   const barWidth = 3;
   const barGap = 1;
   
@@ -127,14 +124,14 @@ export function AudioWaveform({
     
     if (sourceBars.length === 0) {
       // Generate placeholder bars with more visibility
-      for (let i = 0; i < barCount; i++) {
+      for (let i = 0; i < 50; i++) {
         // Create a more visible pattern for empty state
         const pattern = 0.2 + Math.sin(i * 0.3) * 0.15 + Math.random() * 0.1;
         bars.push(Math.max(0.15, Math.min(0.6, pattern)));
       }
     } else {
       // Use actual recorded bars or extend with random data
-      for (let i = 0; i < barCount; i++) {
+      for (let i = 0; i < 50; i++) {
         if (i < sourceBars.length) {
           bars.push(sourceBars[i]);
         } else {
@@ -149,10 +146,10 @@ export function AudioWaveform({
   
   const displayBars = generateBars();
   const currentProgress = isPlaying ? playbackProgress : 0;
-  const progressIndex = Math.floor(currentProgress * barCount);
+  const progressIndex = Math.floor(currentProgress * displayBars.length);
   
   return (
-    <View style={[styles.container, { width, height }]}>
+    <View style={[styles.container, { height }]}>
       <View style={styles.waveformContainer}>
         {displayBars.map((barHeight, index) => {
           const isActive = isRecording || (isPlaying && index <= progressIndex);
@@ -232,18 +229,24 @@ export function AudioWaveform({
 
 const styles = StyleSheet.create({
   container: {
+    overflow: 'hidden',
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   waveformContainer: {
+    overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 1,
+    flex: 1,
   },
   bar: {
     borderRadius: 1,
+    flex: 1,
+    minWidth: 3,
   },
   recordingIndicator: {
     position: 'absolute',
