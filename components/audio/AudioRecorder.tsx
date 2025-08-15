@@ -1,13 +1,12 @@
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import theme from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import { Clip, useClips } from '../../context/clipContext';
 import { useSongs } from '../../context/songContext';
 import { useAudioPlayback } from '../../hooks/useAudioPlayback';
 import { useAudioRecording } from '../../hooks/useAudioRecording';
-import { CloseIcon } from '../icons';
 import { AudioControls } from './AudioControls';
 import SaveClipModal from './SaveClipModal';
 
@@ -26,8 +25,8 @@ export function AudioRecorder({
   onTemporaryClipAdded,
   autoStart = false
 }: AudioRecorderProps) {
-  const { state, startRecording, stopRecording, duration, resetRecording } = useAudioRecording();
-  const { isPlaying, play, pause, stop } = useAudioPlayback(state.audioUri);
+  const { state, startRecording, stopRecording, duration, resetRecording, audioLevel } = useAudioRecording();
+  const { isPlaying, play, pause, stop, playbackProgress, playbackDuration } = useAudioPlayback(state.audioUri);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const { createClip } = useClips();
   const { songs } = useSongs();
@@ -124,26 +123,21 @@ export function AudioRecorder({
 
   return (
     <View style={[styles.container, { backgroundColor: colorPalette.surface1 }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colorPalette.text }]}>
-          {state.state === 'recording' ? 'Recording...' : 
-           state.audioUri ? 'New Clip' : 'Ready to Record'}
-        </Text>
-        <TouchableOpacity onPress={handleDiscard} style={styles.closeButton}>
-          <CloseIcon width={20} height={20} fill={colorPalette.icon.primary} />
-        </TouchableOpacity>
-      </View>
       
       <View style={styles.content}>
         <AudioControls
           isRecording={state.state === 'recording'}
           onRecord={handleRecordPress}
           recordingDuration={duration}
+          audioLevel={audioLevel}
           hasAudio={!!state.audioUri}
           isPlaying={isPlaying}
           onPlay={handlePlayPress}
           onStop={stop}
           onSave={() => setShowSaveModal(true)}
+          onDiscard={handleDiscard}
+          playbackProgress={playbackProgress}
+          playbackDuration={playbackDuration}
         />
       </View>
 
@@ -173,11 +167,10 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 32,
     paddingTop: 16,
-    paddingBottom: 36,
+    paddingBottom: 48,
     borderTopWidth: 1,
     borderColor: theme.colors.light.border,
     borderStyle: 'solid',
-    height: 144,
     zIndex: 1000,
   },
   header: {

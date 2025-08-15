@@ -1,4 +1,4 @@
-import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from 'expo-audio';
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { useCallback, useEffect, useState } from 'react';
 
 // Critical audio configuration to ensure audio plays through main speakers
@@ -17,15 +17,21 @@ interface AudioState {
   duration: number;
   audioUri: string | null;
   error: string | null;
+  audioLevel: number; // 0-1 value representing current audio level
 }
 
 export function useAudioRecording() {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true, // Enable audio level metering
+  });
+  const recorderState = useAudioRecorderState(recorder, 100); // Update every 100ms
   const [state, setState] = useState<AudioState>({
     state: 'idle',
     duration: 0,
     audioUri: null,
-    error: null
+    error: null,
+    audioLevel: 0
   });
 
   // Set audio mode once on mount
@@ -44,6 +50,17 @@ export function useAudioRecording() {
 
     setupAudio();
   }, []);
+
+  // Monitor audio level during recording
+  useEffect(() => {
+    if (state.state === 'recording' && recorderState.metering !== undefined) {
+      // Convert metering value (typically -160 to 0 dB) to 0-1 scale
+      const normalizedLevel = Math.max(0, Math.min(1, (recorderState.metering + 160) / 160));
+      setState(prev => ({ ...prev, audioLevel: normalizedLevel }));
+    } else if (state.state !== 'recording') {
+      setState(prev => ({ ...prev, audioLevel: 0 }));
+    }
+  }, [recorderState.metering, state.state]);
 
   const startRecording = useCallback(async () => {
     setState(prev => {
@@ -97,7 +114,8 @@ export function useAudioRecording() {
       state: 'idle',
       duration: 0,
       audioUri: null,
-      error: null
+      error: null,
+      audioLevel: 0
     });
   }, []);
 
@@ -106,6 +124,7 @@ export function useAudioRecording() {
     startRecording,
     stopRecording,
     resetRecording,
-    duration: state.state === 'recording' ? recorder.currentTime : state.duration
+    duration: state.state === 'recording' ? recorder.currentTime : state.duration,
+    audioLevel: state.audioLevel
   };
 }

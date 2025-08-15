@@ -14,6 +14,7 @@ export function useAudioPlayback(audioUri: string | null) {
   const player = useAudioPlayer(audioUri);
   const status = useAudioPlayerStatus(player);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
 
   const play = useCallback(async () => {
     if (!audioUri) return;
@@ -55,17 +56,32 @@ export function useAudioPlayback(audioUri: string | null) {
     }
   }, [player]);
 
-  // Update playing state based on audio player status
+  // Update playing state and progress based on audio player status
   useEffect(() => {
     if (status) {
       setIsPlaying(status.playing);
+      
+      // Calculate playback progress (0-1)
+      if (status.duration > 0) {
+        const progress = status.currentTime / status.duration;
+        setPlaybackProgress(Math.max(0, Math.min(1, progress)));
+      }
     }
   }, [status]);
 
   // Reset playing state when audio URI changes
   useEffect(() => {
     setIsPlaying(false);
+    setPlaybackProgress(0);
   }, [audioUri]);
 
-  return { isPlaying, play, pause, stop };
+  return { 
+    isPlaying, 
+    play, 
+    pause, 
+    stop, 
+    playbackProgress,
+    playbackDuration: status?.duration || 0,
+    currentTime: status?.currentTime || 0
+  };
 }

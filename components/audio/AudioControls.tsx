@@ -6,12 +6,15 @@ import PauseIcon from '../icons/PauseIcon';
 import PlayIcon from '../icons/PlayIcon';
 import StopIcon from '../icons/StopIcon';
 import GoArrowRightIcon from '../icons/goArrowRightIcon';
+import CloseIcon from '../icons/CloseIcon';
+import { AudioWaveform } from './AudioWaveform';
 
 interface AudioControlsProps {
   // Recording state
   isRecording: boolean;
   onRecord: () => void;
   recordingDuration: number;
+  audioLevel?: number; // 0-1 value representing current audio level
   
   // Playback state  
   hasAudio: boolean;
@@ -19,6 +22,9 @@ interface AudioControlsProps {
   onPlay: () => void;
   onStop: () => void;
   onSave: () => void;
+  onDiscard: () => void; // Add discard/close functionality
+  playbackProgress?: number; // 0-1 value representing playback progress
+  playbackDuration?: number;
 }
 
 const formatDuration = (seconds: number): string => {
@@ -31,68 +37,120 @@ export function AudioControls({
   isRecording, 
   onRecord, 
   recordingDuration,
+  audioLevel = 0,
   hasAudio,
   isPlaying,
   onPlay,
   onStop,
-  onSave
+  onSave,
+  onDiscard,
+  playbackProgress = 0,
+  playbackDuration = 0
 }: AudioControlsProps) {
   const { theme: currentTheme } = useTheme();
   const colorPalette = currentTheme === 'dark' ? theme.colors.dark : theme.colors.light;
 
   return (
     <View style={styles.container}>
-      {/* Record Button - only show when not in playback mode */}
+      {/* Recording State */}
       {!hasAudio && (
-        <TouchableOpacity 
-          onPress={onRecord}
-          style={[
-            styles.recordButton,
-            { backgroundColor: colorPalette.surface2 },
-            isRecording && { backgroundColor: colorPalette.recordingRed }
-          ]}
-        >
-          {isRecording ? (
-            <StopIcon width={16} height={16} fill={colorPalette.bg} />
-          ) : (
-            <View style={[
-              styles.recordIcon,
-              { 
-                backgroundColor: colorPalette.recordingRed,
-                borderColor: colorPalette.bg
-              }
-            ]} />
-          )}
+        <>
+          {/* Discard Button */}
+          <TouchableOpacity 
+            onPress={onDiscard}
+            style={[styles.discardButton, { backgroundColor: colorPalette.surface2 }]}
+          >
+            <CloseIcon width={16} height={16} fill={colorPalette.icon.primary} />
+          </TouchableOpacity>
           
-          {isRecording && (
-            <Text style={[styles.duration, { color: colorPalette.text }]}>
-              {formatDuration(recordingDuration)}
-            </Text>
-          )}
-        </TouchableOpacity>
+          {/* Waveform */}
+          <View style={styles.waveformContainer}>
+            <AudioWaveform
+              isRecording={isRecording}
+              recordingDuration={recordingDuration}
+              isPlaying={isPlaying}
+              playbackProgress={playbackProgress}
+              playbackDuration={playbackDuration}
+              audioLevel={audioLevel}
+              width={200}
+              height={40}
+            />
+          </View>
+          
+          {/* Stop Button with Duration */}
+          <TouchableOpacity 
+            onPress={onRecord}
+            style={[
+              styles.stopButton,
+              { backgroundColor: colorPalette.recordingRed }
+            ]}
+          >
+            {isRecording ? (
+              <>
+                <StopIcon width={16} height={16} fill={colorPalette.bg} />
+                <Text style={[styles.duration, { color: colorPalette.bg }]}>
+                  {formatDuration(recordingDuration)}
+                </Text>
+              </>
+            ) : (
+              <View style={[
+                styles.recordIcon,
+                { 
+                  backgroundColor: colorPalette.bg,
+                  borderColor: colorPalette.recordingRed
+                }
+              ]} />
+            )}
+          </TouchableOpacity>
+        </>
       )}
       
-      {/* Playback Controls - only show when we have audio and not recording */}
+      {/* Playback State */}
       {hasAudio && !isRecording && (
         <>
+          {/* Close Button */}
+          <TouchableOpacity 
+            onPress={onDiscard}
+            style={[styles.discardButton, { backgroundColor: colorPalette.surface2 }]}
+          >
+            <CloseIcon width={16} height={16} fill={colorPalette.icon.primary} />
+          </TouchableOpacity>
+          
+          {/* Play/Pause Button */}
           <TouchableOpacity 
             onPress={onPlay}
             style={[styles.playbackButton, { backgroundColor: colorPalette.surface2 }]}
           >
             {isPlaying ? (
-              <PauseIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              <PauseIcon width={20} height={20} fill={colorPalette.icon.primary} />
             ) : (
-              <PlayIcon width={24} height={24} fill={colorPalette.icon.primary} />
+              <PlayIcon width={20} height={20} fill={colorPalette.icon.primary} />
             )}
           </TouchableOpacity>
           
-
+          {/* Waveform with Duration */}
+          <View style={styles.waveformWithDuration}>
+            <AudioWaveform
+              isRecording={isRecording}
+              recordingDuration={recordingDuration}
+              isPlaying={isPlaying}
+              playbackProgress={playbackProgress}
+              playbackDuration={playbackDuration}
+              audioLevel={audioLevel}
+              width={180}
+              height={40}
+            />
+            <Text style={[styles.duration, { color: colorPalette.text }]}>
+              {formatDuration(playbackDuration)}
+            </Text>
+          </View>
           
+          {/* Save Button */}
           <TouchableOpacity 
             onPress={onSave}
-            style={[styles.playbackButton, { backgroundColor: colorPalette.button.bgInverted }]}
+            style={[styles.saveButton, { backgroundColor: colorPalette.button.bgInverted }]}
           >
-            <GoArrowRightIcon width={24} height={24} fill={colorPalette.icon.inverted} />
+            <GoArrowRightIcon width={20} height={20} fill={colorPalette.icon.inverted} />
           </TouchableOpacity>
         </>
       )}
@@ -104,9 +162,27 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 16,
+  },
+  discardButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waveformContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waveformWithDuration: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
-  recordButton: {
+  stopButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -114,6 +190,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
+    minWidth: 80,
+  },
+  playbackButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   recordIcon: {
     width: 16,
@@ -124,12 +215,5 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: 14,
     fontWeight: '600',
-  },
-  playbackButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
