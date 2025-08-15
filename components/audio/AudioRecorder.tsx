@@ -127,7 +127,7 @@ export function AudioRecorder({
       <View style={styles.header}>
         <Text style={[styles.title, { color: colorPalette.text }]}>
           {state.state === 'recording' ? 'Recording...' : 
-           state.audioUri ? 'Record' : 'Ready to Record'}
+           state.audioUri ? 'New Clip' : 'Ready to Record'}
         </Text>
         <TouchableOpacity onPress={handleDiscard} style={styles.closeButton}>
           <CloseIcon width={20} height={20} fill={colorPalette.icon.primary} />
